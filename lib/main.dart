@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:utopia_front/global/index.dart';
-import 'package:utopia_front/index.dart';
-
-import 'login/index.dart';
+import 'package:utopia_front/pages/index.dart';
+import 'package:utopia_front/pages/login/index.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,7 +9,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  static const String _title = 'Utopia Front';
+  static const String _title = 'Utopia';
 
   @override
   Widget build(BuildContext context) {

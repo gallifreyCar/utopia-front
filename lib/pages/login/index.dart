@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:utopia_front/util/flash.dart';
 import 'package:utopia_front/util/launch.dart';
 
-import '../api/interface/session.dart';
-import '../global/index.dart';
+import '../../api/interface/session.dart';
+import '../../global/index.dart';
 import '../index.dart';
 
 class LoginModeSelectorPage extends StatelessWidget {
