@@ -12,8 +12,19 @@ class UploadFileImpl extends UploadFileAPI {
   }
 
   @override
-  Future<String> uploadFileToKodo(String token, String filePath) {
-    // TODO: implement uploadFileToKodo
-    throw UnimplementedError();
+  Future<String> uploadFileToKodo(String token, UploadFileRequest request) async {
+    FormData formData = FormData.fromMap({
+      "file": request.file,
+      "token": token,
+      "x:file_type": request.fileType,
+      "x:describe": request.describe,
+      "x:cover_url": request.coverUrl,
+      "x:video_type_id": request.videoTypeId,
+      "x:uid": request.videoTypeName,
+    });
+    dio.options.headers['Content-Type'] = 'multipart/form-data';
+    dio.options.baseUrl = '';
+    final resp = await dio.post('s30hxzidb.bkt.clouddn.com', data: formData);
+    return resp.data.toString();
   }
 }
