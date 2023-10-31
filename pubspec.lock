@@ -41,6 +41,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.17.0"
+  crypto:
+    dependency: transitive
+    description:
+      name: crypto
+      sha256: ff625774173754681d66daaf4a448684fb04b78f902da9cb3d308c19cc5e8bab
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.0.3"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -224,6 +232,22 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.6"
+  qiniu_flutter_sdk:
+    dependency: "direct main"
+    description:
+      name: qiniu_flutter_sdk
+      sha256: ee6edab2fc18ddf11af91fe767d04fd5435af2e693e65f7b00a10c2026f1011a
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.5.0"
+  qiniu_sdk_base:
+    dependency: transitive
+    description:
+      name: qiniu_sdk_base
+      sha256: "256eaa6920489d12c534093e61d12232b6252355edc3ef179041bcc0a8746336"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.5.0"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -405,6 +429,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.8"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      sha256: "648e103079f7c64a36dc7d39369cabb358d377078a051d6ae2ad3aa539519313"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.0.7"
   vector_math:
     dependency: transitive
     description:

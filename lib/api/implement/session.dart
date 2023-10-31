@@ -1,35 +1,19 @@
 import 'package:dio/dio.dart';
 
-import '../interface/session.dart';
+import '../abstract/session.dart';
 
 class SessionApiImpl extends SessionApi {
   final Dio dio;
   SessionApiImpl(this.dio);
 
   @override
-  Future<String> getAuthToken({
-    required AuthMode mode,
+  Future<AuthResponse> login({
     required AuthInfo info,
   }) async {
-    final resp = await dio.post('/session', data: {
-      'mode': mode.name,
-      'auth': info.toJson(),
+    final resp = await dio.post('/api/v1/user/login', data: {
+      'username': info.username,
+      'password': info.password,
     });
-    return resp.data['token'];
-  }
-
-  @override
-  Future<void> requestAuthCode({
-    required AuthMode mode,
-    required AuthInfo info,
-  }) async {
-    final resp = await dio.post(
-      '/session/authcode',
-      data: {
-        'mode': mode.toString(),
-        'auth': info.toJson(),
-      },
-    );
-    return resp.data['message'];
+    return AuthResponse.fromJson(resp.data);
   }
 }

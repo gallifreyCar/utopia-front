@@ -1,5 +1,5 @@
 import '../../util/kv_storage.dart';
-import '../interface/user.dart';
+import '../abstract/user.dart';
 
 //用户存储实现
 class UserStorageImpl implements UserStorageBase {

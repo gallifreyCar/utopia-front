@@ -5,13 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:utopia_front/util/flash.dart';
 import 'package:utopia_front/util/launch.dart';
 
-import '../../api/interface/session.dart';
+import '../../api/abstract/session.dart';
 import '../../global/index.dart';
-import '../index.dart';
+import '../video/index.dart';
+
+final _log = GlobalObjects.logger;
 
 class LoginModeSelectorPage extends StatelessWidget {
   const LoginModeSelectorPage({Key? key}) : super(key: key);
 
+  //构建登录模式按钮
   Widget buildLoginModeButton(IconData icon, String text, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
@@ -43,19 +46,15 @@ class LoginModeSelectorPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                buildLoginModeButton(Icons.email, '邮箱登录', () {
+                buildLoginModeButton(Icons.account_box, '登录注册', () {
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => const LoginPage(
-                      mode: AuthMode.email,
+                      mode: LoginMode.account,
                     ),
                   ));
                 }),
-                buildLoginModeButton(Icons.phone, '手机登录', () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const LoginPage(
-                      mode: AuthMode.sms,
-                    ),
-                  ));
+                buildLoginModeButton(Icons.accessibility, '游客入口', () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const IndexPage()));
                 }),
               ],
             ),
@@ -66,53 +65,17 @@ class LoginModeSelectorPage extends StatelessWidget {
   }
 }
 
-//验证码按钮
-class AuthCodeButton extends StatefulWidget {
-  final ValueGetter<Future<void>>? sendAuthCode;
-  const AuthCodeButton({Key? key, this.sendAuthCode}) : super(key: key);
-
-  @override
-  State<AuthCodeButton> createState() => _AuthCodeButtonState();
+//登录模式
+enum LoginMode {
+  //账号密码登录
+  account,
+  //游客模式
+  guest,
 }
 
-//获取验证码
-class _AuthCodeButtonState extends State<AuthCodeButton> {
-  Timer? timer;
-  int remainingSeconds = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    if (remainingSeconds > 0) {
-      return TextButton(
-        onPressed: null,
-        child: Text('$remainingSeconds 秒后重试'),
-      );
-    } else {
-      return TextButton(
-        onPressed: () async {
-          if (remainingSeconds > 0) return;
-          setState(() {
-            remainingSeconds = 3;
-          });
-          await widget.sendAuthCode?.call();
-          timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-            if (!mounted) return;
-            setState(() {
-              remainingSeconds -= 1;
-            });
-            if (remainingSeconds == 0) {
-              timer.cancel();
-            }
-          });
-        },
-        child: const Text('获取验证码'),
-      );
-    }
-  }
-}
-
+//登录页面
 class LoginPage extends StatefulWidget {
-  final AuthMode mode;
+  final LoginMode mode;
   const LoginPage({
     Key? key,
     required this.mode,
@@ -123,8 +86,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _inputController = TextEditingController();
-  final TextEditingController _authCodeController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   // State
   bool isPasswordClear = false;
@@ -133,35 +96,59 @@ class _LoginPageState extends State<LoginPage> {
 
   /// 用户点击登录按钮后
   Future<void> onLogin() async {
+    //未勾选用户协议 提示用户勾选 禁用登录按钮
     if (!isLicenseAccepted) {
       showBasicFlash(context, const Text('请勾选用户协议'));
       return;
     }
-
     setState(() {
       disableLoginButton = true;
     });
+
     try {
+      //mounted:当前页面是否被挂载
       if (!mounted) return;
-
-      String token = '';
+      // 发起请求 获取token
+      final api = GlobalObjects.apiProvider;
+      final authInfo = AuthInfo(
+        username: _usernameController.text,
+        password: _passwordController.text,
+      );
+      AuthResponse resp = await api.session.login(
+        info: authInfo,
+      );
 
       if (!mounted) return;
-      showBasicFlash(context, const Text('登录成功'));
-
-      // 如果登录成功，将token存入全局变量
-      GlobalObjects.token = token;
-
+      _log.d('登录情况: $resp');
+      // 登录成功
+      if (resp.code == 2000) {
+        // 保存token和userID
+        GlobalObjects.storageProvider.user.jwtToken = resp.data?.token;
+        GlobalObjects.storageProvider.user.uid = resp.data?.userId;
+        // 保存用户信息
+        showBasicFlash(context, const Text('登录成功'));
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const IndexPage(),
+        ));
+      }
+      // 登录失败
+      if (resp.code == 4000) {
+        showBasicFlash(context, Text('登录失败: ${resp.msg}'));
+        setState(() {
+          disableLoginButton = false;
+        });
+      }
       if (!mounted) return;
-      await Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => const IndexPage(),
-      ));
     } catch (e) {
       showBasicFlash(context, Text('登录异常: ${e.toString().split('\n')[0]}'));
+      _log.e('登录异常: $e');
       setState(() {
         disableLoginButton = false;
       });
     }
+    setState(() {
+      disableLoginButton = false;
+    });
   }
 
   static void onOpenUserLicense() {
@@ -185,29 +172,23 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       children: [
         TextFormField(
-          controller: _inputController,
+          controller: _usernameController,
           autofocus: true,
-          decoration: InputDecoration(
-            labelText: {
-              AuthMode.email: '请输入您的邮箱',
-              AuthMode.sms: '请输入您的手机号',
-            }[widget.mode]!,
-            hintText: {
-              AuthMode.email: '输入你的邮箱',
-              AuthMode.sms: '输入你的手机号',
-            }[widget.mode]!,
-            icon: const Icon(Icons.person),
+          decoration: const InputDecoration(
+            labelText: "用户名",
+            hintText: "输入你的用户名",
+            icon: Icon(Icons.person),
           ),
         ),
         Row(
           children: [
             Expanded(
               child: TextFormField(
-                controller: _authCodeController,
+                controller: _passwordController,
                 autofocus: true,
                 decoration: const InputDecoration(
-                  labelText: '请输入接收到的验证码',
-                  hintText: '输入你的校验信息',
+                  labelText: '密码',
+                  hintText: '输入你的密码',
                   icon: Icon(Icons.lock),
                 ),
               ),
@@ -218,19 +199,6 @@ class _LoginPageState extends State<LoginPage> {
                 borderRadius: BorderRadius.circular(20.0),
                 border: Border.all(color: Colors.grey),
                 color: Colors.white,
-              ),
-              child: AuthCodeButton(
-                sendAuthCode: () async {
-                  final api = GlobalObjects.apiProvider;
-                  final authInfo = AuthInfo(
-                    sms: widget.mode == AuthMode.sms ? _inputController.text : null,
-                    email: widget.mode == AuthMode.email ? _inputController.text : null,
-                  );
-                  api.session.requestAuthCode(
-                    mode: widget.mode,
-                    info: authInfo,
-                  );
-                },
               ),
             ),
           ],

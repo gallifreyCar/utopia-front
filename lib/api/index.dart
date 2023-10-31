@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 
+import 'abstract/session.dart';
 import 'implement/session.dart';
-import 'interface/session.dart';
 
 abstract class ApiProvider {
   SessionApi get session;
