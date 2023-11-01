@@ -1,5 +1,4 @@
 //上传七牛云的请求参数
-import 'dart:html';
 
 class UploadFileRequest {
   /*
@@ -19,7 +18,7 @@ class UploadFileRequest {
  */
   final String? resourceKey; //资源名，必须是 UTF-8 编码。注意： 如果上传凭证中 scope 指定为 <bucket>:<key>， 则该字段也必须指定。
   final String uploadToken; //必须是一个符合相应规格的上传凭证，否则会返回 401 表示权限认证失败。
-  final File file; //上传的文件
+  final String file; //上传的文件
   final String? fileType; //文件类型
   final String? describe; //文件描述
   final String? coverUrl; //封面链接

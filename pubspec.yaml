@@ -38,6 +38,12 @@ dependencies:
   qiniu_flutter_sdk: ^0.5.0
   file_picker: ^5.2.0
   universal_html: ^2.2.0
+  flukit: ^3.0.1
+  media_kit: ^1.1.4                             # Primary package.
+  media_kit_video: ^1.1.6
+  responsive_builder: ^0.7.0
+
+
 
 
 dev_dependencies:

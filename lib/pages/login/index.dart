@@ -186,6 +186,7 @@ class _LoginPageState extends State<LoginPage> {
               child: TextFormField(
                 controller: _passwordController,
                 autofocus: true,
+                obscureText: true,
                 decoration: const InputDecoration(
                   labelText: '密码',
                   hintText: '输入你的密码',
@@ -272,7 +273,7 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           Center(
             child: Container(
-              width: screenWidth,
+              width: screenWidth / 3,
               padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
