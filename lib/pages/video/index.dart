@@ -26,6 +26,9 @@ class _IndexPageState extends State<IndexPage> {
     const textStyle = TextStyle(color: Colors.white, fontSize: 20);
     return Scaffold(
         appBar: AppBar(title: const Text('Utopia'), actions: [
+          Row(
+            children: buildPersonAppBar(),
+          ),
           SizedBox(width: 20),
           //视频分类 1.热门 2.推荐 3.体育 4.动漫 5.游戏 6.音乐
           TextButton(onPressed: () {}, child: const Text('热门', style: textStyle)),
@@ -35,24 +38,6 @@ class _IndexPageState extends State<IndexPage> {
           TextButton(onPressed: () {}, child: const Text('游戏', style: textStyle)),
           TextButton(onPressed: () {}, child: const Text('音乐', style: textStyle)),
           SizedBox(width: 40),
-          //头像
-          const CircleAvatar(
-              //头像半径
-              radius: 20,
-              //头像图片 -> NetworkImage网络图片，AssetImage项目资源包图片, FileImage本地存储图片
-              backgroundImage: NetworkImage('http://s351j97d8.hd-bkt.clouddn.com/d56e2a96.png'),
-              //背景颜色
-              backgroundColor: Colors.white),
-          const SizedBox(width: 5),
-          //个人中心
-          TextButton(onPressed: () {}, child: Text("冰航", style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('个人中心', style: textStyle)),
-          //退出登录
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
-              },
-              child: const Text('退出登录', style: textStyle)),
         ]),
         body: KeepAliveWrapper(
             keepAlive: true,
@@ -73,6 +58,32 @@ class _IndexPageState extends State<IndexPage> {
     "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
     "https://prod-streaming-video-msn-com.akamaized.net/35960fe4-724f-44fc-ad77-0b91c55195e4/bfd49cd7-a0c6-467e-ae34-8674779e689b.mp4"
   ];
+
+  List<Widget> buildPersonAppBar() {
+    if (GlobalObjects.storageProvider.user.jwtToken != null) {
+      return [
+        const CircleAvatar(
+          radius: 20,
+          backgroundImage: NetworkImage('http://s351j97d8.hd-bkt.clouddn.com/d56e2a96.png'),
+          backgroundColor: Colors.white,
+        ),
+        const SizedBox(width: 5),
+        TextButton(
+          onPressed: () {},
+          child: const Text('个人中心', style: TextStyle(color: Colors.white, fontSize: 20)),
+        ),
+        TextButton(
+          onPressed: () {
+            GlobalObjects.storageProvider.user.jwtToken = null;
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
+          },
+          child: const Text('退出登录', style: TextStyle(color: Colors.white, fontSize: 20)),
+        ),
+        SizedBox(width: 40),
+      ];
+    }
+    return [Container()];
+  }
 }
 
 //全局日志打印
