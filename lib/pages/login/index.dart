@@ -93,6 +93,8 @@ class _LoginPageState extends State<LoginPage> {
   bool isPasswordClear = false;
   bool isLicenseAccepted = false;
   bool disableLoginButton = false;
+  bool disableRegisterButton = false;
+  bool isObscure = true;
 
   /// 用户点击登录按钮后
   Future<void> onLogin() async {
@@ -151,6 +153,63 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  /// 用户点击注册按钮后
+  Future<void> onRegister() async {
+    //未勾选用户协议 提示用户勾选 禁用注册按钮
+    if (!isLicenseAccepted) {
+      showBasicFlash(context, const Text('请勾选用户协议'));
+      return;
+    }
+    setState(() {
+      disableRegisterButton = true;
+    });
+
+    try {
+      //mounted:当前页面是否被挂载
+      if (!mounted) return;
+      // 发起请求 获取token
+      final api = GlobalObjects.apiProvider;
+      final authInfo = AuthInfo(
+        username: _usernameController.text,
+        password: _passwordController.text,
+      );
+      AuthResponse resp = await api.session.register(
+        info: authInfo,
+      );
+
+      if (!mounted) return;
+      _log.d('注册情况: $resp');
+      // 注册成功
+      if (resp.code == 2000) {
+        // 保存token和userID
+        GlobalObjects.storageProvider.user.jwtToken = resp.data?.token;
+        GlobalObjects.storageProvider.user.uid = resp.data?.userId;
+        // 进入首页
+        showBasicFlash(context, const Text('注册成功'));
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const IndexPage(),
+        ));
+      }
+      // 注册失败
+      if (resp.code == 4000) {
+        showBasicFlash(context, Text('注册失败: ${resp.msg}'));
+        setState(() {
+          disableRegisterButton = false;
+        });
+      }
+      if (!mounted) return;
+    } catch (e) {
+      showBasicFlash(context, Text('注册异常: ${e.toString().split('\n')[0]}'));
+      _log.e('注册异常: $e');
+      setState(() {
+        disableRegisterButton = false;
+      });
+    }
+    setState(() {
+      disableRegisterButton = false;
+    });
+  }
+
   static void onOpenUserLicense() {
     // launchInBrowser(Backend.license);
   }
@@ -185,12 +244,18 @@ class _LoginPageState extends State<LoginPage> {
             Expanded(
               child: TextFormField(
                 controller: _passwordController,
-                autofocus: true,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: isObscure,
+                decoration: InputDecoration(
                   labelText: '密码',
                   hintText: '输入你的密码',
-                  icon: Icon(Icons.lock),
+                  icon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                      icon: Icon(isObscure ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () {
+                        setState(() {
+                          isObscure = !isObscure;
+                        });
+                      }),
                 ),
               ),
             ),
@@ -225,7 +290,7 @@ class _LoginPageState extends State<LoginPage> {
               Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(text: '未注册用户登录后将自动注册，请确认您已阅读并同意'),
+                    const TextSpan(text: '请确认您已阅读并同意'),
                     TextSpan(
                       text: '《用户协议》',
                       style: const TextStyle(color: Colors.blue),
@@ -250,7 +315,25 @@ class _LoginPageState extends State<LoginPage> {
           height: 40,
           child: ElevatedButton(
             onPressed: disableLoginButton ? null : onLogin,
-            child: const Text('进入首页'),
+            child: const Text('登录进入'),
+          ),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+          height: 40,
+          child: ElevatedButton(
+            onPressed: disableRegisterButton ? null : onRegister,
+            child: const Text('我要注册'),
+          ),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+          height: 40,
+          child: ElevatedButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const IndexPage(),
+            )),
+            child: const Text('游客入口'),
           ),
         ),
         TextButton(
@@ -258,7 +341,7 @@ class _LoginPageState extends State<LoginPage> {
             '遇到问题?',
             style: TextStyle(color: Colors.grey),
           ),
-          onPressed: () => launchInBrowser('https://support.qq.com/products/377648'),
+          onPressed: () => launchInBrowser('https://github.com/VideoUtopia/utopia-back/issues'),
         ),
       ],
     );

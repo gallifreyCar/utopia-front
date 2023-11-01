@@ -12,15 +12,6 @@ class IndexPage extends StatefulWidget {
 }
 
 class _IndexPageState extends State<IndexPage> {
-  final _tabs = [
-    const Tab(text: '热门'),
-    const Tab(text: '推荐'),
-    const Tab(text: '体育'),
-    const Tab(text: '动漫'),
-    const Tab(text: '游戏'),
-    const Tab(text: '音乐'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     const textStyle = TextStyle(color: Colors.white, fontSize: 20);
@@ -68,17 +59,23 @@ class _IndexPageState extends State<IndexPage> {
           backgroundColor: Colors.white,
         ),
         const SizedBox(width: 5),
-        TextButton(
+        TextButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.person, color: Colors.white),
+            label: const Text('个人', style: TextStyle(color: Colors.white, fontSize: 20))),
+        //投稿
+        TextButton.icon(
           onPressed: () {},
-          child: const Text('个人中心', style: TextStyle(color: Colors.white, fontSize: 20)),
+          icon: const Icon(Icons.upload_file, color: Colors.white),
+          label: const Text('投稿', style: TextStyle(color: Colors.white, fontSize: 20)),
         ),
-        TextButton(
-          onPressed: () {
-            GlobalObjects.storageProvider.user.jwtToken = null;
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
-          },
-          child: const Text('退出登录', style: TextStyle(color: Colors.white, fontSize: 20)),
-        ),
+        TextButton.icon(
+            onPressed: () {
+              GlobalObjects.storageProvider.user.jwtToken = null;
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
+            },
+            icon: const Icon(Icons.logout, color: Colors.white),
+            label: const Text('退出', style: TextStyle(color: Colors.white, fontSize: 20))),
         SizedBox(width: 40),
       ];
     }
