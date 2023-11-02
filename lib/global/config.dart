@@ -1,5 +1,5 @@
 class GlobalConfig {
-  static const String baseUrl = 'http://localhost:8080';
+  static const String baseUrl = 'http://106.15.107.229:8080';
   static const String? proxy = null;
   static const bool isDebug = true;
   static const bool isMock = false;
