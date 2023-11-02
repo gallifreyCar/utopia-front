@@ -46,10 +46,6 @@ Dio getDioClient() {
     connectTimeout: GlobalConfig.connectTimeout,
     receiveTimeout: GlobalConfig.receiveTimeout,
     sendTimeout: GlobalConfig.sendTimeout,
-    //设置跨域请求
-    headers: {
-      HttpHeaders.acceptHeader: '*/*',
-    },
   ));
   dio.interceptors.add(JwtAuthInterceptor(tokenGetter: () => GlobalObjects.storageProvider.user.jwtToken));
   return dio;

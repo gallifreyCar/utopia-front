@@ -20,33 +20,15 @@ final _log = GlobalObjects.logger;
 
 class _IndexPageState extends State<IndexPage> {
   VideoResponse? videoResponse;
-  List<String> urls = [];
+  // List<String> urls = [];
+  //视频信息
+  List<VideoInfo> videoInfoList = [];
   int nextTime = 0;
 
   @override
   void initState() {
     super.initState();
     EasyLoading.show(status: '视频加载中...');
-
-    // 请求视频列表
-    // final api = GlobalObjects.apiProvider;
-    // const request = VideoRequest(lastTime: 0, videoType: 1);
-    // api.video.getVideoList(request).then((videoResponse) {
-    //   EasyLoading.dismiss();
-    //   _log.i(videoResponse);
-    //   if (videoResponse?.code == 2000) {
-    //     setState(() {
-    //       urls = videoResponse!.data!.videoInfo!.map((e) => e.playUrl!).toList();
-    //       nextTime = videoResponse!.data!.nextTime!;
-    //     });
-    //   }
-    //   if (videoResponse?.code == 4000) {
-    //     showBasicFlash(context, Text("请求失败"), duration: const Duration(seconds: 2));
-    //     _log.i('请求失败');
-    //   }
-    // }).catchError((e) {
-    //   _log.i(e);
-    // });
 
     // 请求视频列表
     _onRefresh(1, 0);
@@ -91,7 +73,7 @@ class _IndexPageState extends State<IndexPage> {
   Future<void> _onRefresh(int videoType, int myNextTime) async {
     setState(() {
       if (myNextTime == 0) {
-        urls.clear();
+        videoInfoList.clear();
       }
     });
     EasyLoading.show(status: '视频加载中...');
@@ -104,9 +86,9 @@ class _IndexPageState extends State<IndexPage> {
         //如果是下拉刷新，那么就清空urls
         setState(() {
           if (myNextTime == 0) {
-            urls.clear();
+            videoInfoList.clear();
           }
-          urls.addAll(videoResponse!.data!.videoInfo!.map((e) => e.playUrl!).toList());
+          videoInfoList.addAll(videoResponse!.data!.videoInfo);
           nextTime = videoResponse!.data!.nextTime!;
         });
       }
@@ -115,8 +97,14 @@ class _IndexPageState extends State<IndexPage> {
         _log.i('请求失败');
       }
     }).catchError((e) {
-      EasyLoading.dismiss();
       _log.e(e);
+      EasyLoading.dismiss();
+      EasyLoading.showError('服务器抽风了,请稍后再试');
+      //停留5秒
+      Future.delayed(const Duration(seconds: 5), () {
+        EasyLoading.dismiss();
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
+      });
     });
   }
 
@@ -166,17 +154,17 @@ class _IndexPageState extends State<IndexPage> {
           keepAlive: true,
           child: PageView.builder(
             scrollDirection: Axis.vertical,
-            itemCount: urls.length,
+            itemCount: videoInfoList.length,
             itemBuilder: (context, index) {
               // return VideoPlayerPage(
               //   text: "视频$index",
               //   playUrl: urls[index],
               // );
-              return urls.isEmpty
+              return videoInfoList.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : VideoPlayerPage(
                       text: "视频$index",
-                      playUrl: urls[index],
+                      videoInfo: videoInfoList[index],
                     );
             },
           ),

@@ -2,10 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:utopia_front/api/abstract/video.dart';
 
 class VideoPlayerPage extends StatefulWidget {
-  const VideoPlayerPage({Key? key, required this.text, required this.playUrl}) : super(key: key);
-  final String playUrl;
+  const VideoPlayerPage({Key? key, required this.text, required this.videoInfo}) : super(key: key);
+  final VideoInfo videoInfo;
   final String text;
 
   @override
@@ -14,17 +15,44 @@ class VideoPlayerPage extends StatefulWidget {
 
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
   bool isLike = false; //是否点赞
-  bool isCollect = false; //是否收藏
+  bool isFavorite = false; //是否收藏
+  bool isFollow = false; //是否关注
+  // 点赞数，收藏数，粉丝数
+  int fansCount = 0;
+  int followCount = 0;
+  int videoCount = 0;
 
+  // 作者个人信息
+  String avatar = "";
+  String nickname = "";
+  String username = "";
+
+  // 视频描述
+  String describe = "";
+
+  //视频播放器
   late final player = Player();
-
   late final controller = VideoController(player);
 
   @override
   void initState() {
     super.initState();
     // Play a [Media] or [Playlist].
-    player.open(Media(widget.playUrl));
+    player.open(Media(widget.videoInfo.playUrl));
+    // 是否点赞，收藏，关注
+    isLike = widget.videoInfo.isLike;
+    isFavorite = widget.videoInfo.isFavorite;
+    isFollow = widget.videoInfo.isFollow;
+    // 点赞数，收藏数，粉丝数，关注数
+    fansCount = widget.videoInfo.author.fansCount;
+    followCount = widget.videoInfo.author.followCount;
+    videoCount = widget.videoInfo.author.videoCount;
+    // 个人信息
+    avatar = widget.videoInfo.author.avatar; //头像
+    nickname = widget.videoInfo.author.nickname; //昵称
+
+    // 视频描述
+    describe = widget.videoInfo.describe;
   }
 
   @override
@@ -67,12 +95,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   child: Row(
                     children: [
                       //点赞，收藏，评论，分享
-                      buildButton(context, Text("点赞 12000"),
-                          isLike ? Icon(Icons.thumb_up) : Icon(Icons.thumb_up_off_alt), like),
-                      buildButton(
-                          context, Text("收藏 124"), isCollect ? Icon(Icons.star) : Icon(Icons.star_border), collect),
-                      buildButton(context, Text("评论 120"), Icon(Icons.comment), () {}),
-                      buildButton(context, Text("分享 120"), Icon(Icons.share), () {}),
+                      buildButton(context, buildTextAndNum("点赞", 120),
+                          isLike ? const Icon(Icons.thumb_up) : const Icon(Icons.thumb_up_off_alt), like),
+                      buildButton(context, const Text("收藏 124"),
+                          isFavorite ? const Icon(Icons.star) : const Icon(Icons.star_border), collect),
+                      buildButton(context, const Text("评论 120"), const Icon(Icons.comment), () {}),
+                      buildButton(context, const Text("分享 120"), const Icon(Icons.share), () {}),
 
                       //评论输入框 和 发送按钮
                       Expanded(
@@ -103,7 +131,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               height: MediaQuery.of(context).size.height -
                   MediaQuery.of(context).size.height / 3 +
                   MediaQuery.of(context).size.height / 10,
-              //头像
+              //作者信息
               child: Column(
                 children: [
                   Padding(
@@ -111,20 +139,22 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        const CircleAvatar(
-                          radius: 30,
-                          child: Icon(Icons.person, size: 30),
-                        ),
+                        const SizedBox(height: 10),
                         Column(
                           children: [
-                            const Text("用户名"),
-                            const SizedBox(height: 10),
-                            ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.add),
-                              label: const Text("关注"),
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundImage: NetworkImage(avatar),
                             ),
+                            const SizedBox(height: 4),
+                            Text(nickname,
+                                style: const TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.bold)),
                           ],
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.add),
+                          label: const Text("关注"),
                         ),
                       ],
                     ),
@@ -133,19 +163,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   //关注，粉丝
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: const [
-                      Text("关注 120"),
-                      Text("粉丝 120"),
+                    children: [
+                      buildTextAndNum("作品数", videoCount, textStyle: const TextStyle(fontSize: 16, color: Colors.blue)),
+                      buildTextAndNum("粉丝数", followCount, textStyle: const TextStyle(fontSize: 16, color: Colors.blue)),
                     ],
                   ),
 
                   //简介
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 20, 8, 20),
                     child: Text(
-                      "这是一段个人描述：的就是两个煎熬了就管理监督机构第三个了解了代购",
+                      describe,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
+                      //文字从左到右
+                      textDirection: TextDirection.ltr,
                     ),
                   ),
                   //评论 100条 滚动
@@ -181,7 +213,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   //收藏/取消收藏
   collect() {
     setState(() {
-      isCollect = !isCollect;
+      isFavorite = !isFavorite;
     });
   }
 }
@@ -191,4 +223,11 @@ Widget buildButton(BuildContext context, Text text, Icon icon, Function() onPres
     padding: const EdgeInsets.all(8.0),
     child: TextButton.icon(onPressed: onPressed, icon: icon, label: text),
   );
+}
+
+Text buildTextAndNum(String text, int howMany, {TextStyle? textStyle}) {
+  if (textStyle != null) {
+    return Text("$text: $howMany", style: textStyle);
+  }
+  return Text("$text: $howMany");
 }
