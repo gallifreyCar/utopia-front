@@ -32,9 +32,15 @@ jobs:
     - name: Display structure of build files
       run: ls -R
       working-directory: ./web
-    - name: Deploy-to-GitHub-Pages
+    - name: Deploy to GH Pages
       run: |
-        mkdir public
-        mv build/web/* public/
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        cd build/web
+        git init
+        git config --global user.email 956465331@qq.com
+        git config --global user.name gallifrey
+        git status
+        git remote add origin https://${{secrets.GH_DEPLOY}}@github.com/himanshusharma89/dev.git
+        git checkout -b gh-pages
+        git add --all
+        git commit -m "update"
+        git push origin gh-pages -f
