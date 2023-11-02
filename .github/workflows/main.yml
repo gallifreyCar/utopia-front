@@ -48,6 +48,6 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         personal_token: ${{ secrets.GH_DEPLOY }}
-        external_repository: VideoUtopia/uptopia.github.io
+        external_repository: VideoUtopia/VideoUtopia.github.io
         publish_branch: master
         publish_dir: build/web
