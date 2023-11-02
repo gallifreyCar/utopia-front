@@ -95,7 +95,7 @@ class KodoTokenData {
 }
 
 //上传文件的API抽象类
-abstract class UploadFileAPI {
+abstract class UploadFileApi {
   //获取七牛云存储kodo的token
   Future<GetKodoTokenResponse> getKodoToken();
 

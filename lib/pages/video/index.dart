@@ -1,8 +1,11 @@
 import 'package:flukit/flukit.dart';
 import 'package:flutter/material.dart';
+import 'package:utopia_front/api/abstract/video.dart';
 import 'package:utopia_front/global/index.dart';
 import 'package:utopia_front/pages/login/index.dart';
 import 'package:utopia_front/pages/video/singleVideoPage.dart';
+
+import '../../util/flash.dart';
 
 class IndexPage extends StatefulWidget {
   const IndexPage({Key? key}) : super(key: key);
@@ -11,44 +14,36 @@ class IndexPage extends StatefulWidget {
   State<IndexPage> createState() => _IndexPageState();
 }
 
-class _IndexPageState extends State<IndexPage> {
-  @override
-  Widget build(BuildContext context) {
-    const textStyle = TextStyle(color: Colors.white, fontSize: 20);
-    return Scaffold(
-        appBar: AppBar(title: const Text('Utopia'), actions: [
-          Row(
-            children: buildPersonAppBar(),
-          ),
-          SizedBox(width: 20),
-          //视频分类 1.热门 2.推荐 3.体育 4.动漫 5.游戏 6.音乐
-          TextButton(onPressed: () {}, child: const Text('热门', style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('推荐', style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('体育', style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('动漫', style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('游戏', style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('音乐', style: textStyle)),
-          SizedBox(width: 40),
-        ]),
-        body: KeepAliveWrapper(
-            keepAlive: true,
-            child: PageView(
-              scrollDirection: Axis.vertical,
-              children: [
-                for (var i = 0; i < urls.length; i++)
-                  VideoPlayerPage(
-                    text: "视频$i",
-                    playUrl: urls[i],
-                  )
-              ],
-            )));
-  }
+//全局日志打印
+final _log = GlobalObjects.logger;
 
-  List<String> urls = [
-    "https://tbh-image.oss-cn-beijing.aliyuncs.com/0daee0df3225f7c258a045feb5f09d0d.mp4",
-    "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
-    "https://prod-streaming-video-msn-com.akamaized.net/35960fe4-724f-44fc-ad77-0b91c55195e4/bfd49cd7-a0c6-467e-ae34-8674779e689b.mp4"
-  ];
+class _IndexPageState extends State<IndexPage> {
+  VideoResponse? videoResponse;
+  List<String> urls = [];
+  int nextTime = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // 请求视频列表
+    final api = GlobalObjects.apiProvider;
+    final request = const VideoRequest(lastTime: 0, videoType: 1);
+    api.video.getVideoList(request).then((videoResponse) {
+      _log.i(videoResponse);
+      if (videoResponse?.code == 2000) {
+        setState(() {
+          urls = videoResponse!.data!.videoInfo!.map((e) => e.playUrl!).toList();
+          nextTime = videoResponse!.data!.nextTime!;
+        });
+      }
+      if (videoResponse?.code == 4000) {
+        showBasicFlash(context, Text("请求失败"), duration: const Duration(seconds: 2));
+        _log.i('请求失败');
+      }
+    }).catchError((e) {
+      _log.i(e);
+    });
+  }
 
   List<Widget> buildPersonAppBar() {
     if (GlobalObjects.storageProvider.user.jwtToken != null) {
@@ -81,10 +76,39 @@ class _IndexPageState extends State<IndexPage> {
     }
     return [Container()];
   }
-}
 
-//全局日志打印
-final _log = GlobalObjects.logger;
+  @override
+  Widget build(BuildContext context) {
+    const textStyle = TextStyle(color: Colors.white, fontSize: 20);
+    return Scaffold(
+        appBar: AppBar(title: const Text('Utopia'), actions: [
+          Row(
+            children: buildPersonAppBar(),
+          ),
+          SizedBox(width: 20),
+          //视频分类 1.热门 2.推荐 3.体育 4.动漫 5.游戏 6.音乐
+          TextButton(onPressed: () {}, child: const Text('热门', style: textStyle)),
+          TextButton(onPressed: () {}, child: const Text('推荐', style: textStyle)),
+          TextButton(onPressed: () {}, child: const Text('体育', style: textStyle)),
+          TextButton(onPressed: () {}, child: const Text('动漫', style: textStyle)),
+          TextButton(onPressed: () {}, child: const Text('游戏', style: textStyle)),
+          TextButton(onPressed: () {}, child: const Text('音乐', style: textStyle)),
+          SizedBox(width: 40),
+        ]),
+        body: KeepAliveWrapper(
+            keepAlive: true,
+            child: PageView(
+              scrollDirection: Axis.vertical,
+              children: [
+                for (var i = 0; i < urls.length; i++)
+                  VideoPlayerPage(
+                    text: "视频$i",
+                    playUrl: urls[i],
+                  )
+              ],
+            )));
+  }
+}
 
 //选择文件 获取token 上传视频
 // Future<void> pickFile(BuildContext context) async {

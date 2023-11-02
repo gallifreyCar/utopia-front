@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:utopia_front/api/abstract/upload_file.dart';
 
-class UploadFileImpl extends UploadFileAPI {
+class UploadFileApiImpl extends UploadFileApi {
   final Dio dio;
-  UploadFileImpl(this.dio);
+  UploadFileApiImpl(this.dio);
 
   @override
   Future<GetKodoTokenResponse> getKodoToken() async {
