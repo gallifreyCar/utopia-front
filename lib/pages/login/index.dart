@@ -14,7 +14,7 @@ final _log = GlobalObjects.logger;
 class LoginModeSelectorPage extends StatelessWidget {
   const LoginModeSelectorPage({Key? key}) : super(key: key);
 
-  //构建登录模式按钮
+  ///构建登录模式按钮
   Widget buildLoginModeButton(IconData icon, String text, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
@@ -65,7 +65,7 @@ class LoginModeSelectorPage extends StatelessWidget {
   }
 }
 
-//登录模式
+///登录模式
 enum LoginMode {
   //账号密码登录
   account,
@@ -73,7 +73,7 @@ enum LoginMode {
   guest,
 }
 
-//登录页面
+///登录页面
 class LoginPage extends StatefulWidget {
   final LoginMode mode;
   const LoginPage({
@@ -89,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // State
+  /// State
   bool isPasswordClear = false;
   bool isLicenseAccepted = false;
   bool disableLoginButton = false;
@@ -129,8 +129,8 @@ class _LoginPageState extends State<LoginPage> {
         GlobalObjects.storageProvider.user.uid = resp.data?.userId;
         // 保存用户信息
         showBasicFlash(context, const Text('登录成功'));
-        await Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const IndexPage(),
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => IndexPage(),
         ));
       }
       // 登录失败

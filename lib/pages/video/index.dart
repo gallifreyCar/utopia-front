@@ -15,7 +15,7 @@ class IndexPage extends StatefulWidget {
   State<IndexPage> createState() => _IndexPageState();
 }
 
-//全局日志打印
+///全局日志打印
 final _log = GlobalObjects.logger;
 
 class _IndexPageState extends State<IndexPage> {
@@ -26,29 +26,33 @@ class _IndexPageState extends State<IndexPage> {
   @override
   void initState() {
     super.initState();
-    EasyLoading.show(status: '视频资源加载中......');
+    EasyLoading.show(status: '视频加载中...');
 
     // 请求视频列表
-    final api = GlobalObjects.apiProvider;
-    const request = VideoRequest(lastTime: 0, videoType: 1);
-    api.video.getVideoList(request).then((videoResponse) {
-      EasyLoading.dismiss();
-      _log.i(videoResponse);
-      if (videoResponse?.code == 2000) {
-        setState(() {
-          urls = videoResponse!.data!.videoInfo!.map((e) => e.playUrl!).toList();
-          nextTime = videoResponse!.data!.nextTime!;
-        });
-      }
-      if (videoResponse?.code == 4000) {
-        showBasicFlash(context, Text("请求失败"), duration: const Duration(seconds: 2));
-        _log.i('请求失败');
-      }
-    }).catchError((e) {
-      _log.i(e);
-    });
+    // final api = GlobalObjects.apiProvider;
+    // const request = VideoRequest(lastTime: 0, videoType: 1);
+    // api.video.getVideoList(request).then((videoResponse) {
+    //   EasyLoading.dismiss();
+    //   _log.i(videoResponse);
+    //   if (videoResponse?.code == 2000) {
+    //     setState(() {
+    //       urls = videoResponse!.data!.videoInfo!.map((e) => e.playUrl!).toList();
+    //       nextTime = videoResponse!.data!.nextTime!;
+    //     });
+    //   }
+    //   if (videoResponse?.code == 4000) {
+    //     showBasicFlash(context, Text("请求失败"), duration: const Duration(seconds: 2));
+    //     _log.i('请求失败');
+    //   }
+    // }).catchError((e) {
+    //   _log.i(e);
+    // });
+
+    // 请求视频列表
+    _onRefresh(1, 0);
   }
 
+  ///构建个人中心 如果没有登录则不显示
   List<Widget> buildPersonAppBar() {
     if (GlobalObjects.storageProvider.user.jwtToken != null) {
       return [
@@ -81,6 +85,41 @@ class _IndexPageState extends State<IndexPage> {
     return [Container()];
   }
 
+  ///请求视频方法 这里是切换视频分类的时候调用，下拉刷新也会调用
+  ///如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
+  ///如果是切换分类，那么myNextTime就是0
+  Future<void> _onRefresh(int videoType, int myNextTime) async {
+    setState(() {
+      if (myNextTime == 0) {
+        urls.clear();
+      }
+    });
+    EasyLoading.show(status: '视频加载中...');
+    final api = GlobalObjects.apiProvider;
+    final request = VideoRequest(lastTime: myNextTime, videoType: videoType);
+    api.video.getVideoList(request).then((videoResponse) {
+      EasyLoading.dismiss();
+      if (videoResponse?.code == 2000) {
+        _log.i('请求成功');
+        //如果是下拉刷新，那么就清空urls
+        setState(() {
+          if (myNextTime == 0) {
+            urls.clear();
+          }
+          urls.addAll(videoResponse!.data!.videoInfo!.map((e) => e.playUrl!).toList());
+          nextTime = videoResponse!.data!.nextTime!;
+        });
+      }
+      if (videoResponse?.code == 4000) {
+        showBasicFlash(context, Text("请求失败"), duration: const Duration(seconds: 2));
+        _log.i('请求失败');
+      }
+    }).catchError((e) {
+      EasyLoading.dismiss();
+      _log.e(e);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     const textStyle = TextStyle(color: Colors.white, fontSize: 20);
@@ -91,27 +130,61 @@ class _IndexPageState extends State<IndexPage> {
           ),
           SizedBox(width: 20),
           //视频分类 1.热门 2.推荐 3.体育 4.动漫 5.游戏 6.音乐
-          TextButton(onPressed: () {}, child: const Text('热门', style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('推荐', style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('体育', style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('动漫', style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('游戏', style: textStyle)),
-          TextButton(onPressed: () {}, child: const Text('音乐', style: textStyle)),
-          SizedBox(width: 40),
+          TextButton(
+              onPressed: () {
+                _onRefresh(1, 0);
+              },
+              child: const Text('热门', style: textStyle)),
+          TextButton(
+              onPressed: () {
+                _onRefresh(2, 0);
+              },
+              child: const Text('推荐', style: textStyle)),
+          TextButton(
+              onPressed: () {
+                _onRefresh(3, 0);
+              },
+              child: const Text('体育', style: textStyle)),
+          TextButton(
+              onPressed: () {
+                _onRefresh(4, 0);
+              },
+              child: const Text('动漫', style: textStyle)),
+          TextButton(
+              onPressed: () {
+                _onRefresh(5, 0);
+              },
+              child: const Text('游戏', style: textStyle)),
+          TextButton(
+              onPressed: () {
+                _onRefresh(6, 0);
+              },
+              child: const Text('音乐', style: textStyle)),
+          const SizedBox(width: 40),
         ]),
         body: KeepAliveWrapper(
-            keepAlive: true,
-            child: PageView(
-              scrollDirection: Axis.vertical,
-              children: [
-                for (var i = 0; i < urls.length; i++)
-                  VideoPlayerPage(
-                    text: "视频$i",
-                    playUrl: urls[i],
-                  )
-              ],
-            )));
+          keepAlive: true,
+          child: PageView.builder(
+            scrollDirection: Axis.vertical,
+            itemCount: urls.length,
+            itemBuilder: (context, index) {
+              // return VideoPlayerPage(
+              //   text: "视频$index",
+              //   playUrl: urls[index],
+              // );
+              return urls.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : VideoPlayerPage(
+                      text: "视频$index",
+                      playUrl: urls[index],
+                    );
+            },
+          ),
+        ));
   }
+
+  //构建KeepAliveWrapper整个页面
+  // Widget buildKeepAliveWrapper() {
 }
 
 //选择文件 获取token 上传视频

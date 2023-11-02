@@ -73,6 +73,13 @@ class VideoData {
   });
 
   factory VideoData.fromJson(Map<String, dynamic> json) {
+    // 如果 nextTime 为 -1，说明没有更多数据了 不用解析 videoInfo
+    if (json['next_time'] == -1) {
+      return VideoData(
+        videoInfo: [],
+        nextTime: -1,
+      );
+    }
     return VideoData(
       videoInfo:
           (json['video_info'] as List<dynamic>).map((e) => VideoInfo.fromJson(e as Map<String, dynamic>)).toList(),
@@ -81,6 +88,13 @@ class VideoData {
   }
 
   Map<String, dynamic> toJson() {
+    // 如果 nextTime 为 -1，说明没有更多数据了 不用解析 videoInfo
+    if (nextTime == -1) {
+      return {
+        'video_info': [],
+        'next_time': -1,
+      };
+    }
     return {
       'video_info': videoInfo.map((e) => e.toJson()).toList(),
       'next_time': nextTime,
