@@ -39,7 +39,7 @@ jobs:
         git config --global user.email 956465331@qq.com
         git config --global user.name gallifrey
         git status
-        git remote add origin https://${{secrets.GH_DEPLOY}}@github.com/himanshusharma89/dev.git
+        git remote add origin https://${{secrets.GH_DEPLOY}}@github.com/VideoUtopia/utopia-front.git
         git checkout -b gh-pages
         git add --all
         git commit -m "update"
