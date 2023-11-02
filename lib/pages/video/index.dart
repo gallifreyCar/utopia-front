@@ -1,5 +1,6 @@
 import 'package:flukit/flukit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:utopia_front/api/abstract/video.dart';
 import 'package:utopia_front/global/index.dart';
 import 'package:utopia_front/pages/login/index.dart';
@@ -25,10 +26,13 @@ class _IndexPageState extends State<IndexPage> {
   @override
   void initState() {
     super.initState();
+    EasyLoading.show(status: '视频资源加载中......');
+
     // 请求视频列表
     final api = GlobalObjects.apiProvider;
-    final request = const VideoRequest(lastTime: 0, videoType: 1);
+    const request = VideoRequest(lastTime: 0, videoType: 1);
     api.video.getVideoList(request).then((videoResponse) {
+      EasyLoading.dismiss();
       _log.i(videoResponse);
       if (videoResponse?.code == 2000) {
         setState(() {

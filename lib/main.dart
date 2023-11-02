@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:utopia_front/global/index.dart';
 import 'package:utopia_front/pages/login/index.dart';
 import 'package:utopia_front/pages/video/index.dart';
@@ -22,16 +23,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    EasyLoading.instance.indicatorType = EasyLoadingIndicatorType.cubeGrid;
     final app = MaterialApp(
-        title: _title,
-        home: () {
-          // 如果用户未登录，则跳转到登录页面
-          if (GlobalObjects.storageProvider.user.jwtToken == null) {
-            return const LoginModeSelectorPage();
-          } else {
-            return const IndexPage();
-          }
-        }());
+      title: _title,
+      home: () {
+        // 如果用户未登录，则跳转到登录页面
+        if (GlobalObjects.storageProvider.user.jwtToken == null) {
+          return const LoginModeSelectorPage();
+        } else {
+          return const IndexPage();
+        }
+      }(),
+      builder: EasyLoading.init(),
+    );
 
     return app;
   }
