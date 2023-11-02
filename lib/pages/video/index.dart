@@ -29,19 +29,29 @@ class _IndexPageState extends State<IndexPage> {
   void initState() {
     super.initState();
     EasyLoading.show(status: '视频加载中...');
-
     // 请求视频列表
     _onRefresh(1, 0);
   }
 
   ///构建个人中心 如果没有登录则不显示
   List<Widget> buildPersonAppBar() {
+    String? avatarUrl = GlobalObjects.storageProvider.user.avatar ?? 'http://s351j97d8.hd-bkt.clouddn.com/d56e2a96.png';
+    String nickname = GlobalObjects.storageProvider.user.nickname ?? '三九';
+
     if (GlobalObjects.storageProvider.user.jwtToken != null) {
       return [
-        const CircleAvatar(
-          radius: 20,
-          backgroundImage: NetworkImage('http://s351j97d8.hd-bkt.clouddn.com/d56e2a96.png'),
-          backgroundColor: Colors.white,
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundImage: NetworkImage(avatarUrl),
+              backgroundColor: Colors.white,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(nickname),
+            )
+          ],
         ),
         const SizedBox(width: 5),
         TextButton.icon(
@@ -116,36 +126,36 @@ class _IndexPageState extends State<IndexPage> {
           Row(
             children: buildPersonAppBar(),
           ),
-          SizedBox(width: 20),
-          //视频分类 1.热门 2.推荐 3.体育 4.动漫 5.游戏 6.音乐
+          const SizedBox(width: 20),
+          //视频分类 0.热门 1.体育 2.动漫 3.游戏 4.音乐
           TextButton(
               onPressed: () {
-                _onRefresh(1, 0);
+                _onRefresh(0, 0);
               },
               child: const Text('热门', style: textStyle)),
           TextButton(
               onPressed: () {
-                _onRefresh(2, 0);
+                _onRefresh(0, 0);
               },
               child: const Text('推荐', style: textStyle)),
           TextButton(
               onPressed: () {
-                _onRefresh(3, 0);
+                _onRefresh(1, 0);
               },
               child: const Text('体育', style: textStyle)),
           TextButton(
               onPressed: () {
-                _onRefresh(4, 0);
+                _onRefresh(2, 0);
               },
               child: const Text('动漫', style: textStyle)),
           TextButton(
               onPressed: () {
-                _onRefresh(5, 0);
+                _onRefresh(3, 0);
               },
               child: const Text('游戏', style: textStyle)),
           TextButton(
               onPressed: () {
-                _onRefresh(6, 0);
+                _onRefresh(4, 0);
               },
               child: const Text('音乐', style: textStyle)),
           const SizedBox(width: 40),

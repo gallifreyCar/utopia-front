@@ -1,4 +1,4 @@
-//视频接口的请求参数
+///视频接口的请求参数
 class VideoRequest {
   //最后时间 时间戳
   final int? lastTime;
@@ -25,7 +25,7 @@ class VideoRequest {
   }
 }
 
-//视频接口的响应体
+///视频接口的响应体
 class VideoResponse {
   final int code;
   final String msg;
@@ -62,7 +62,7 @@ class VideoResponse {
   }
 }
 
-//视频数据
+///视频数据
 class VideoData {
   final List<VideoInfo> videoInfo;
   final int nextTime;
@@ -74,7 +74,7 @@ class VideoData {
 
   factory VideoData.fromJson(Map<String, dynamic> json) {
     // 如果 nextTime 为 -1，说明没有更多数据了 不用解析 videoInfo
-    if (json['next_time'] == -1) {
+    if (json['next_time'] == -1 || json['video_info'] == null) {
       return VideoData(
         videoInfo: [],
         nextTime: -1,
@@ -89,7 +89,7 @@ class VideoData {
 
   Map<String, dynamic> toJson() {
     // 如果 nextTime 为 -1，说明没有更多数据了 不用解析 videoInfo
-    if (nextTime == -1) {
+    if (nextTime == -1 || videoInfo == null) {
       return {
         'video_info': [],
         'next_time': -1,
@@ -102,7 +102,7 @@ class VideoData {
   }
 }
 
-//视频信息
+///视频信息
 class VideoInfo {
   final int id;
   final String createdAt;
@@ -158,7 +158,7 @@ class VideoInfo {
   }
 }
 
-//作者信息
+///作者信息
 class Author {
   final int id;
   final String nickname;
@@ -203,6 +203,7 @@ class Author {
   }
 }
 
+///视频API接口
 abstract class VideoApi {
   Future<VideoResponse> getVideoList(VideoRequest request);
 }

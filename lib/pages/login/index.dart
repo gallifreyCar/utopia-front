@@ -127,8 +127,10 @@ class _LoginPageState extends State<LoginPage> {
         // 保存token和userID
         GlobalObjects.storageProvider.user.jwtToken = resp.data?.token;
         GlobalObjects.storageProvider.user.uid = resp.data?.userId;
-        // 保存用户信息
+        // 请求用户信息
+        await getUserInfo(context);
         showBasicFlash(context, const Text('登录成功'));
+        // 进入首页
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => IndexPage(),
         ));
@@ -184,9 +186,11 @@ class _LoginPageState extends State<LoginPage> {
         // 保存token和userID
         GlobalObjects.storageProvider.user.jwtToken = resp.data?.token;
         GlobalObjects.storageProvider.user.uid = resp.data?.userId;
+        // 请求用户信息
+        await getUserInfo(context);
         // 进入首页
         showBasicFlash(context, const Text('注册成功'));
-        await Navigator.of(context).push(MaterialPageRoute(
+        Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => const IndexPage(),
         ));
       }
@@ -379,5 +383,22 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
     );
+  }
+}
+
+Future<void> getUserInfo(BuildContext context) async {
+  final api = GlobalObjects.apiProvider;
+  final userInfo = await api.user.getUserInfo();
+  if (userInfo.code == 2000) {
+    GlobalObjects.storageProvider.user.avatar = userInfo.data!.avatar;
+    GlobalObjects.storageProvider.user.nickname = userInfo.data!.nickname;
+    GlobalObjects.storageProvider.user.username = userInfo.data!.username;
+    GlobalObjects.storageProvider.user.uid = userInfo.data!.id;
+    _log.i('getUserInfo: ${userInfo.data}');
+  }
+  if (userInfo.code == 4000) {
+    showBasicFlash(context, Text('获取用户信息失败: ${userInfo.msg}'));
+    _log.e('获取用户信息失败: ${userInfo.msg}');
+    return;
   }
 }
