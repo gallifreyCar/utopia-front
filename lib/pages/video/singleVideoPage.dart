@@ -173,7 +173,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     backgroundImage: NetworkImage(avatar),
                   ),
                   const SizedBox(height: 4),
-                  Text(nickname, style: const TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.bold)),
+                  Text(nickname,
+                      style:
+                          TextStyle(fontSize: 18, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
                 ],
               ),
               ElevatedButton.icon(
@@ -189,8 +191,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildTextAndNum("作品数", videoCount, textStyle: const TextStyle(fontSize: 16, color: Colors.blue)),
-            _buildTextAndNum("粉丝数", fansCount, textStyle: const TextStyle(fontSize: 16, color: Colors.blue)),
+            _buildTextAndNum("作品数", videoCount,
+                textStyle: TextStyle(fontSize: 16, color: Theme.of(context).primaryColor)),
+            _buildTextAndNum("粉丝数", fansCount,
+                textStyle: TextStyle(fontSize: 16, color: Theme.of(context).primaryColor)),
           ],
         ),
 
@@ -328,23 +332,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   /// 未登录时的弹窗
   void showLoginDialog() {
-    TextStyle style = const TextStyle(fontSize: 16, color: Colors.blue);
-    TextStyle style2 = const TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.bold);
+    TextStyle style = TextStyle(fontSize: 16, color: Theme.of(context).primaryColor);
+    TextStyle style2 = TextStyle(fontSize: 18, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold);
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text("小提示", style: style2),
-          // content: Text("游客身份无法进行此操作操作哦😊~", style: style),
-          content: TextField(
-            decoration: InputDecoration(
-              hintText: "游客身份无法进行此操作操作哦😊~",
-              hintStyle: style,
-              // enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
-              // focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
-            ),
-            enabled: false,
-          ),
+          content: Text("游客身份无法进行此操作操作哦😊~", style: style),
           actions: [
             Padding(
               padding: const EdgeInsets.all(8.0),
