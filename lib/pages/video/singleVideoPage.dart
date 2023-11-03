@@ -6,6 +6,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:utopia_front/global/index.dart';
 
 import '../../api/model/video.dart';
+import '../login/index.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   const VideoPlayerPage({Key? key, required this.text, required this.videoInfo}) : super(key: key);
@@ -234,6 +235,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   /// todo 点赞收藏逻辑可以抽象出来
   ///点赞/取消点赞
   like() async {
+    isLogin();
     if (!isLikeButtonEnable) {
       EasyLoading.showToast("操作过于频繁");
       Future.delayed(const Duration(seconds: 1), () {
@@ -251,6 +253,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   ///收藏/取消收藏
   collect() async {
+    isLogin();
     if (!isFavoriteButtonEnable) {
       EasyLoading.showToast("操作过于频繁");
       Future.delayed(const Duration(seconds: 1), () {
@@ -312,8 +315,54 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
   }
 
-//关注
+  //关注
   Future followUp() async {}
+
+  /// 登录判断
+
+  void isLogin() {
+    if (GlobalObjects.storageProvider.user.jwtToken == null) {
+      showLoginDialog();
+    }
+    return;
+  }
+
+  /// 未登录时的弹窗
+  void showLoginDialog() {
+    TextStyle style = const TextStyle(fontSize: 16, color: Colors.blue);
+    TextStyle style2 = const TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.bold);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("小提示", style: style2),
+          content: Text("游客身份无法进行此操作操作哦😊~", style: style),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("下次一定"),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => const LoginPage(mode: LoginMode.account)));
+                },
+                child: const Text("我要登录"),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 Widget buildButton(BuildContext context, Text text, Icon icon, Function() onPressed) {
