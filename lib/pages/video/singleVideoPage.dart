@@ -1,4 +1,5 @@
 // 单独的视频播放器页面
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:media_kit/media_kit.dart';
@@ -6,6 +7,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:utopia_front/global/index.dart';
 
 import '../../api/model/video.dart';
+import '../../custom_widgets/chat_widow.dart';
 import '../login/index.dart';
 
 class VideoPlayerPage extends StatefulWidget {
@@ -81,10 +83,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     _log.i("build ${widget.text}");
     return Container(
       color: Colors.lightBlueAccent,
-      height: MediaQuery.of(context).size.height -
-          MediaQuery.of(context).size.height / 3 +
-          MediaQuery.of(context).size.height / 10,
-      width: MediaQuery.of(context).size.width / 6,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
@@ -93,10 +91,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           _buildVideoPlayer(),
           Container(
               color: Colors.white,
-              width: MediaQuery.of(context).size.width / 6,
-              height: MediaQuery.of(context).size.height -
-                  MediaQuery.of(context).size.height / 3 +
-                  MediaQuery.of(context).size.height / 10,
+              width: MediaQuery.of(context).size.width * 0.16,
+              height: MediaQuery.of(context).size.height * 0.78,
               //作者信息列
               child: _buildAuthInfoColum()),
         ],
@@ -106,52 +102,54 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   /// 构建视频播放器部件
   Widget _buildVideoPlayer() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Stack(
       children: [
-        //视频播放器
-        SizedBox(
-          width: MediaQuery.of(context).size.width - MediaQuery.of(context).size.width / 3,
-          height: MediaQuery.of(context).size.height - MediaQuery.of(context).size.height / 3,
-          // Use [Video] widget to display video output.
-          child: Video(controller: controller),
-        ),
-        //点赞，收藏，评论，分享
-        SizedBox(
-          width: MediaQuery.of(context).size.width - MediaQuery.of(context).size.width / 3,
-          height: MediaQuery.of(context).size.height / 10,
-          // Use [Video] widget to display video output.
-          child: Container(
-            color: Colors.white,
-            child: Row(
-              children: [
-                //点赞，收藏，评论，分享
-                buildButton(context, buildTextAndNum("点赞", likeCount),
-                    isLike ? const Icon(Icons.thumb_up) : const Icon(Icons.thumb_up_off_alt), like),
-                buildButton(context, buildTextAndNum("收藏", favoriteCount),
-                    isFavorite ? const Icon(Icons.star) : const Icon(Icons.star_border), collect),
-                buildButton(context, const Text("评论 120"), const Icon(Icons.comment), () {}),
-                buildButton(context, const Text("分享 120"), const Icon(Icons.share), () {}),
-
-                //评论输入框 和 发送按钮
-                Expanded(
-                    child: TextField(
-                  decoration: InputDecoration(
-                    hintText: "评论",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                )),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    child: Text("发送"),
-                  ),
-                ),
-              ],
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            //视频播放器
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.68,
+              height: MediaQuery.of(context).size.height * 0.68,
+              // Use [Video] widget to display video output.
+              child: Video(controller: controller),
             ),
+            //点赞，收藏，评论，分享
+            Container(
+              color: Colors.white,
+              width: MediaQuery.of(context).size.width * 0.68,
+              height: MediaQuery.of(context).size.height * 0.1,
+              // Use [Video] widget to display video output.
+              child: Row(
+                children: [
+                  //点赞，收藏，评论，分享
+                  _buildButton(context, _buildTextAndNum("点赞", likeCount),
+                      isLike ? const Icon(Icons.thumb_up) : const Icon(Icons.thumb_up_off_alt), like),
+                  _buildButton(context, _buildTextAndNum("收藏", favoriteCount),
+                      isFavorite ? const Icon(Icons.star) : const Icon(Icons.star_border), collect),
+                  _buildButton(context, const Text("评论 120"), const Icon(Icons.comment), () {}),
+                  _buildButton(context, const Text("分享 120"), const Icon(Icons.share), () {}),
+                ],
+              ),
+            ),
+          ],
+        ),
+        //  评论窗口
+        Positioned(
+          right: 20,
+          bottom: MediaQuery.of(context).size.height * 0.08,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.4,
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Column(
+                // mainAxisSize: MainAxisSize.min, //垂直方向最小化处理
+                crossAxisAlignment: CrossAxisAlignment.center, //水平方向居中对齐
+                mainAxisAlignment: MainAxisAlignment.end, // 从下往上排列
+                children: [
+                  ChatWindow(
+                    sendMessage: sendMsg,
+                  ),
+                ]),
           ),
         ),
       ],
@@ -191,8 +189,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            buildTextAndNum("作品数", videoCount, textStyle: const TextStyle(fontSize: 16, color: Colors.blue)),
-            buildTextAndNum("粉丝数", fansCount, textStyle: const TextStyle(fontSize: 16, color: Colors.blue)),
+            _buildTextAndNum("作品数", videoCount, textStyle: const TextStyle(fontSize: 16, color: Colors.blue)),
+            _buildTextAndNum("粉丝数", fansCount, textStyle: const TextStyle(fontSize: 16, color: Colors.blue)),
           ],
         ),
 
@@ -233,6 +231,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   int failCode = 4000;
 
   /// todo 点赞收藏逻辑可以抽象出来
+
   ///点赞/取消点赞
   like() async {
     isLogin();
@@ -315,7 +314,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
   }
 
-  //关注
+  ///关注
   Future followUp() async {}
 
   /// 登录判断
@@ -336,7 +335,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       builder: (context) {
         return AlertDialog(
           title: Text("小提示", style: style2),
-          content: Text("游客身份无法进行此操作操作哦😊~", style: style),
+          // content: Text("游客身份无法进行此操作操作哦😊~", style: style),
+          content: TextField(
+            decoration: InputDecoration(
+              hintText: "游客身份无法进行此操作操作哦😊~",
+              hintStyle: style,
+              // enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+              // focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+            ),
+            enabled: false,
+          ),
           actions: [
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -365,16 +373,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 }
 
-Widget buildButton(BuildContext context, Text text, Icon icon, Function() onPressed) {
+Widget _buildButton(BuildContext context, Text text, Icon icon, Function() onPressed) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: TextButton.icon(onPressed: onPressed, icon: icon, label: text),
   );
 }
 
-Text buildTextAndNum(String text, int howMany, {TextStyle? textStyle}) {
+Text _buildTextAndNum(String text, int howMany, {TextStyle? textStyle}) {
   if (textStyle != null) {
     return Text("$text: $howMany", style: textStyle);
   }
   return Text("$text: $howMany");
 }
+
+/// 发送评论
+sendMsg(String text) async {}

@@ -3,6 +3,7 @@ import 'package:utopia_front/api/abstract/upload_file.dart';
 import 'package:utopia_front/api/abstract/video.dart';
 import 'package:utopia_front/api/implement/upload_file.dart';
 import 'package:utopia_front/api/implement/user.dart';
+import 'package:utopia_front/api/mock/video.dart';
 
 import 'abstract/session.dart';
 import 'abstract/user.dart';
@@ -44,8 +45,7 @@ class ApiProviderMock extends ApiProvider {
   UploadFileApi get upload => throw UnimplementedError();
 
   @override
-  // TODO: implement video
-  VideoApi get video => throw UnimplementedError();
+  VideoApi get video => VideoApiMock();
 
   @override
   // TODO: implement user

@@ -20,7 +20,6 @@ final _log = GlobalObjects.logger;
 
 class _IndexPageState extends State<IndexPage> {
   VideoResponse? videoResponse;
-  // List<String> urls = [];
   //视频信息
   List<VideoInfo> videoInfoList = [];
   int nextTime = 0;
@@ -37,7 +36,6 @@ class _IndexPageState extends State<IndexPage> {
     EasyLoading.show(status: '视频加载中...');
     // 请求视频列表
     _onRefresh(1, 0);
-
     // 创建一个 PageController
     _pageController = PageController(initialPage: 0);
     // 添加监听器来检测页面的变化
@@ -150,7 +148,7 @@ class _IndexPageState extends State<IndexPage> {
       //停留5秒
       Future.delayed(const Duration(seconds: 5), () {
         EasyLoading.dismiss();
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
+        // Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
       });
     });
   }
@@ -203,10 +201,6 @@ class _IndexPageState extends State<IndexPage> {
             scrollDirection: Axis.vertical,
             itemCount: videoInfoList.length,
             itemBuilder: (context, index) {
-              // return VideoPlayerPage(
-              //   text: "视频$index",
-              //   playUrl: urls[index],
-              // );
               return videoInfoList.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : VideoPlayerPage(

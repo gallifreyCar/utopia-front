@@ -42,6 +42,7 @@ dependencies:
   media_kit: ^1.1.4                             # Primary package.
   media_kit_video: ^1.1.6
   responsive_builder: ^0.7.0
+  emoji_picker_flutter: ^1.6.1
 
 
 
