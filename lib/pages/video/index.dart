@@ -157,7 +157,7 @@ class _IndexPageState extends State<IndexPage> {
   Widget build(BuildContext context) {
     TextStyle textStyle = Theme.of(context).primaryTextTheme.titleLarge!;
     return Scaffold(
-        appBar: AppBar(title: const Text('Utopia'), actions: [
+        appBar: AppBar(backgroundColor: Theme.of(context).primaryColorDark, title: const Text('Utopia'), actions: [
           Row(
             children: buildPersonAppBar(),
           ),
