@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:utopia_front/api/abstract/upload_file.dart';
 
+import '../model/kodoFile.dart';
+
 class UploadFileApiImpl extends UploadFileApi {
   final Dio dio;
   UploadFileApiImpl(this.dio);

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../abstract/session.dart';
+import '../model/session.dart';
 
 class SessionApiImpl extends SessionApi {
   final Dio dio;

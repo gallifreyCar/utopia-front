@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:utopia_front/api/abstract/video.dart';
+
+import '../../api/model/video.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   const VideoPlayerPage({Key? key, required this.text, required this.videoInfo}) : super(key: key);

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../abstract/user.dart';
+import '../model/user.dart';
 
 class UserApiImpl extends UserApi {
   final Dio dio;

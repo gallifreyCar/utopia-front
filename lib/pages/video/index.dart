@@ -1,11 +1,11 @@
 import 'package:flukit/flukit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:utopia_front/api/abstract/video.dart';
 import 'package:utopia_front/global/index.dart';
 import 'package:utopia_front/pages/login/index.dart';
 import 'package:utopia_front/pages/video/singleVideoPage.dart';
 
+import '../../api/model/video.dart';
 import '../../util/flash.dart';
 
 class IndexPage extends StatefulWidget {
@@ -25,12 +25,40 @@ class _IndexPageState extends State<IndexPage> {
   List<VideoInfo> videoInfoList = [];
   int nextTime = 0;
 
+  // 没有更多
+  bool noMore = false;
+
+  // 创建一个 PageController
+  late PageController _pageController;
+
   @override
   void initState() {
     super.initState();
     EasyLoading.show(status: '视频加载中...');
     // 请求视频列表
     _onRefresh(1, 0);
+
+    // 创建一个 PageController
+    _pageController = PageController(initialPage: 0);
+    // 添加监听器来检测页面的变化
+    _pageController.addListener(() {
+      int? currentPageIndex = _pageController.page?.toInt();
+      _log.i("当前页面索引：$currentPageIndex");
+      if (currentPageIndex == videoInfoList.length - 1) {
+        if (!noMore) {
+          _log.i("加载下一页");
+          _onRefresh(2, nextTime);
+        }
+        _log.i("没有更多了");
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // 在组件销毁时，记得释放 PageController
+    _pageController.dispose();
+    super.dispose();
   }
 
   ///构建个人中心 如果没有登录则不显示
@@ -93,11 +121,19 @@ class _IndexPageState extends State<IndexPage> {
       EasyLoading.dismiss();
       if (videoResponse?.code == 2000) {
         _log.i('请求成功');
-        //如果是下拉刷新，那么就清空urls
         setState(() {
+          //如果是切换分类，那么myNextTime就是0 清空列表
           if (myNextTime == 0) {
             videoInfoList.clear();
           }
+
+          //没有更多视频了
+          if (videoResponse!.data!.videoInfo.isEmpty) {
+            EasyLoading.showInfo('没有更多视频了');
+            noMore = true;
+            return;
+          }
+          // 如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
           videoInfoList.addAll(videoResponse!.data!.videoInfo);
           nextTime = videoResponse!.data!.nextTime!;
         });
@@ -177,6 +213,7 @@ class _IndexPageState extends State<IndexPage> {
                       videoInfo: videoInfoList[index],
                     );
             },
+            controller: _pageController,
           ),
         ));
   }

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:utopia_front/util/flash.dart';
 import 'package:utopia_front/util/launch.dart';
 
-import '../../api/abstract/session.dart';
+import '../../api/model/session.dart';
 import '../../global/index.dart';
 import '../video/index.dart';
 
