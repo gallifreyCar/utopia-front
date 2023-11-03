@@ -157,44 +157,50 @@ class _IndexPageState extends State<IndexPage> {
   Widget build(BuildContext context) {
     TextStyle textStyle = Theme.of(context).primaryTextTheme.titleLarge!;
     return Scaffold(
-        appBar: AppBar(backgroundColor: Theme.of(context).primaryColorDark, title: const Text('Utopia'), actions: [
-          Row(
-            children: buildPersonAppBar(),
-          ),
-          const SizedBox(width: 20),
-          //视频分类 0.热门 1.体育 2.动漫 3.游戏 4.音乐
-          TextButton(
-              onPressed: () {
-                _onRefresh(0, 0);
-              },
-              child: Text('热门', style: textStyle)),
-          TextButton(
-              onPressed: () {
-                _onRefresh(0, 0);
-              },
-              child: Text('推荐', style: textStyle)),
-          TextButton(
-              onPressed: () {
-                _onRefresh(1, 0);
-              },
-              child: Text('体育', style: textStyle)),
-          TextButton(
-              onPressed: () {
-                _onRefresh(2, 0);
-              },
-              child: Text('动漫', style: textStyle)),
-          TextButton(
-              onPressed: () {
-                _onRefresh(3, 0);
-              },
-              child: Text('游戏', style: textStyle)),
-          TextButton(
-              onPressed: () {
-                _onRefresh(4, 0);
-              },
-              child: Text('音乐', style: textStyle)),
-          const SizedBox(width: 40),
-        ]),
+        appBar: AppBar(
+            backgroundColor: Theme.of(context).primaryColor,
+            title: Text(
+              'Utopia',
+              style: textStyle,
+            ),
+            actions: [
+              Row(
+                children: buildPersonAppBar(),
+              ),
+              const SizedBox(width: 20),
+              //视频分类 0.热门 1.体育 2.动漫 3.游戏 4.音乐
+              TextButton(
+                  onPressed: () {
+                    _onRefresh(0, 0);
+                  },
+                  child: Text('热门', style: textStyle)),
+              TextButton(
+                  onPressed: () {
+                    _onRefresh(0, 0);
+                  },
+                  child: Text('推荐', style: textStyle)),
+              TextButton(
+                  onPressed: () {
+                    _onRefresh(1, 0);
+                  },
+                  child: Text('体育', style: textStyle)),
+              TextButton(
+                  onPressed: () {
+                    _onRefresh(2, 0);
+                  },
+                  child: Text('动漫', style: textStyle)),
+              TextButton(
+                  onPressed: () {
+                    _onRefresh(3, 0);
+                  },
+                  child: Text('游戏', style: textStyle)),
+              TextButton(
+                  onPressed: () {
+                    _onRefresh(4, 0);
+                  },
+                  child: Text('音乐', style: textStyle)),
+              const SizedBox(width: 40),
+            ]),
         body: KeepAliveWrapper(
           keepAlive: true,
           child: PageView.builder(

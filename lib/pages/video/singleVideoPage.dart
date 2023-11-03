@@ -238,7 +238,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   ///点赞/取消点赞
   like() async {
-    isLogin();
+    //判断是否登录 没有登录则弹出登录框 并返回
+    if (!isLogin()) {
+      showLoginDialog();
+      return;
+    }
+    //防止重复点击
     if (!isLikeButtonEnable) {
       EasyLoading.showToast("操作过于频繁");
       Future.delayed(const Duration(seconds: 1), () {
@@ -256,7 +261,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   ///收藏/取消收藏
   collect() async {
-    isLogin();
+    //判断是否登录 没有登录则弹出登录框 并返回
+    if (!isLogin()) {
+      showLoginDialog();
+      return;
+    }
     if (!isFavoriteButtonEnable) {
       EasyLoading.showToast("操作过于频繁");
       Future.delayed(const Duration(seconds: 1), () {
@@ -322,12 +331,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Future followUp() async {}
 
   /// 登录判断
-
-  void isLogin() {
-    if (GlobalObjects.storageProvider.user.jwtToken == null) {
-      showLoginDialog();
-    }
-    return;
+  bool isLogin() {
+    return GlobalObjects.storageProvider.user.jwtToken != null;
   }
 
   /// 未登录时的弹窗
