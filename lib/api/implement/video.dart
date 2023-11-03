@@ -6,7 +6,9 @@ import '../model/video.dart';
 
 class VideoApiImpl extends VideoApi {
   final Dio dio;
+
   VideoApiImpl(this.dio);
+
   @override
   Future<VideoResponse> getVideoList(VideoRequest request) async {
     final resp = await dio.get('/api/v1/video/category', queryParameters: {
@@ -17,20 +19,20 @@ class VideoApiImpl extends VideoApi {
   }
 
   @override
-  Future<DefaultResponse> favorite() async {
-    final resp = await dio.post('/api/v1/interact/favorite');
+  Future<DefaultResponse> favorite(VideoLikeAndFavoriteRequest request) async {
+    final resp = await dio.post('/api/v1/interact/favorite', data: request.toJson());
     return DefaultResponse.fromJson(resp.data);
   }
 
   @override
-  Future<DefaultResponse> follow() async {
-    final resp = await dio.post('/api/v1/interact/follow');
+  Future<DefaultResponse> follow(FollowRequest request) async {
+    final resp = await dio.post('/api/v1/interact/follow', data: request.toJson());
     return DefaultResponse.fromJson(resp.data);
   }
 
   @override
-  Future<DefaultResponse> like() async {
-    final resp = await dio.post('/api/v1/interact/like');
+  Future<DefaultResponse> like(VideoLikeAndFavoriteRequest request) async {
+    final resp = await dio.post('/api/v1/interact/like', data: request.toJson());
     return DefaultResponse.fromJson(resp.data);
   }
 }

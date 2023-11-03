@@ -117,6 +117,7 @@ class _IndexPageState extends State<IndexPage> {
     EasyLoading.show(status: '视频加载中...');
     final api = GlobalObjects.apiProvider;
     final request = VideoRequest(lastTime: myNextTime, videoType: videoType);
+    _log.i('请求视频列表', request.toJson());
     api.video.getVideoList(request).then((videoResponse) {
       EasyLoading.dismiss();
       if (videoResponse?.code == 2000) {
@@ -140,7 +141,7 @@ class _IndexPageState extends State<IndexPage> {
       }
       if (videoResponse?.code == 4000) {
         showBasicFlash(context, Text("请求失败"), duration: const Duration(seconds: 2));
-        _log.i('请求失败');
+        _log.i('请求失败', videoResponse?.msg);
       }
     }).catchError((e) {
       _log.e(e);

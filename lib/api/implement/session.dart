@@ -11,19 +11,16 @@ class SessionApiImpl extends SessionApi {
   Future<AuthResponse> login({
     required AuthInfo info,
   }) async {
-    final resp = await dio.post('/api/v1/user/login', data: {
-      'username': info.username,
-      'password': info.password,
-    });
+    final resp = await dio.post('/api/v1/user/login', data: info.toJson());
     return AuthResponse.fromJson(resp.data);
   }
 
   @override
   Future<AuthResponse> register({required AuthInfo info}) async {
-    final resp = await dio.post('/api/v1/user/register', data: {
-      'username': info.username,
-      'password': info.password,
-    });
+    final resp = await dio.post(
+      '/api/v1/user/register',
+      data: info.toJson(),
+    );
     return AuthResponse.fromJson(resp.data);
   }
 }

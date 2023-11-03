@@ -204,3 +204,53 @@ class Author {
     };
   }
 }
+
+///点赞和收藏的请求参体
+class VideoLikeAndFavoriteRequest {
+  final int videoId;
+  final int actionType;
+
+  VideoLikeAndFavoriteRequest({
+    required this.videoId,
+    required this.actionType,
+  });
+
+  factory VideoLikeAndFavoriteRequest.fromJson(Map<String, dynamic> json) {
+    return VideoLikeAndFavoriteRequest(
+      videoId: json['video_id'] as int,
+      actionType: json['action_type'] as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'video_id': videoId,
+      'action_type': actionType,
+    };
+  }
+}
+
+///关注的请求体
+class FollowRequest {
+  final int actionType;
+  final int toUserId;
+
+  FollowRequest({
+    required this.actionType,
+    required this.toUserId,
+  });
+
+  factory FollowRequest.fromJson(Map<String, dynamic> json) {
+    return FollowRequest(
+      actionType: json['action_type'] as int,
+      toUserId: json['to_user_id'] as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'action_type': actionType,
+      'to_user_id': toUserId,
+    };
+  }
+}
