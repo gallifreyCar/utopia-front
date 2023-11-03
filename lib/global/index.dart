@@ -18,6 +18,8 @@ class GlobalObjects {
   static late KvStorage kvStorage;
   //Logger 日志
   static Logger logger = Logger();
+  //baseUrl
+  static final String baseUrl = GlobalConfig.isUseTestBaseUrl ? GlobalConfig.testBaseUrl : GlobalConfig.workBaseUrl;
 
   //初始化
   static Future<void> init() async {

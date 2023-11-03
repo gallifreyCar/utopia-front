@@ -42,7 +42,7 @@ class MyHttpOverrides extends HttpOverrides {
 Dio getDioClient() {
   // HttpOverrides.global = MyHttpOverrides(GlobalConfig.proxy);
   final dio = Dio(BaseOptions(
-    baseUrl: GlobalConfig.baseUrl,
+    baseUrl: GlobalObjects.baseUrl,
     connectTimeout: GlobalConfig.connectTimeout,
     receiveTimeout: GlobalConfig.receiveTimeout,
     sendTimeout: GlobalConfig.sendTimeout,

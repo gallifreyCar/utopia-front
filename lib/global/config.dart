@@ -1,8 +1,10 @@
 class GlobalConfig {
-  static const String baseUrl = 'http://api.tbghg.top:8080';
+  static const String workBaseUrl = 'https://api.tbghg.top';
+  static const String testBaseUrl = 'localhost:8080';
   static const String? proxy = null;
+  static const bool isUseTestBaseUrl = false;
   static const bool isDebug = true;
-  static const bool isMock = true;
+  static const bool isMock = false;
   static const Duration connectTimeout = Duration(seconds: 6);
   static const Duration receiveTimeout = Duration(seconds: 6);
   static const Duration sendTimeout = Duration(seconds: 6);
