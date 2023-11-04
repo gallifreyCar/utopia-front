@@ -71,7 +71,7 @@ class UserPageState extends State<UserPage> {
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 70),
+                const SizedBox(height: 80),
                 Container(
                     width: 0.12 * MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
@@ -86,9 +86,7 @@ class UserPageState extends State<UserPage> {
                           padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton(
                             onPressed: () {},
-                            child: const Text(
-                              '修改头像',
-                            ),
+                            child: const Text('修改头像'),
                           ),
                         ),
                         //用户名和昵称
@@ -102,9 +100,9 @@ class UserPageState extends State<UserPage> {
                     )),
                 const SizedBox(height: 20),
                 //我的关注
-                _buildButton('我的关注', Icons.person_add, () {}),
+                _buildButton('我的关注', Icons.remove_red_eye_outlined, () {}),
                 //我的粉丝
-                _buildButton('我的粉丝', Icons.person, () {}),
+                _buildButton('我的粉丝', Icons.face_rounded, () {}),
                 //我的收藏
                 _buildButton('我的收藏', Icons.star, () {}),
                 //我的投稿
@@ -117,7 +115,7 @@ class UserPageState extends State<UserPage> {
           //头像
           Positioned(
             left: 0.075 * MediaQuery.of(context).size.width - 40,
-            top: 10,
+            top: 20,
             child: CircleAvatar(
               radius: 40,
               backgroundImage: NetworkImage(avatarUrl),
