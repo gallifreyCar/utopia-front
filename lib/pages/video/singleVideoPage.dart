@@ -266,7 +266,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   ///点赞
   Future likeVideo() async {
     isLikeButtonEnable = false;
-    int actionType = isLike ? 1 : 2;
+    int actionType = isLike ? 2 : 1;
     final request = VideoLikeAndFavoriteRequest(videoId: videoId, actionType: actionType);
     _log.i("点赞/取消点赞请求：", request.toJson());
 
@@ -288,7 +288,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   ///收藏
   Future collectVideo() async {
     isFavoriteButtonEnable = false;
-    int actionType = isFavorite ? 1 : 2;
+    int actionType = isFavorite ? 2 : 1;
     final request = VideoLikeAndFavoriteRequest(videoId: videoId, actionType: actionType);
     _log.i("收藏/取消收藏请求：", request.toJson());
     final response = await api.video.favorite(request);
