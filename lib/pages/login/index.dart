@@ -8,10 +8,10 @@ import 'package:utopia_front/util/launch.dart';
 
 import '../../api/model/session.dart';
 import '../../global/index.dart';
-import '../video/index.dart';
 
 final _log = GlobalObjects.logger;
 
+///登录方式选择页面
 class LoginModeSelectorPage extends StatelessWidget {
   const LoginModeSelectorPage({Key? key}) : super(key: key);
 
@@ -51,7 +51,7 @@ class LoginModeSelectorPage extends StatelessWidget {
                   Navigator.pushNamed(context, '/login');
                 }),
                 buildLoginModeButton(Icons.accessibility, '游客入口', () {
-                  Navigator.pushNamed(context, '/index');
+                  Navigator.pushNamed(context, '/video');
                 }),
               ],
             ),
@@ -60,14 +60,6 @@ class LoginModeSelectorPage extends StatelessWidget {
       ),
     );
   }
-}
-
-///登录模式
-enum LoginMode {
-  //账号密码登录
-  account,
-  //游客模式
-  guest,
 }
 
 ///登录页面
@@ -135,9 +127,7 @@ class _LoginPageState extends State<LoginPage> {
         await getUserInfo(context);
         showBasicFlash(context, const Text('登录成功'));
         // 进入首页
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => IndexPage(),
-        ));
+        Navigator.pushNamed(context, '/video');
       }
       // 登录失败
       if (resp.code == 4000) {
@@ -203,9 +193,7 @@ class _LoginPageState extends State<LoginPage> {
         await getUserInfo(context);
         // 进入首页
         showBasicFlash(context, const Text('注册成功'));
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const IndexPage(),
-        ));
+        Navigator.of(context).pushNamedAndRemoveUntil('/video', (route) => false);
       }
       // 注册失败
       if (resp.code == 4000) {
@@ -232,6 +220,7 @@ class _LoginPageState extends State<LoginPage> {
     // launchInBrowser(Backend.license);
   }
 
+  /// 构建标题
   Widget buildTitleLine() {
     return Container(
       alignment: Alignment.centerLeft,
@@ -294,6 +283,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  ///构建协议勾选框
   Widget buildUserLicenseCheckbox() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -327,6 +317,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// 构建登录按钮
   Widget buildLoginButton() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -351,9 +342,7 @@ class _LoginPageState extends State<LoginPage> {
         SizedBox(
           height: 40,
           child: ElevatedButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => const IndexPage(),
-            )),
+            onPressed: () => Navigator.of(context).pushNamed('/video'),
             child: const Text('游客入口'),
           ),
         ),
@@ -403,6 +392,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+///获取用户信息
 Future<void> getUserInfo(BuildContext context) async {
   final api = GlobalObjects.apiProvider;
   final userInfo = await api.user.getUserInfo();

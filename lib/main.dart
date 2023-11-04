@@ -29,9 +29,9 @@ class MyApp extends StatelessWidget {
     final app = MaterialApp(
       title: _title,
       routes: {
-        '/loginSelector': (context) => const LoginModeSelectorPage(),
+        '/select': (context) => const LoginModeSelectorPage(),
         '/login': (context) => const LoginPage(),
-        '/index': (context) => const IndexPage(),
+        '/video': (context) => const IndexPage(),
         '/user': (context) => const UserPage(),
       },
       home: () {

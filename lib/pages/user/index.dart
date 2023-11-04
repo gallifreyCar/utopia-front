@@ -14,21 +14,6 @@ class UserPageState extends State<UserPage> {
   String avatarUrl = GlobalObjects.storageProvider.user.avatar ?? ''; // 头像
   String nickname = GlobalObjects.storageProvider.user.nickname ?? ''; // 昵称
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: buildAppBar(),
-      body: Center(
-        child: Container(
-          color: Colors.black,
-          width: WH.w(context),
-          height: WH.h(context),
-          // child: _buildUserInfoRow(),
-        ),
-      ),
-    );
-  }
-
   /// 构建AppBar
   AppBar buildAppBar() {
     Color secColor = Theme.of(context).secondaryHeaderColor;
@@ -64,5 +49,20 @@ class UserPageState extends State<UserPage> {
           icon: Icon(Icons.video_camera_back, color: secColor),
           label: Text('返回', style: textStyle)),
     ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: buildAppBar(),
+      body: Center(
+        child: Container(
+          color: Colors.black,
+          width: WH.w(context),
+          height: WH.h(context),
+          // child: _buildUserInfoRow(),
+        ),
+      ),
+    );
   }
 }
