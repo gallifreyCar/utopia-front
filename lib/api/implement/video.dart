@@ -32,7 +32,7 @@ class VideoApiImpl extends VideoApi {
 
   @override
   Future<DefaultResponse> like(VideoLikeAndFavoriteRequest request) async {
-    final resp = await dio.post('/api/v1/interact/like', data: request.toJson());
+    final resp = await dio.post('/api/v3/interact/like', data: request.toJson());
     return DefaultResponse.fromJson(resp.data);
   }
 }
