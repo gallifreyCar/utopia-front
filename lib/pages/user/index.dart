@@ -23,7 +23,7 @@ class UserPageState extends State<UserPage> {
   @override
   void initState() {
     super.initState();
-
+    getUserInfo();
     _requestFollowOrFansList(true);
   }
 
@@ -363,6 +363,27 @@ class UserPageState extends State<UserPage> {
     } catch (e) {
       EasyLoading.showError('服务器抽风了，请稍后再试');
       _log.e('获取粉丝或关注列表失败:$e');
+    }
+  }
+
+  /// 获取用户信息
+  Future<void> getUserInfo() async {
+    final api = GlobalObjects.apiProvider;
+    final userInfo = await api.user.getUserInfo();
+    if (userInfo.code == 2000) {
+      GlobalObjects.storageProvider.user.avatar = userInfo.data!.avatar;
+      GlobalObjects.storageProvider.user.nickname = userInfo.data!.nickname;
+      GlobalObjects.storageProvider.user.username = userInfo.data!.username;
+      GlobalObjects.storageProvider.user.uid = userInfo.data!.id;
+      GlobalObjects.storageProvider.user.fansCount = userInfo.data!.fansCount;
+      GlobalObjects.storageProvider.user.followCount = userInfo.data!.followCount;
+      GlobalObjects.storageProvider.user.videoCount = userInfo.data!.videoCount;
+      _log.i('getUserInfo: ${userInfo.data}');
+    }
+    if (userInfo.code == 4000) {
+      EasyLoading.showError('获取用户信息失败: ${userInfo.msg}');
+      _log.e('获取用户信息失败: ${userInfo.msg}');
+      return;
     }
   }
 }

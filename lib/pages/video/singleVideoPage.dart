@@ -341,6 +341,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       setState(() {
         //操作成功
         isFollow = !isFollow;
+        GlobalObjects.storageProvider.user.followCount = isFollow
+            ? GlobalObjects.storageProvider.user.followCount! + 1
+            : GlobalObjects.storageProvider.user.followCount! - 1;
       });
     }
     if (response.code == failCode) {
