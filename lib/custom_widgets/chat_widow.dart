@@ -51,7 +51,7 @@ class _ChatWindowState extends State<ChatWindow> {
 
                 /// 删除按钮回调
                 onBackspacePressed: _onBackspacePressed,
-                config: const Config(
+                config: Config(
 
                     // 列数
                     columns: 10,
@@ -63,19 +63,19 @@ class _ChatWindowState extends State<ChatWindow> {
                     // 初始类别
                     initCategory: Category.RECENT,
                     // 背景颜色
-                    bgColor: Color(0xFFF2F2F2),
+                    bgColor: const Color(0xFFF2F2F2),
                     // 指示器颜色
-                    indicatorColor: Colors.blue,
+                    indicatorColor: Theme.of(context).primaryColor,
                     // 图标颜色
-                    iconColor: Colors.grey,
+                    iconColor: Colors.black87,
                     // 选中图标颜色
-                    iconColorSelected: Colors.blue,
+                    iconColorSelected: Theme.of(context).primaryColorDark,
                     // 删除按钮颜色
-                    backspaceColor: Colors.blue,
+                    backspaceColor: Theme.of(context).primaryColorDark,
                     // 选择肤色弹窗背景颜色
                     skinToneDialogBgColor: Colors.white,
                     // 选择肤色指示器颜色
-                    skinToneIndicatorColor: Colors.grey,
+                    skinToneIndicatorColor: Colors.white12,
                     // 是否启用肤色选择
                     enableSkinTones: true,
                     // 最近使用表情包数量
@@ -83,7 +83,7 @@ class _ChatWindowState extends State<ChatWindow> {
                     // 无最近使用表情包时显示
                     noRecents: Text(
                       '最近没有使用表情包哦',
-                      style: TextStyle(fontSize: 20, color: Colors.black26),
+                      style: TextStyle(fontSize: 20, color: Theme.of(context).primaryColor),
                       textAlign: TextAlign.center,
                     ),
                     // 指示器动画时长
@@ -129,6 +129,9 @@ class _ChatWindowState extends State<ChatWindow> {
                     /// 输入框
                     Expanded(
                       child: TextField(
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize),
                         controller: _controller,
                         decoration: InputDecoration(
                             hintText: "友好地发表你的意见吧",
