@@ -8,7 +8,6 @@ abstract class StorageProvider {
 
 class StorageProviderImpl implements StorageProvider {
   final KvStorage kv;
-
   StorageProviderImpl(this.kv);
 
   @override

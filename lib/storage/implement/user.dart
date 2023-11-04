@@ -8,6 +8,9 @@ class UserStorageImpl implements UserStorageBase {
   static const _usernameKey = 'username';
   static const _nicknameKey = 'nickname';
   static const _avatarKey = 'avatar';
+  static const _fansCountKey = 'fansCount';
+  static const _followCountKey = 'followCount';
+  static const _videoCountKey = 'videoCount';
 
   KvStorage kv;
 
@@ -37,4 +40,19 @@ class UserStorageImpl implements UserStorageBase {
   String? get avatar => kv.get<String>(_avatarKey);
   @override
   set avatar(String? value) => kv.set(_avatarKey, value);
+
+  @override
+  int? get fansCount => kv.get<int>(_fansCountKey);
+  @override
+  set fansCount(int? value) => kv.set(_fansCountKey, value);
+
+  @override
+  int? get followCount => kv.get<int>(_followCountKey);
+  @override
+  set followCount(int? value) => kv.set(_followCountKey, value);
+
+  @override
+  int? get videoCount => kv.get<int>(_videoCountKey);
+  @override
+  set videoCount(int? value) => kv.set(_videoCountKey, value);
 }

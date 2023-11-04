@@ -14,4 +14,13 @@ abstract class UserStorageBase {
 
   String? get avatar;
   set avatar(String? value);
+
+  int? get fansCount;
+  set fansCount(int? value);
+
+  int? get followCount;
+  set followCount(int? value);
+
+  int? get videoCount;
+  set videoCount(int? value);
 }

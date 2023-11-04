@@ -63,60 +63,67 @@ class UserPageState extends State<UserPage> {
     return Container(
       color: Theme.of(context).secondaryHeaderColor,
       width: 0.15 * MediaQuery.of(context).size.width,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Stack(
         children: [
-          SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          SizedBox(
+            width: 0.15 * MediaQuery.of(context).size.width,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 70),
+                Container(
+                    width: 0.12 * MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white,
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        //修改头像
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            child: const Text(
+                              '修改头像',
+                            ),
+                          ),
+                        ),
+                        //用户名和昵称
+                        _buildUsernameAndNicknameColumn(),
+                        _buildIconTextRow('粉丝数: ${GlobalObjects.storageProvider.user.fansCount}', Icons.person),
+                        //关注数
+                        _buildIconTextRow('关注数: ${GlobalObjects.storageProvider.user.followCount}', Icons.person_add),
+                        //投稿数
+                        _buildIconTextRow('投稿数: ${GlobalObjects.storageProvider.user.videoCount}', Icons.upload_file),
+                      ],
+                    )),
+                const SizedBox(height: 20),
+                //我的关注
+                _buildButton('我的关注', Icons.person_add, () {}),
+                //我的粉丝
+                _buildButton('我的粉丝', Icons.person, () {}),
+                //我的收藏
+                _buildButton('我的收藏', Icons.star, () {}),
+                //我的投稿
+                _buildButton('我的投稿', Icons.upload_file, () {}),
+                //我的消息
+                _buildButton('我的消息', Icons.message, () {}),
+              ],
+            ),
+          ),
+          //头像
+          Positioned(
+            left: 0.075 * MediaQuery.of(context).size.width - 40,
+            top: 10,
             child: CircleAvatar(
               radius: 40,
               backgroundImage: NetworkImage(avatarUrl),
               backgroundColor: Colors.white,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: () {},
-              child: Text(
-                '修改头像',
-              ),
-            ),
-          ),
-
-          //粉丝数
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-                width: 0.12 * MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
-                ),
-                child: Column(
-                  children: [
-                    //用户名和昵称
-                    _buildUsernameAndNicknameColumn(),
-                    _buildIconTextRow('粉丝数: 0', Icons.person),
-                    //关注数
-                    _buildIconTextRow('关注数: 80', Icons.person_add),
-                    //投稿数
-                    _buildIconTextRow('投稿数: 80', Icons.upload_file),
-                  ],
-                )),
-          ),
-
-          //我的关注
-          _buildButton('我的关注', Icons.person_add, () {}),
-          //我的粉丝
-          _buildButton('我的粉丝', Icons.person, () {}),
-          //我的收藏
-          _buildButton('我的收藏', Icons.star, () {}),
-          //我的投稿
-          _buildButton('我的投稿', Icons.upload_file, () {}),
-          //我的消息
-          _buildButton('我的消息', Icons.message, () {}),
         ],
       ),
     );
@@ -179,10 +186,7 @@ class UserPageState extends State<UserPage> {
       child: ElevatedButton.icon(
         icon: Icon(icon),
         onPressed: onPressed,
-        label: Text(text,
-            style: TextStyle(
-                color: Theme.of(context).secondaryHeaderColor,
-                fontSize: Theme.of(context).primaryTextTheme.titleMedium?.fontSize)),
+        label: Text(text),
       ),
     );
   }

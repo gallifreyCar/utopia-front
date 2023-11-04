@@ -401,6 +401,9 @@ Future<void> getUserInfo(BuildContext context) async {
     GlobalObjects.storageProvider.user.nickname = userInfo.data!.nickname;
     GlobalObjects.storageProvider.user.username = userInfo.data!.username;
     GlobalObjects.storageProvider.user.uid = userInfo.data!.id;
+    GlobalObjects.storageProvider.user.fansCount = userInfo.data!.fansCount;
+    GlobalObjects.storageProvider.user.followCount = userInfo.data!.followCount;
+    GlobalObjects.storageProvider.user.videoCount = userInfo.data!.videoCount;
     _log.i('getUserInfo: ${userInfo.data}');
   }
   if (userInfo.code == 4000) {
