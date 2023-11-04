@@ -19,10 +19,10 @@ class WH {
   }
 
   static double personWith(BuildContext context) {
-    return 0.7 * MediaQuery.of(context).size.width;
+    return 0.8 * MediaQuery.of(context).size.width;
   }
 
   static double personHeight(BuildContext context) {
-    return 0.7 * MediaQuery.of(context).size.height;
+    return 0.8 * MediaQuery.of(context).size.height;
   }
 }

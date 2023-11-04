@@ -58,7 +58,6 @@ class _ChatWindowState extends State<ChatWindow> {
                     // 表情包最大尺寸
                     emojiSizeMax: 28 * (1.0),
                     verticalSpacing: 0, //
-
                     horizontalSpacing: 0,
                     // 初始类别
                     initCategory: Category.RECENT,
@@ -69,9 +68,9 @@ class _ChatWindowState extends State<ChatWindow> {
                     // 图标颜色
                     iconColor: Colors.black87,
                     // 选中图标颜色
-                    iconColorSelected: Theme.of(context).primaryColorDark,
+                    iconColorSelected: Theme.of(context).primaryColor,
                     // 删除按钮颜色
-                    backspaceColor: Theme.of(context).primaryColorDark,
+                    backspaceColor: Theme.of(context).primaryColor,
                     // 选择肤色弹窗背景颜色
                     skinToneDialogBgColor: Colors.white,
                     // 选择肤色指示器颜色
@@ -98,7 +97,7 @@ class _ChatWindowState extends State<ChatWindow> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 25),
 
-          /// 行内组件 有三个： 表情按钮，输入框，发送按钮
+          /// Row内组件有三个： 表情按钮，输入框，发送按钮
           child: Row(
             children: [
               Expanded(
