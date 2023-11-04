@@ -23,6 +23,8 @@ class UserPageState extends State<UserPage> {
   @override
   void initState() {
     super.initState();
+
+    _requestFollowOrFansList(true);
   }
 
   /// 构建AppBar
@@ -187,7 +189,7 @@ class UserPageState extends State<UserPage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              "nickname",
+              userInfoList[index].nickname,
               style: TextStyle(
                   fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize, color: Theme.of(context).primaryColor),
             ),
@@ -338,6 +340,7 @@ class UserPageState extends State<UserPage> {
   /// 请求获取粉丝或关注列表
   Future<void> _requestFollowOrFansList(bool isFollow) async {
     try {
+      EasyLoading.show(status: '资源加载中...');
       UserListResponse _userListResponse;
       final api = GlobalObjects.apiProvider.user;
       if (isFollow) {
@@ -356,7 +359,9 @@ class UserPageState extends State<UserPage> {
         _log.i('获取粉丝或关注列表失败');
         EasyLoading.showError('获取粉丝或关注列表失败:${_userListResponse.msg!}');
       }
+      EasyLoading.dismiss();
     } catch (e) {
+      EasyLoading.showError('服务器抽风了，请稍后再试');
       _log.e('获取粉丝或关注列表失败:$e');
     }
   }

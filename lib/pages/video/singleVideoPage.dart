@@ -110,7 +110,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 _buildButton(context, _buildTextAndNum("收藏", favoriteCount),
                     isFavorite ? const Icon(Icons.star) : const Icon(Icons.star_border), collect),
                 _buildButton(context, const Text("评论 120"), const Icon(Icons.comment), () {}),
-                _buildButton(context, const Text("分享 120"), const Icon(Icons.share), () {}),
+                _buildButton(context, const Text("分享"), const Icon(Icons.share), () {}),
               ],
             ),
           ),
@@ -160,7 +160,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ],
               ),
               ElevatedButton.icon(
-                onPressed: followUp,
+                onPressed: follow,
                 icon: isFollow ? const Icon(Icons.check) : const Icon(Icons.add),
                 label: isFollow ? const Text("已关注") : const Text("关注"),
               ),
@@ -216,6 +216,28 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   int failCode = 4000;
 
   /// todo 点赞收藏逻辑可以抽象出来
+
+  ///follow 关注/取消关注
+  follow() async {
+    //判断是否登录 没有登录则弹出登录框 并返回
+    if (!isLogin()) {
+      showLoginDialog();
+      return;
+    }
+    if (!isFollowButtonEnable) {
+      EasyLoading.showToast("操作过于频繁");
+      Future.delayed(const Duration(seconds: 1), () {
+        EasyLoading.dismiss();
+      });
+      return;
+    }
+    try {
+      await followUp();
+    } catch (e) {
+      _log.e("请求失败", e);
+    }
+    isFollowButtonEnable = true;
+  }
 
   ///点赞/取消点赞
   like() async {

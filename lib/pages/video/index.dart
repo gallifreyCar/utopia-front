@@ -128,21 +128,20 @@ class _IndexPageState extends State<IndexPage> {
 
   /// 构建视频PageView
   Widget _buildVideoListPageView() {
-    return KeepAliveWrapper(
-      keepAlive: true,
-      child: PageView.builder(
-        scrollDirection: Axis.vertical,
-        itemCount: videoInfoList.length,
-        itemBuilder: (context, index) {
-          return videoInfoList.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : VideoPlayerPage(
-                  text: "视频$index",
-                  videoInfo: videoInfoList[index],
-                );
-        },
-        controller: _pageController,
-      ),
+    var children = <Widget>[];
+
+    for (var i = 0; i < videoInfoList.length; i++) {
+      children.add(KeepAliveWrapper(
+        child: VideoPlayerPage(
+          text: "视频$i",
+          videoInfo: videoInfoList[i],
+        ),
+      ));
+    }
+    return PageView(
+      scrollDirection: Axis.vertical,
+      children: children,
+      controller: _pageController,
     );
   }
 
