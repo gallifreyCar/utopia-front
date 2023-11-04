@@ -214,6 +214,7 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  /// 用户点击用户协议后 跳转到用户协议页面
   static void onOpenUserLicense() {
     // launchInBrowser(Backend.license);
   }
@@ -231,12 +232,14 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  ///构建登录表单
   Widget buildLoginForm() {
     return Column(
       children: [
         TextFormField(
           controller: _usernameController,
           autofocus: true,
+          maxLength: 12,
           decoration: const InputDecoration(
             labelText: "用户名",
             hintText: "输入你的用户名",
@@ -249,6 +252,7 @@ class _LoginPageState extends State<LoginPage> {
               child: TextFormField(
                 controller: _passwordController,
                 obscureText: isObscure,
+                maxLength: 16,
                 decoration: InputDecoration(
                   labelText: '密码',
                   hintText: '输入你的密码',
