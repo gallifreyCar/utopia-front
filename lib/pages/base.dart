@@ -23,6 +23,6 @@ class WH {
   }
 
   static double personHeight(BuildContext context) {
-    return 0.5 * MediaQuery.of(context).size.height;
+    return 0.7 * MediaQuery.of(context).size.height;
   }
 }

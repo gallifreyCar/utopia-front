@@ -41,7 +41,6 @@ class _IndexPageState extends State<IndexPage> {
   @override
   void initState() {
     super.initState();
-    EasyLoading.show(status: '视频加载中...');
     // 请求视频列表
     _onRefresh(1, 0);
 
@@ -174,7 +173,7 @@ class _IndexPageState extends State<IndexPage> {
         TextButton.icon(
             onPressed: () {
               setState(() {
-                Navigator.pushNamedAndRemoveUntil(context, '/user', (route) => true);
+                Navigator.pushNamed(context, '/user');
                 pt = PageType.userInfo;
               });
             },
@@ -192,7 +191,7 @@ class _IndexPageState extends State<IndexPage> {
             onPressed: () {
               GlobalObjects.storageProvider.user.jwtToken = null;
               // 退出登录 清空路由栈
-              Navigator.pushNamedAndRemoveUntil(context, '/select', (route) => true);
+              Navigator.pushNamedAndRemoveUntil(context, '/select', (route) => false);
             },
             icon: const Icon(Icons.logout, color: Colors.white),
             label: Text('退出', style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20))),
@@ -209,7 +208,7 @@ class _IndexPageState extends State<IndexPage> {
         videoInfoList.clear();
       }
     });
-    EasyLoading.show(status: '视频加载中...');
+    EasyLoading.show(status: '数据加载中...');
     final api = GlobalObjects.apiProvider;
     final request = VideoRequest(lastTime: myNextTime, videoType: videoType);
     _log.i('请求视频列表', request.toJson());

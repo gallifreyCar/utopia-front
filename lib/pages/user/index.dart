@@ -12,29 +12,13 @@ class UserPage extends StatefulWidget {
 
 class UserPageState extends State<UserPage> {
   String avatarUrl = GlobalObjects.storageProvider.user.avatar ?? ''; // 头像
-  String nickname = GlobalObjects.storageProvider.user.nickname ?? ''; // 昵称
+  String nickname = GlobalObjects.storageProvider.user.nickname ?? '';
 
   /// 构建AppBar
   AppBar buildAppBar() {
     Color secColor = Theme.of(context).secondaryHeaderColor;
     TextStyle textStyle = TextStyle(color: secColor, fontSize: Theme.of(context).primaryTextTheme.titleLarge?.fontSize);
     return AppBar(actions: [
-      Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundImage: NetworkImage(avatarUrl),
-            backgroundColor: Colors.white,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              nickname,
-              style: textStyle,
-            ),
-          )
-        ],
-      ),
       const SizedBox(width: 5),
       //投稿
       TextButton.icon(
@@ -54,14 +38,151 @@ class UserPageState extends State<UserPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColorLight,
       appBar: buildAppBar(),
       body: Center(
         child: Container(
-          color: Colors.black,
-          width: WH.w(context),
-          height: WH.h(context),
-          // child: _buildUserInfoRow(),
+          color: Colors.white,
+          width: WH.personWith(context),
+          height: WH.personHeight(context),
+          child: _buildMainRow(),
         ),
+      ),
+    );
+  }
+
+  /// 构建用户信息Row  第一部分显示个人信息和按钮 第二部分显示内容
+  Widget _buildMainRow() {
+    return Row(
+      children: [_buildUserInfoAndButton()],
+    );
+  }
+
+  /// UserInfoAndButton
+  Widget _buildUserInfoAndButton() {
+    return Container(
+      color: Theme.of(context).secondaryHeaderColor,
+      width: 0.15 * MediaQuery.of(context).size.width,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              radius: 40,
+              backgroundImage: NetworkImage(avatarUrl),
+              backgroundColor: Colors.white,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () {},
+              child: Text(
+                '修改头像',
+              ),
+            ),
+          ),
+
+          //粉丝数
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+                width: 0.12 * MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white,
+                ),
+                child: Column(
+                  children: [
+                    //用户名和昵称
+                    _buildUsernameAndNicknameColumn(),
+                    _buildIconTextRow('粉丝数: 0', Icons.person),
+                    //关注数
+                    _buildIconTextRow('关注数: 80', Icons.person_add),
+                    //投稿数
+                    _buildIconTextRow('投稿数: 80', Icons.upload_file),
+                  ],
+                )),
+          ),
+
+          //我的关注
+          _buildButton('我的关注', Icons.person_add, () {}),
+          //我的粉丝
+          _buildButton('我的粉丝', Icons.person, () {}),
+          //我的收藏
+          _buildButton('我的收藏', Icons.star, () {}),
+          //我的投稿
+          _buildButton('我的投稿', Icons.upload_file, () {}),
+          //我的消息
+          _buildButton('我的消息', Icons.message, () {}),
+        ],
+      ),
+    );
+  }
+
+  /// 构建用户名和昵称Column
+  Widget _buildUsernameAndNicknameColumn() {
+    Color secColor = Theme.of(context).primaryColor;
+    TextStyle textStyle =
+        TextStyle(color: secColor, fontSize: Theme.of(context).primaryTextTheme.titleMedium?.fontSize);
+    return Column(
+      children: [
+        //用户名
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            "用户名：${GlobalObjects.storageProvider.user.username}",
+            style: textStyle,
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "昵称：$nickname",
+                style: textStyle,
+              ),
+            ),
+            IconButton(onPressed: () {}, icon: Icon(Icons.edit, color: Theme.of(context).primaryColor)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// 构建IconTextRow
+  Widget _buildIconTextRow(String text, IconData icon) {
+    Color secColor = Theme.of(context).primaryColor;
+    TextStyle textStyle =
+        TextStyle(color: secColor, fontSize: Theme.of(context).primaryTextTheme.titleMedium?.fontSize);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(icon, color: secColor),
+        ),
+        Text(text, style: textStyle),
+      ],
+    );
+  }
+
+  /// 构按钮
+  Widget _buildButton(String text, IconData icon, VoidCallback onPressed) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton.icon(
+        icon: Icon(icon),
+        onPressed: onPressed,
+        label: Text(text,
+            style: TextStyle(
+                color: Theme.of(context).secondaryHeaderColor,
+                fontSize: Theme.of(context).primaryTextTheme.titleMedium?.fontSize)),
       ),
     );
   }

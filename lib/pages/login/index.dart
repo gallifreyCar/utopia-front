@@ -193,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
         await getUserInfo(context);
         // 进入首页
         showBasicFlash(context, const Text('注册成功'));
-        Navigator.of(context).pushNamedAndRemoveUntil('/video', (route) => false);
+        Navigator.of(context).pushNamed('/video');
       }
       // 注册失败
       if (resp.code == 4000) {
