@@ -2,7 +2,6 @@ import 'package:flukit/flukit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:utopia_front/global/index.dart';
-import 'package:utopia_front/pages/login/index.dart';
 import 'package:utopia_front/pages/video/singleVideoPage.dart';
 
 import '../../api/model/video.dart';
@@ -175,7 +174,7 @@ class _IndexPageState extends State<IndexPage> {
         TextButton.icon(
             onPressed: () {
               setState(() {
-                Navigator.pushNamed(context, '/user');
+                Navigator.pushNamedAndRemoveUntil(context, '/user', (route) => true);
                 pt = PageType.userInfo;
               });
             },
@@ -192,7 +191,8 @@ class _IndexPageState extends State<IndexPage> {
         TextButton.icon(
             onPressed: () {
               GlobalObjects.storageProvider.user.jwtToken = null;
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
+              // 退出登录 清空路由栈
+              Navigator.pushNamedAndRemoveUntil(context, '/select', (route) => true);
             },
             icon: const Icon(Icons.logout, color: Colors.white),
             label: Text('退出', style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20))),

@@ -8,6 +8,7 @@ import 'package:utopia_front/global/index.dart';
 
 import '../../api/model/video.dart';
 import '../../custom_widgets/chat_widow.dart';
+import '../base.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   const VideoPlayerPage({Key? key, required this.text, required this.videoInfo}) : super(key: key);
@@ -79,82 +80,59 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    _log.i("build ${widget.text}");
-    return Container(
-      color: Theme.of(context).primaryColorLight,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          //中间的首页
-          _buildVideoPlayer(),
-          Container(
-              color: Colors.white,
-              width: MediaQuery.of(context).size.width * 0.16,
-              height: MediaQuery.of(context).size.height * 0.78,
-              //作者信息列
-              child: _buildAuthInfoColum()),
-        ],
-      ),
-    );
-  }
-
   /// 构建视频播放器部件
   Widget _buildVideoPlayer() {
-    return Stack(
-      children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            //视频播放器
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.68,
-              height: MediaQuery.of(context).size.height * 0.68,
-              // Use [Video] widget to display video output.
-              child: Video(controller: controller),
-            ),
-            //点赞，收藏，评论，分享
-            Container(
-              color: Colors.white,
-              width: MediaQuery.of(context).size.width * 0.68,
-              height: MediaQuery.of(context).size.height * 0.1,
-              // Use [Video] widget to display video output.
-              child: Row(
-                children: [
-                  //点赞，收藏，评论，分享
-                  _buildButton(context, _buildTextAndNum("点赞", likeCount),
-                      isLike ? const Icon(Icons.thumb_up) : const Icon(Icons.thumb_up_off_alt), like),
-                  _buildButton(context, _buildTextAndNum("收藏", favoriteCount),
-                      isFavorite ? const Icon(Icons.star) : const Icon(Icons.star_border), collect),
-                  _buildButton(context, const Text("评论 120"), const Icon(Icons.comment), () {}),
-                  _buildButton(context, const Text("分享 120"), const Icon(Icons.share), () {}),
-                ],
-              ),
-            ),
-          ],
-        ),
-        //  评论窗口
-        Positioned(
-          right: 20,
-          bottom: MediaQuery.of(context).size.height * 0.08,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.height * 0.6,
-            child: Column(
-                // mainAxisSize: MainAxisSize.min, //垂直方向最小化处理
-                crossAxisAlignment: CrossAxisAlignment.center, //水平方向居中对齐
-                mainAxisAlignment: MainAxisAlignment.end, // 从下往上排列
-                children: [
-                  ChatWindow(
-                    sendMessage: sendMsg,
-                  ),
-                ]),
+    double likeWidth = MediaQuery.of(context).size.width * 0.3;
+
+    return Stack(children: [
+      Column(
+        //靠左对齐
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          //视频播放器
+          SizedBox(
+            width: WH.playerWith(context),
+            height: WH.playerHeight(context),
+            child: Video(controller: controller),
           ),
+          //点赞，收藏，评论，分享
+          SizedBox(
+            width: likeWidth,
+            height: WH.h(context) - WH.playerHeight(context),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                //点赞，收藏，评论，分享
+                _buildButton(context, _buildTextAndNum("点赞", likeCount),
+                    isLike ? const Icon(Icons.thumb_up) : const Icon(Icons.thumb_up_off_alt), like),
+                _buildButton(context, _buildTextAndNum("收藏", favoriteCount),
+                    isFavorite ? const Icon(Icons.star) : const Icon(Icons.star_border), collect),
+                _buildButton(context, const Text("评论 120"), const Icon(Icons.comment), () {}),
+                _buildButton(context, const Text("分享 120"), const Icon(Icons.share), () {}),
+              ],
+            ),
+          ),
+        ],
+      ),
+      //  评论窗口
+      Positioned(
+        right: 0,
+        bottom: 0,
+        child: SizedBox(
+          width: WH.playerWith(context) - likeWidth,
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: Column(
+              // mainAxisSize: MainAxisSize.min, //垂直方向最小化处理
+              crossAxisAlignment: CrossAxisAlignment.center, //水平方向居中对齐
+              mainAxisAlignment: MainAxisAlignment.end, // 从下往上排列
+              children: [
+                ChatWindow(
+                  sendMessage: sendMsg,
+                ),
+              ]),
         ),
-      ],
-    );
+      ),
+    ]);
   }
 
   /// 构建作者信息列
@@ -371,12 +349,42 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       },
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    _log.i("build ${widget.text}");
+    return Container(
+      color: Theme.of(context).primaryColorLight,
+      child: _buildMainRow(),
+    );
+  }
+
+  /// buildMainRow
+  Widget _buildMainRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        //第一部分是构建视频播放器部件列 包括：视频 点赞 收藏 评论
+        Container(
+            color: Colors.white, width: WH.playerWith(context), height: WH.h(context), child: _buildVideoPlayer()),
+        //第二部分是构建作者信息部件列 包括：头像 昵称 粉丝 关注 作品
+        Container(
+            color: Colors.white,
+            width: WH.w(context) - WH.playerWith(context),
+            height: WH.h(context),
+            child: _buildAuthInfoColum())
+      ],
+    );
+  }
 }
 
 Widget _buildButton(BuildContext context, Text text, Icon icon, Function() onPressed) {
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: TextButton.icon(onPressed: onPressed, icon: icon, label: text),
+  return Container(
+    width: MediaQuery.of(context).size.width * 0.3 / 4,
+    child: Padding(
+      padding: const EdgeInsets.all(5.0),
+      child: TextButton.icon(onPressed: onPressed, icon: icon, label: text),
+    ),
   );
 }
 
