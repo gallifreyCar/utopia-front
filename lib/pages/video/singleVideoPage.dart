@@ -84,7 +84,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Widget build(BuildContext context) {
     _log.i("build ${widget.text}");
     return Container(
-      color: Colors.lightBlueAccent,
+      color: Theme.of(context).primaryColorLight,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,

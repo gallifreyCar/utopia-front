@@ -56,6 +56,8 @@ class _IndexPageState extends State<IndexPage> {
   void dispose() {
     // 在组件销毁时，记得释放 PageController
     _pageController.dispose();
+    // 释放 EasyLoading
+    EasyLoading.dismiss();
     super.dispose();
   }
 
@@ -75,7 +77,10 @@ class _IndexPageState extends State<IndexPage> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(nickname),
+              child: Text(
+                nickname,
+                style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20),
+              ),
             )
           ],
         ),
@@ -83,12 +88,12 @@ class _IndexPageState extends State<IndexPage> {
         TextButton.icon(
             onPressed: () {},
             icon: const Icon(Icons.person, color: Colors.white),
-            label: const Text('个人', style: TextStyle(color: Colors.white, fontSize: 20))),
+            label: Text('个人', style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20))),
         //投稿
         TextButton.icon(
           onPressed: () {},
           icon: const Icon(Icons.upload_file, color: Colors.white),
-          label: const Text('投稿', style: TextStyle(color: Colors.white, fontSize: 20)),
+          label: Text('投稿', style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20)),
         ),
         TextButton.icon(
             onPressed: () {
@@ -96,7 +101,7 @@ class _IndexPageState extends State<IndexPage> {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
             },
             icon: const Icon(Icons.logout, color: Colors.white),
-            label: const Text('退出', style: TextStyle(color: Colors.white, fontSize: 20))),
+            label: Text('退出', style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20))),
         SizedBox(width: 40),
       ];
     }
