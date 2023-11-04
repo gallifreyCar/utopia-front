@@ -48,14 +48,10 @@ class LoginModeSelectorPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 buildLoginModeButton(Icons.account_box, '登录注册', () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const LoginPage(
-                      mode: LoginMode.account,
-                    ),
-                  ));
+                  Navigator.pushNamed(context, '/login');
                 }),
                 buildLoginModeButton(Icons.accessibility, '游客入口', () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const IndexPage()));
+                  Navigator.pushNamed(context, '/index');
                 }),
               ],
             ),
@@ -76,10 +72,8 @@ enum LoginMode {
 
 ///登录页面
 class LoginPage extends StatefulWidget {
-  final LoginMode mode;
   const LoginPage({
     Key? key,
-    required this.mode,
   }) : super(key: key);
 
   @override

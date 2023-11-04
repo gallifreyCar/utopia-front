@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:utopia_front/global/index.dart';
 import 'package:utopia_front/pages/login/index.dart';
+import 'package:utopia_front/pages/user/index.dart';
 import 'package:utopia_front/pages/video/index.dart';
 
 final _log = GlobalObjects.logger;
@@ -19,6 +20,7 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   static const String _title = 'Utopia';
 
   @override
@@ -26,6 +28,12 @@ class MyApp extends StatelessWidget {
     EasyLoading.instance.indicatorType = EasyLoadingIndicatorType.cubeGrid;
     final app = MaterialApp(
       title: _title,
+      routes: {
+        '/loginSelector': (context) => const LoginModeSelectorPage(),
+        '/login': (context) => const LoginPage(),
+        '/index': (context) => const IndexPage(),
+        '/user': (context) => const UserPage(),
+      },
       home: () {
         // 如果用户未登录，则跳转到登录页面
         if (GlobalObjects.storageProvider.user.jwtToken == null) {

@@ -8,7 +8,6 @@ import 'package:utopia_front/global/index.dart';
 
 import '../../api/model/video.dart';
 import '../../custom_widgets/chat_widow.dart';
-import '../login/index.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   const VideoPlayerPage({Key? key, required this.text, required this.videoInfo}) : super(key: key);
@@ -362,8 +361,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => const LoginPage(mode: LoginMode.account)));
+                  Navigator.pushNamed(context, "/login");
                 },
                 child: const Text("我要登录"),
               ),

@@ -18,17 +18,26 @@ class IndexPage extends StatefulWidget {
 ///全局日志打印
 final _log = GlobalObjects.logger;
 
+///切换页面
+enum PageType {
+  ///视频列表
+  videoList,
+
+  ///用户信息
+  userInfo,
+}
+
 class _IndexPageState extends State<IndexPage> {
-  VideoResponse? videoResponse;
+  //当前页面
+  PageType pt = PageType.videoList;
   //视频信息
   List<VideoInfo> videoInfoList = [];
+  //下一次请求的时间
   int nextTime = 0;
-
   // 没有更多
   bool noMore = false;
-
   // 创建一个 PageController
-  late PageController _pageController;
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -36,8 +45,7 @@ class _IndexPageState extends State<IndexPage> {
     EasyLoading.show(status: '视频加载中...');
     // 请求视频列表
     _onRefresh(1, 0);
-    // 创建一个 PageController
-    _pageController = PageController(initialPage: 0);
+
     // 添加监听器来检测页面的变化
     _pageController.addListener(() {
       int? currentPageIndex = _pageController.page?.toInt();
@@ -46,7 +54,9 @@ class _IndexPageState extends State<IndexPage> {
         if (!noMore) {
           _log.i("加载下一页");
           _onRefresh(2, nextTime);
+          return;
         }
+        EasyLoading.showInfo("没有更多了");
         _log.i("没有更多了");
       }
     });
@@ -58,11 +68,88 @@ class _IndexPageState extends State<IndexPage> {
     _pageController.dispose();
     // 释放 EasyLoading
     EasyLoading.dismiss();
+
     super.dispose();
   }
 
-  ///构建个人中心 如果没有登录则不显示
-  List<Widget> buildPersonAppBar() {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(appBar: buildAppBar(), body: _buildVideoListPageView());
+  }
+
+  /// 构建AppBar
+  AppBar buildAppBar() {
+    TextStyle textStyle = Theme.of(context).primaryTextTheme.titleLarge!;
+
+    return AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
+        title: Text(
+          'Utopia',
+          style: textStyle,
+        ),
+        actions: [
+          Row(
+            children: _buildPersonAppBarRow(),
+          ),
+          const SizedBox(width: 20),
+          //视频分类 0.热门 1.体育 2.动漫 3.游戏 4.音乐
+          TextButton(
+              onPressed: () {
+                pt = PageType.videoList;
+                _onRefresh(0, 0);
+              },
+              child: Text('热门', style: textStyle)),
+          TextButton(
+              onPressed: () {
+                _onRefresh(0, 0);
+              },
+              child: Text('推荐', style: textStyle)),
+          TextButton(
+              onPressed: () {
+                _onRefresh(1, 0);
+              },
+              child: Text('体育', style: textStyle)),
+          TextButton(
+              onPressed: () {
+                _onRefresh(2, 0);
+              },
+              child: Text('动漫', style: textStyle)),
+          TextButton(
+              onPressed: () {
+                _onRefresh(3, 0);
+              },
+              child: Text('游戏', style: textStyle)),
+          TextButton(
+              onPressed: () {
+                _onRefresh(4, 0);
+              },
+              child: Text('音乐', style: textStyle)),
+          const SizedBox(width: 40),
+        ]);
+  }
+
+  /// 构建视频PageView
+  Widget _buildVideoListPageView() {
+    return KeepAliveWrapper(
+      keepAlive: true,
+      child: PageView.builder(
+        scrollDirection: Axis.vertical,
+        itemCount: videoInfoList.length,
+        itemBuilder: (context, index) {
+          return videoInfoList.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : VideoPlayerPage(
+                  text: "视频$index",
+                  videoInfo: videoInfoList[index],
+                );
+        },
+        controller: _pageController,
+      ),
+    );
+  }
+
+  ///构建个人中心AppBar里面的Row 如果没有登录则不显示
+  List<Widget> _buildPersonAppBarRow() {
     String? avatarUrl = GlobalObjects.storageProvider.user.avatar ?? 'http://s351j97d8.hd-bkt.clouddn.com/d56e2a96.png';
     String nickname = GlobalObjects.storageProvider.user.nickname ?? '三九';
 
@@ -86,12 +173,19 @@ class _IndexPageState extends State<IndexPage> {
         ),
         const SizedBox(width: 5),
         TextButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              setState(() {
+                Navigator.pushNamed(context, '/user');
+                pt = PageType.userInfo;
+              });
+            },
             icon: const Icon(Icons.person, color: Colors.white),
             label: Text('个人', style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20))),
         //投稿
         TextButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            pt = PageType.userInfo;
+          },
           icon: const Icon(Icons.upload_file, color: Colors.white),
           label: Text('投稿', style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20)),
         ),
@@ -108,9 +202,7 @@ class _IndexPageState extends State<IndexPage> {
     return [Container()];
   }
 
-  ///请求视频方法 这里是切换视频分类的时候调用，下拉刷新也会调用
-  ///如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
-  ///如果是切换分类，那么myNextTime就是0
+  /// 请求视频方法
   Future<void> _onRefresh(int videoType, int myNextTime) async {
     setState(() {
       if (myNextTime == 0) {
@@ -130,7 +222,6 @@ class _IndexPageState extends State<IndexPage> {
           if (myNextTime == 0) {
             videoInfoList.clear();
           }
-
           //没有更多视频了
           if (videoResponse!.data!.videoInfo.isEmpty) {
             EasyLoading.showInfo('没有更多视频了');
@@ -157,75 +248,6 @@ class _IndexPageState extends State<IndexPage> {
       });
     });
   }
-
-  @override
-  Widget build(BuildContext context) {
-    TextStyle textStyle = Theme.of(context).primaryTextTheme.titleLarge!;
-    return Scaffold(
-        appBar: AppBar(
-            backgroundColor: Theme.of(context).primaryColor,
-            title: Text(
-              'Utopia',
-              style: textStyle,
-            ),
-            actions: [
-              Row(
-                children: buildPersonAppBar(),
-              ),
-              const SizedBox(width: 20),
-              //视频分类 0.热门 1.体育 2.动漫 3.游戏 4.音乐
-              TextButton(
-                  onPressed: () {
-                    _onRefresh(0, 0);
-                  },
-                  child: Text('热门', style: textStyle)),
-              TextButton(
-                  onPressed: () {
-                    _onRefresh(0, 0);
-                  },
-                  child: Text('推荐', style: textStyle)),
-              TextButton(
-                  onPressed: () {
-                    _onRefresh(1, 0);
-                  },
-                  child: Text('体育', style: textStyle)),
-              TextButton(
-                  onPressed: () {
-                    _onRefresh(2, 0);
-                  },
-                  child: Text('动漫', style: textStyle)),
-              TextButton(
-                  onPressed: () {
-                    _onRefresh(3, 0);
-                  },
-                  child: Text('游戏', style: textStyle)),
-              TextButton(
-                  onPressed: () {
-                    _onRefresh(4, 0);
-                  },
-                  child: Text('音乐', style: textStyle)),
-              const SizedBox(width: 40),
-            ]),
-        body: KeepAliveWrapper(
-          keepAlive: true,
-          child: PageView.builder(
-            scrollDirection: Axis.vertical,
-            itemCount: videoInfoList.length,
-            itemBuilder: (context, index) {
-              return videoInfoList.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
-                  : VideoPlayerPage(
-                      text: "视频$index",
-                      videoInfo: videoInfoList[index],
-                    );
-            },
-            controller: _pageController,
-          ),
-        ));
-  }
-
-  //构建KeepAliveWrapper整个页面
-  // Widget buildKeepAliveWrapper() {
 }
 
 //选择文件 获取token 上传视频
