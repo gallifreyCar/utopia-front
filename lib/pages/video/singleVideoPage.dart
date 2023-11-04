@@ -42,6 +42,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   String avatar = "";
   String nickname = "";
   String username = "";
+  int uid = 0;
 
   // 视频描述
   String describe = "";
@@ -69,6 +70,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     // 个人信息
     avatar = widget.videoInfo.author.avatar; //头像
     nickname = widget.videoInfo.author.nickname; //昵称
+    uid = widget.videoInfo.author.id; //用户id
 
     // 视频描述
     describe = widget.videoInfo.describe;
@@ -158,9 +160,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ],
               ),
               ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add),
-                label: const Text("关注"),
+                onPressed: followUp,
+                icon: isFollow ? const Icon(Icons.check) : const Icon(Icons.add),
+                label: isFollow ? const Text("已关注") : const Text("关注"),
               ),
             ],
           ),
@@ -307,7 +309,23 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   ///关注
-  Future followUp() async {}
+  Future followUp() async {
+    isFollowButtonEnable = false;
+    int actionType = isFollow ? 2 : 1;
+    final request = FollowRequest(actionType: actionType, toUserId: uid);
+    _log.i("关注/取消关注请求：", request.toJson());
+    final response = await api.video.follow(request);
+    if (response.code == successCode) {
+      setState(() {
+        //操作成功
+        isFollow = !isFollow;
+      });
+    }
+    if (response.code == failCode) {
+      EasyLoading.showError(response.msg);
+      _log.i("关注/取消关注失败：${response.msg}");
+    }
+  }
 
   /// 登录判断
   bool isLogin() {
