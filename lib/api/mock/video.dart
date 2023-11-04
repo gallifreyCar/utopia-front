@@ -46,6 +46,8 @@ class VideoApiMock extends VideoApi {
                 isFollow: false,
                 isLike: false,
                 isFavorite: false,
+                likeCount: 120,
+                favoriteCount: 0,
               ),
               VideoInfo(
                 id: 7,
@@ -67,6 +69,8 @@ class VideoApiMock extends VideoApi {
                 isFollow: false,
                 isLike: false,
                 isFavorite: false,
+                likeCount: 120,
+                favoriteCount: 230,
               ),
               VideoInfo(
                 id: 10,
@@ -88,6 +92,8 @@ class VideoApiMock extends VideoApi {
                 isFollow: false,
                 isLike: false,
                 isFavorite: false,
+                likeCount: 2,
+                favoriteCount: 1,
               ),
             ],
             nextTime: 1698470604033,

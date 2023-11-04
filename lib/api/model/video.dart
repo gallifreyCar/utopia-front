@@ -115,6 +115,8 @@ class VideoInfo {
   final bool isFollow;
   final bool isLike;
   final bool isFavorite;
+  final int likeCount;
+  final int favoriteCount;
 
   VideoInfo({
     required this.id,
@@ -127,6 +129,8 @@ class VideoInfo {
     required this.isFollow,
     required this.isLike,
     required this.isFavorite,
+    required this.likeCount,
+    required this.favoriteCount,
   });
 
   factory VideoInfo.fromJson(Map<String, dynamic> json) {
@@ -141,6 +145,8 @@ class VideoInfo {
       isFollow: json['is_follow'] as bool,
       isLike: json['is_like'] as bool,
       isFavorite: json['is_favorite'] as bool,
+      likeCount: json['like_count'] as int,
+      favoriteCount: json['favorite_count'] as int,
     );
   }
 
@@ -156,6 +162,8 @@ class VideoInfo {
       'is_follow': isFollow,
       'is_like': isLike,
       'is_favorite': isFavorite,
+      'like_count': likeCount,
+      'favorite_count': favoriteCount,
     };
   }
 }

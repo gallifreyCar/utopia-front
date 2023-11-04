@@ -64,6 +64,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     // 点赞数，收藏数，粉丝数，关注数
     fansCount = widget.videoInfo.author.fansCount;
     videoCount = widget.videoInfo.author.videoCount;
+    likeCount = widget.videoInfo.likeCount;
+    favoriteCount = widget.videoInfo.favoriteCount;
     // 个人信息
     avatar = widget.videoInfo.author.avatar; //头像
     nickname = widget.videoInfo.author.nickname; //昵称
