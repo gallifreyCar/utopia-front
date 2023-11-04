@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:utopia_front/util/flash.dart';
 import 'package:utopia_front/util/launch.dart';
 
@@ -98,6 +99,15 @@ class _LoginPageState extends State<LoginPage> {
 
   /// 用户点击登录按钮后
   Future<void> onLogin() async {
+    if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
+      EasyLoading.showError('用户名或密码不能为空');
+      return;
+    }
+    if (_usernameController.text.length < 6 || _passwordController.text.length < 6) {
+      EasyLoading.showError('用户名或密码长度不能小于6');
+      return;
+    }
+
     //未勾选用户协议 提示用户勾选 禁用登录按钮
     if (!isLicenseAccepted) {
       showBasicFlash(context, const Text('请勾选用户协议'));
@@ -157,6 +167,15 @@ class _LoginPageState extends State<LoginPage> {
 
   /// 用户点击注册按钮后
   Future<void> onRegister() async {
+    if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
+      EasyLoading.showError('用户名或密码不能为空');
+      return;
+    }
+    if (_usernameController.text.length < 6 || _passwordController.text.length < 6) {
+      EasyLoading.showError('用户名或密码长度不能小于6');
+      return;
+    }
+
     //未勾选用户协议 提示用户勾选 禁用注册按钮
     if (!isLicenseAccepted) {
       showBasicFlash(context, const Text('请勾选用户协议'));
