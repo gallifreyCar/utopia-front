@@ -79,3 +79,44 @@ class UserInfoData {
     };
   }
 }
+
+/// 用户列表响应体
+class UserListResponse {
+  final int code;
+  final String msg;
+  final List<UserInfoData>? userList;
+
+  UserListResponse({
+    required this.code,
+    required this.msg,
+    this.userList,
+  });
+
+  factory UserListResponse.fromJson(Map<String, dynamic> json) {
+    if (json['user_list'] == null) {
+      return UserListResponse(
+        code: json['code'],
+        msg: json['msg'],
+      );
+    }
+    return UserListResponse(
+      code: json['code'],
+      msg: json['msg'],
+      userList: List<UserInfoData>.from(json['user_list'].map((x) => UserInfoData.fromJson(x))),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    if (userList == null) {
+      return {
+        'code': code,
+        'msg': msg,
+      };
+    }
+    return {
+      'code': code,
+      'msg': msg,
+      'user_list': List<dynamic>.from(userList!.map((x) => x.toJson())),
+    };
+  }
+}

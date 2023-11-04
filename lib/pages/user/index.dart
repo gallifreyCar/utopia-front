@@ -1,6 +1,8 @@
 import 'package:card_actions/card_action_button.dart';
 import 'package:card_actions/card_actions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:utopia_front/api/model/user.dart';
 
 import '../../global/index.dart';
 import '../base.dart';
@@ -15,6 +17,13 @@ class UserPage extends StatefulWidget {
 class UserPageState extends State<UserPage> {
   String avatarUrl = GlobalObjects.storageProvider.user.avatar ?? ''; // 头像
   String nickname = GlobalObjects.storageProvider.user.nickname ?? '';
+
+  final _log = GlobalObjects.logger;
+  List<UserInfoData> userInfoList = [];
+  @override
+  void initState() {
+    super.initState();
+  }
 
   /// 构建AppBar
   AppBar buildAppBar() {
@@ -92,33 +101,42 @@ class UserPageState extends State<UserPage> {
         Container(
           width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
           height: WH.personHeight(context) - 100,
-          child: ListView.builder(
-              itemExtent: WH.personWith(context) / 5,
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return Container(
-                    color: Colors.white,
-                    width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
-                    height: WH.personHeight(context),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildCardActions(),
-                        _buildCardActions(),
-                        _buildCardActions(),
-                        _buildCardActions(),
-                      ],
-                    ));
-              }),
+          child: userInfoList.isEmpty
+              ? const Center(
+                  child: Text(
+                  '暂无更多相关人员哦,关注其他人吧，或者发作品，赚取一些粉丝吧！',
+                  style: TextStyle(fontSize: 20),
+                ))
+              : ListView.builder(
+                  itemExtent: WH.personWith(context) / 5,
+                  itemCount: userInfoList.length ~/ 4 + 1,
+                  itemBuilder: (context, index) {
+                    return Container(
+                        color: Colors.white,
+                        width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
+                        height: WH.personHeight(context),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildCardActions(index),
+                            _buildCardActions(index + 1),
+                            _buildCardActions(index + 2),
+                            _buildCardActions(index + 3),
+                          ],
+                        ));
+                  }),
         ),
       ],
     );
   }
 
   /// 构建个人信息弹出框
-  Widget _buildCardActions() {
+  Widget _buildCardActions(int index) {
+    if (index >= userInfoList.length) {
+      return Container();
+    }
     return CardActions(
-        child: _buildUserInfoCard(),
+        child: _buildUserInfoCard(index),
         width: WH.personWith(context) / 6,
         height: WH.personWith(context) / 6,
         backgroundColor: Theme.of(context).primaryColor,
@@ -144,7 +162,11 @@ class UserPageState extends State<UserPage> {
   }
 
   /// 构建个人信息卡片
-  Widget _buildUserInfoCard() {
+  Widget _buildUserInfoCard(int index) {
+    if (index >= userInfoList.length) {
+      return Container();
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).secondaryHeaderColor,
@@ -158,7 +180,7 @@ class UserPageState extends State<UserPage> {
           //头像
           CircleAvatar(
             radius: 40,
-            backgroundImage: NetworkImage(avatarUrl),
+            backgroundImage: NetworkImage(userInfoList[index].avatar),
             backgroundColor: Colors.white,
           ),
           //用户名和昵称
@@ -170,9 +192,9 @@ class UserPageState extends State<UserPage> {
                   fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize, color: Theme.of(context).primaryColor),
             ),
           ),
-          _buildIconTextRow('粉丝数: ${GlobalObjects.storageProvider.user.fansCount}', Icons.person),
+          _buildIconTextRow('粉丝数: ${userInfoList[index].fansCount}', Icons.person),
           //投稿数
-          _buildIconTextRow('投稿数: ${GlobalObjects.storageProvider.user.videoCount}', Icons.upload_file),
+          _buildIconTextRow('投稿数: ${userInfoList[index].videoCount}', Icons.upload_file),
         ],
       ),
     );
@@ -220,9 +242,13 @@ class UserPageState extends State<UserPage> {
                     )),
                 const SizedBox(height: 20),
                 //我的关注
-                _buildButton('我的关注', Icons.remove_red_eye_outlined, () {}),
+                _buildButton('我的关注', Icons.remove_red_eye_outlined, () {
+                  _requestFollowOrFansList(true);
+                }),
                 //我的粉丝
-                _buildButton('我的粉丝', Icons.face_rounded, () {}),
+                _buildButton('我的粉丝', Icons.face_rounded, () {
+                  _requestFollowOrFansList(false);
+                }),
                 //我的收藏
                 _buildButton('我的收藏', Icons.star, () {}),
                 //我的投稿
@@ -307,5 +333,31 @@ class UserPageState extends State<UserPage> {
         label: Text(text),
       ),
     );
+  }
+
+  /// 请求获取粉丝或关注列表
+  Future<void> _requestFollowOrFansList(bool isFollow) async {
+    try {
+      UserListResponse _userListResponse;
+      final api = GlobalObjects.apiProvider.user;
+      if (isFollow) {
+        _userListResponse = await api.getFollowList();
+      } else {
+        _userListResponse = await api.getFansList();
+      }
+
+      if (_userListResponse.code == 2000) {
+        _log.i('获取粉丝或关注列表成功');
+        setState(() {
+          userInfoList = _userListResponse.userList!;
+        });
+      }
+      if (_userListResponse.code == 4000) {
+        _log.i('获取粉丝或关注列表失败');
+        EasyLoading.showError('获取粉丝或关注列表失败:${_userListResponse.msg!}');
+      }
+    } catch (e) {
+      _log.e('获取粉丝或关注列表失败:$e');
+    }
   }
 }

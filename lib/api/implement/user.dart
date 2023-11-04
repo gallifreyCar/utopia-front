@@ -12,4 +12,16 @@ class UserApiImpl extends UserApi {
     final resp = await dio.get('/api/v1/user/info');
     return UserInfoResponse.fromJson(resp.data);
   }
+
+  @override
+  Future<UserListResponse> getFansList() async {
+    final resp = await dio.get('/api/v1/interact/follower/list');
+    return UserListResponse.fromJson(resp.data);
+  }
+
+  @override
+  Future<UserListResponse> getFollowList() async {
+    final resp = await dio.get('/api/v1/interact/follow/list');
+    return UserListResponse.fromJson(resp.data);
+  }
 }
