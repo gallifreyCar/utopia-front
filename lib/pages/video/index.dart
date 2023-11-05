@@ -17,19 +17,7 @@ class IndexPage extends StatefulWidget {
 ///全局日志打印
 final _log = GlobalObjects.logger;
 
-///切换页面
-enum PageType {
-  ///视频列表
-  videoList,
-
-  ///用户信息
-  userInfo,
-}
-
 class _IndexPageState extends State<IndexPage> {
-  //当前页面
-  PageType pt = PageType.videoList;
-
   //视频信息
   List<VideoInfo> videoInfoList = [];
 
@@ -50,6 +38,19 @@ class _IndexPageState extends State<IndexPage> {
 
   // 搜索控制器
   final TextEditingController _searchController = TextEditingController();
+
+  ///投稿表单变量
+  //标题控制器
+  final titleController = TextEditingController();
+
+  //描述控制器
+  final describeController = TextEditingController();
+
+  // 视频分类选择
+  int selectedValue = 0;
+
+  // 投稿表单是否显示
+  bool showContributeForm = false;
 
   @override
   void initState() {
@@ -118,7 +119,6 @@ class _IndexPageState extends State<IndexPage> {
                 children: [
                   TextButton(
                       onPressed: () {
-                        pt = PageType.videoList;
                         _onRefresh(0, 0);
                       },
                       child: Text('热门', style: textStyle)),
@@ -204,7 +204,6 @@ class _IndexPageState extends State<IndexPage> {
               onPressed: () {
                 setState(() {
                   Navigator.pushNamed(context, '/user');
-                  pt = PageType.userInfo;
                 });
               },
               icon: const Icon(Icons.person, color: Colors.white),
@@ -212,7 +211,9 @@ class _IndexPageState extends State<IndexPage> {
           //投稿
           TextButton.icon(
             onPressed: () {
-              pt = PageType.userInfo;
+              setState(() {
+                showContributeForm = !showContributeForm;
+              });
             },
             icon: const Icon(Icons.upload_file, color: Colors.white),
             label: Text('投稿', style: textStyle),
@@ -338,6 +339,7 @@ class _IndexPageState extends State<IndexPage> {
             ],
           ),
         ),
+        Positioned(bottom: 20, left: 0.35 * MediaQuery.of(context).size.width, child: _buildContributeForm()),
       ],
     );
   }
@@ -495,6 +497,165 @@ class _IndexPageState extends State<IndexPage> {
       _log.e('搜索视频异常', e);
     }
     EasyLoading.dismiss();
+  }
+
+  /// 投稿表单
+  Widget _buildContributeForm() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.3,
+      height: MediaQuery.of(context).size.height * 0.85,
+      child: Offstage(
+        offstage: !showContributeForm,
+        child: Container(
+          decoration: BoxDecoration(
+            // 增加圆角
+            borderRadius: BorderRadius.circular(30),
+            // 设置边框
+            border: Border.all(
+              color: Theme.of(context).primaryColor,
+              width: 10,
+            ),
+            color: Colors.white,
+          ),
+          width: MediaQuery.of(context).size.width * 0.3,
+          height: MediaQuery.of(context).size.height * 0.85,
+          child: Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    '投稿',
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                //标题
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.2,
+                  child: TextFormField(
+                    controller: titleController,
+                    decoration: const InputDecoration(
+                      labelText: '标题',
+                      hintText: '请输入标题',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请输入标题';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+                //描述
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.15,
+                  width: MediaQuery.of(context).size.width * 0.2,
+                  child: TextFormField(
+                    controller: describeController,
+                    maxLines: 5,
+                    decoration: const InputDecoration(
+                      labelText: '描述',
+                      hintText: '请输入描述',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请输入描述';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(height: 30),
+                //封面
+                ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('选择封面（可选）'),
+                ),
+                const SizedBox(height: 30),
+                //视频
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {},
+                      child: const Text('选择视频（必填）'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                //视频类型选择列表 体育 动漫 游戏 音乐  RadioListTile单选
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.1,
+                  child: Column(
+                    children: [
+                      const Text(
+                        '视频类型(必选)',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      RadioListTile(
+                        title: Text('体育'),
+                        value: 0,
+                        groupValue: selectedValue,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedValue = value as int;
+                          });
+                        },
+                      ),
+                      RadioListTile(
+                        title: Text('动漫'),
+                        value: 1,
+                        groupValue: selectedValue,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedValue = value as int;
+                          });
+                        },
+                      ),
+                      RadioListTile(
+                        title: Text('游戏'),
+                        value: 2,
+                        groupValue: selectedValue,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedValue = value as int;
+                          });
+                        },
+                      ),
+                      RadioListTile(
+                        title: Text('音乐'),
+                        value: 3,
+                        groupValue: selectedValue,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedValue = value as int;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+                //提交
+                ElevatedButton(
+                  onPressed: () {
+                    _log.i('提交投稿');
+                    // _contributeVideo(titleController.text, describeController.text);
+                  },
+                  child: const Text('提交'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
