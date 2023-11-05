@@ -17,6 +17,9 @@ class UserPage extends StatefulWidget {
 class UserPageState extends State<UserPage> {
   String avatarUrl = GlobalObjects.storageProvider.user.avatar ?? ''; // 头像
   String nickname = GlobalObjects.storageProvider.user.nickname ?? '';
+  //标题
+  String bigTitle = '我的关注';
+  IconData bigIcon = Icons.favorite;
 
   final _log = GlobalObjects.logger;
   List<UserInfoData> userInfoList = [];
@@ -31,7 +34,7 @@ class UserPageState extends State<UserPage> {
   AppBar buildAppBar() {
     Color secColor = Theme.of(context).secondaryHeaderColor;
     TextStyle textStyle = TextStyle(color: secColor, fontSize: Theme.of(context).primaryTextTheme.titleLarge?.fontSize);
-    return AppBar(actions: [
+    return AppBar(backgroundColor: Theme.of(context).primaryColor, actions: [
       const SizedBox(width: 5),
       //投稿
       TextButton.icon(
@@ -77,36 +80,41 @@ class UserPageState extends State<UserPage> {
     );
   }
 
+  /// 大标题
+  Widget buildTitle(IconData icon, String title) {
+    return Container(
+      width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
+      height: 100,
+      color: Theme.of(context).primaryColor,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Icon(icon, color: Colors.white, size: 32),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(title, style: TextStyle(color: Colors.white, fontSize: 32)),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// 构建第二部分 内容
   Widget _buildContentColumn() {
     return Column(
       children: [
-        Container(
-          width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
-          height: 100,
-          color: Theme.of(context).primaryColor,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(Icons.remove_red_eye_sharp, color: Colors.white, size: 32),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('我的关注', style: TextStyle(color: Colors.white, fontSize: 32)),
-              ),
-            ],
-          ),
-        ),
+        buildTitle(bigIcon, bigTitle),
         Container(
           width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
           height: WH.personHeight(context) - 100,
           child: userInfoList.isEmpty
               ? const Center(
                   child: Text(
-                  '暂无更多相关人员哦,关注其他人吧，或者发作品，赚取一些粉丝吧！',
+                  '暂无更多相关人员哦，关注其他人吧，或者发作品，赚取更多粉丝吧！',
                   style: TextStyle(fontSize: 20),
                 ))
               : ListView.builder(
@@ -244,11 +252,19 @@ class UserPageState extends State<UserPage> {
                     )),
                 const SizedBox(height: 20),
                 //我的关注
-                _buildButton('我的关注', Icons.remove_red_eye_outlined, () {
+                _buildButton('我的关注', Icons.favorite, () {
+                  setState(() {
+                    bigTitle = '我的关注';
+                    bigIcon = Icons.favorite;
+                  });
                   _requestFollowOrFansList(true);
                 }),
                 //我的粉丝
                 _buildButton('我的粉丝', Icons.face_rounded, () {
+                  setState(() {
+                    bigTitle = '我的粉丝';
+                    bigIcon = Icons.face_rounded;
+                  });
                   _requestFollowOrFansList(false);
                 }),
                 //我的收藏
