@@ -86,6 +86,7 @@ class _IndexPageState extends State<IndexPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: _buildSearchBar(),
       appBar: buildAppBar(),
       body: _buildVideoListPageView(),
     );
@@ -93,7 +94,7 @@ class _IndexPageState extends State<IndexPage> {
 
   /// 构建AppBar
   AppBar buildAppBar() {
-    TextStyle textStyle = Theme.of(context).primaryTextTheme.titleMedium!;
+    TextStyle textStyle = Theme.of(context).primaryTextTheme.titleLarge!;
     return AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
@@ -101,7 +102,7 @@ class _IndexPageState extends State<IndexPage> {
           style: textStyle,
         ),
         actions: [
-          _buildSearchBar(),
+          Container(width: MediaQuery.of(context).size.width * 0.28),
           const SizedBox(
             width: 20,
           ),
@@ -110,7 +111,7 @@ class _IndexPageState extends State<IndexPage> {
 
           //视频分类 热门单独
           // 0.体育 1.动漫 2.游戏 3.音乐
-          Container(
+          SizedBox(
             width: MediaQuery.of(context).size.width * 0.25,
             child: Center(
               child: Row(
@@ -176,7 +177,7 @@ class _IndexPageState extends State<IndexPage> {
   Widget _buildPersonAppBarRow() {
     String? avatarUrl = GlobalObjects.storageProvider.user.avatar ?? 'http://s351j97d8.hd-bkt.clouddn.com/d56e2a96.png';
     String nickname = GlobalObjects.storageProvider.user.nickname ?? '三九';
-    TextStyle textStyle = Theme.of(context).primaryTextTheme.titleMedium!;
+    TextStyle textStyle = Theme.of(context).primaryTextTheme.titleLarge!;
     if (GlobalObjects.storageProvider.user.jwtToken != null) {
       return Container(
         width: MediaQuery.of(context).size.width * 0.28,
@@ -281,54 +282,62 @@ class _IndexPageState extends State<IndexPage> {
 
   /// 搜索框
   Widget _buildSearchBar() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Stack(
       children: [
-        //搜索框
-        Container(
-          width: MediaQuery.of(context).size.width * 0.28,
-          margin: const EdgeInsets.only(left: 5, right: 5, top: 5, bottom: 5),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: '搜索',
-              border: InputBorder.none,
-              prefixIcon: Icon(Icons.search),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  if (_searchController.text.isEmpty) {
-                    EasyLoading.showInfo('请输入搜索内容');
-                    return;
-                  }
-                  setState(() {
-                    showSearchVideoInfoList = false;
-                    _searchController.clear();
-                    searchVideoInfoList.clear();
-                  });
-                },
+        Positioned(
+          left: 0.1 * MediaQuery.of(context).size.width,
+          top: 20,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //搜索框
+              Container(
+                width: MediaQuery.of(context).size.width * 0.28,
+                margin: const EdgeInsets.only(left: 8, right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: '搜索',
+                    border: InputBorder.none,
+                    prefixIcon: Icon(Icons.search),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        if (_searchController.text.isEmpty) {
+                          EasyLoading.showInfo('请输入搜索内容');
+                          return;
+                        }
+                        setState(() {
+                          showSearchVideoInfoList = false;
+                          _searchController.clear();
+                          searchVideoInfoList.clear();
+                        });
+                      },
+                    ),
+                  ),
+                  onSubmitted: (value) async {
+                    if (_searchController.text.isEmpty) {
+                      EasyLoading.showInfo('请输入搜索内容');
+                      return;
+                    }
+                    _log.i('搜索', value);
+                    await _searchVideoInfoList(value);
+                    setState(() {
+                      showSearchVideoInfoList = true;
+                    });
+                  },
+                ),
               ),
-            ),
-            onSubmitted: (value) async {
-              if (_searchController.text.isEmpty) {
-                EasyLoading.showInfo('请输入搜索内容');
-                return;
-              }
-              _log.i('搜索', value);
-              await _searchVideoInfoList(value);
-              setState(() {
-                showSearchVideoInfoList = true;
-              });
-            },
+              //搜索后 显示的视频列表
+              SizedBox(height: 10),
+              _buildSearchVideoInfoList(),
+            ],
           ),
         ),
-        //搜索后 显示的视频列表
-        SizedBox(height: 10),
-        _buildSearchVideoInfoList(),
       ],
     );
   }
@@ -461,7 +470,6 @@ class _IndexPageState extends State<IndexPage> {
       if (videoResponse.code == 2000) {
         _log.i('搜索视频成功', videoResponse.data);
         setState(() {
-          EasyLoading.showSuccess('搜索视频成功');
           searchVideoInfoList = videoResponse.data?.videoInfo ?? [];
         });
       }

@@ -180,17 +180,37 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           ],
         ),
 
-        //简介
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 20, 8, 20),
-          child: Text(
-            describe,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            //文字从左到右
-            textDirection: TextDirection.ltr,
+        // 视频标题和描述
+        Container(
+          margin: const EdgeInsets.fromLTRB(10, 20, 10, 20),
+          width: WH.w(context) - WH.playerWith(context) - 40,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.background,
+            //设置四周圆角 角度
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 20, 12, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.videoInfo.title,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  describe,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  //文字从左到右
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
           ),
         ),
+
         //评论 100条 滚动
         Expanded(
           child: ListView.builder(
