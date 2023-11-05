@@ -247,8 +247,19 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                               radius: 15,
                               backgroundImage: NetworkImage(commentList[index].avatar),
                             ),
-                            title: Text(commentList[index].nickname),
-                            subtitle: Text(commentList[index].content),
+                            title: Text(
+                              commentList[index].nickname,
+                              style: TextStyle(
+                                  fontSize: Theme.of(context).textTheme.titleSmall?.fontSize,
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                            subtitle: Text(
+                              commentList[index].content,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize, color: Colors.black),
+                            ),
                           );
                         },
                       ),
@@ -493,11 +504,6 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
       EasyLoading.showError('评论正在发送中，请稍等');
       return;
     }
-    //判断评论内容是否为空
-    if (content.isEmpty) {
-      EasyLoading.showError('评论内容不能为空');
-      return;
-    }
     //判断评论内容是否超过200字
     if (content.length > 200) {
       EasyLoading.showError('评论内容不能超过200字');
@@ -507,12 +513,23 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
     setState(() {
       isSendComment = true;
     });
+    _log.i('发送评论', content);
     try {
-      final request = PostCommentRequest(content: content, videoId: uerId);
+      final request = PostCommentRequest(content: content, videoId: videoId);
       api.interact.postComment(request).then((resp) {
         if (resp.code == 2000) {
-          EasyLoading.showSuccess('评论成功');
+          // EasyLoading.showSuccess('评论成功');
           _log.i('评论成功');
+          //评论数+1
+          //评论增加一条
+          setState(() {
+            // commentCount = commentCount + 1;
+            commentList.add(CommentInfo(
+              nickname: GlobalObjects.storageProvider.user.nickname ?? '',
+              avatar: GlobalObjects.storageProvider.user.avatar ?? '',
+              content: content,
+            ));
+          });
         }
         if (resp.code == 4000) {
           EasyLoading.showError(resp.msg);
@@ -576,7 +593,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
       api.interact.getComment(request).then((resp) {
         if (resp.code == 2000) {
           // EasyLoading.showSuccess('获取评论列表成功');
-          _log.i('获取评论列表成功${resp.data!.commentInfo}');
+          _log.i('获取评论列表成功${resp.data!.commentInfo.length}');
           setState(() {
             commentList.addAll(resp.data!.commentInfo);
             lastTime = resp.data?.nextTime;

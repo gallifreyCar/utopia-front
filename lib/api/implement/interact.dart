@@ -37,7 +37,7 @@ class InteractApiImpl extends InteractApi {
 
   @override
   Future<DefaultResponse> postComment(PostCommentRequest request) async {
-    final resp = await dio.post('/api/v1/interact/comment/post', data: request.toJson());
+    final resp = await dio.post('/api/v1/interact/comment', data: request.toJson());
     return DefaultResponse.fromJson(resp.data);
   }
 }
