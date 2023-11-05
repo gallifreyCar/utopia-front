@@ -201,7 +201,8 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.background,
             //设置四周圆角 角度
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            border: Border.all(width: 1, color: Theme.of(context).colorScheme.primary),
+            borderRadius: const BorderRadius.all(Radius.circular(10.0)),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 20, 12, 20),
@@ -210,12 +211,12 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
               children: [
                 Text(
                   widget.videoInfo.title,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   describe,
-                  maxLines: 3,
+                  maxLines: 5,
                   overflow: TextOverflow.ellipsis,
                   //文字从左到右
                   textDirection: TextDirection.ltr,
