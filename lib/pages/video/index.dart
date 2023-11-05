@@ -86,8 +86,6 @@ class _IndexPageState extends State<IndexPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
-      floatingActionButton: _buildSearchBar(),
       appBar: buildAppBar(),
       body: _buildVideoListPageView(),
     );
@@ -95,7 +93,7 @@ class _IndexPageState extends State<IndexPage> {
 
   /// 构建AppBar
   AppBar buildAppBar() {
-    TextStyle textStyle = Theme.of(context).primaryTextTheme.titleLarge!;
+    TextStyle textStyle = Theme.of(context).primaryTextTheme.titleMedium!;
     return AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
@@ -103,45 +101,53 @@ class _IndexPageState extends State<IndexPage> {
           style: textStyle,
         ),
         actions: [
-          //个人信息 登录才显示
-          Row(
-            children: _buildPersonAppBarRow(),
+          _buildSearchBar(),
+          const SizedBox(
+            width: 20,
           ),
-          const SizedBox(width: 20),
+          //个人信息 登录才显示
+          _buildPersonAppBarRow(),
+
           //视频分类 热门单独
           // 0.体育 1.动漫 2.游戏 3.音乐
-          TextButton(
-              onPressed: () {
-                pt = PageType.videoList;
-                _onRefresh(0, 0);
-              },
-              child: Text('热门', style: textStyle)),
-          TextButton(
-              onPressed: () {
-                _onRefresh(0, 0);
-              },
-              child: Text('推荐', style: textStyle)),
-          TextButton(
-              onPressed: () {
-                _onRefresh(1, 0);
-              },
-              child: Text('体育', style: textStyle)),
-          TextButton(
-              onPressed: () {
-                _onRefresh(2, 0);
-              },
-              child: Text('动漫', style: textStyle)),
-          TextButton(
-              onPressed: () {
-                _onRefresh(3, 0);
-              },
-              child: Text('游戏', style: textStyle)),
-          TextButton(
-              onPressed: () {
-                _onRefresh(4, 0);
-              },
-              child: Text('音乐', style: textStyle)),
-          const SizedBox(width: 40),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.25,
+            child: Row(
+              children: [
+                TextButton(
+                    onPressed: () {
+                      pt = PageType.videoList;
+                      _onRefresh(0, 0);
+                    },
+                    child: Text('热门', style: textStyle)),
+                TextButton(
+                    onPressed: () {
+                      _onRefresh(0, 0);
+                    },
+                    child: Text('推荐', style: textStyle)),
+                TextButton(
+                    onPressed: () {
+                      _onRefresh(1, 0);
+                    },
+                    child: Text('体育', style: textStyle)),
+                TextButton(
+                    onPressed: () {
+                      _onRefresh(2, 0);
+                    },
+                    child: Text('动漫', style: textStyle)),
+                TextButton(
+                    onPressed: () {
+                      _onRefresh(3, 0);
+                    },
+                    child: Text('游戏', style: textStyle)),
+                TextButton(
+                    onPressed: () {
+                      _onRefresh(4, 0);
+                    },
+                    child: Text('音乐', style: textStyle)),
+              ],
+            ),
+          )
         ]);
   }
 
@@ -165,58 +171,63 @@ class _IndexPageState extends State<IndexPage> {
   }
 
   ///构建个人中心AppBar里面的Row 如果没有登录则不显示
-  List<Widget> _buildPersonAppBarRow() {
+  Widget _buildPersonAppBarRow() {
     String? avatarUrl = GlobalObjects.storageProvider.user.avatar ?? 'http://s351j97d8.hd-bkt.clouddn.com/d56e2a96.png';
     String nickname = GlobalObjects.storageProvider.user.nickname ?? '三九';
-
+    TextStyle textStyle = Theme.of(context).primaryTextTheme.titleMedium!;
     if (GlobalObjects.storageProvider.user.jwtToken != null) {
-      return [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundImage: NetworkImage(avatarUrl),
-              backgroundColor: Colors.white,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                nickname,
-                style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20),
+      return Container(
+        width: MediaQuery.of(context).size.width * 0.28,
+        child: Row(children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundImage: NetworkImage(avatarUrl),
+                backgroundColor: Colors.white,
               ),
-            )
-          ],
-        ),
-        const SizedBox(width: 5),
-        TextButton.icon(
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  nickname,
+                  style: textStyle,
+                ),
+              )
+            ],
+          ),
+          const SizedBox(width: 5),
+
+          TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  Navigator.pushNamed(context, '/user');
+                  pt = PageType.userInfo;
+                });
+              },
+              icon: const Icon(Icons.person, color: Colors.white),
+              label: Text('个人', style: textStyle)),
+          //投稿
+          TextButton.icon(
             onPressed: () {
-              setState(() {
-                Navigator.pushNamed(context, '/user');
-                pt = PageType.userInfo;
-              });
+              pt = PageType.userInfo;
             },
-            icon: const Icon(Icons.person, color: Colors.white),
-            label: Text('个人', style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20))),
-        //投稿
-        TextButton.icon(
-          onPressed: () {
-            pt = PageType.userInfo;
-          },
-          icon: const Icon(Icons.upload_file, color: Colors.white),
-          label: Text('投稿', style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20)),
-        ),
-        TextButton.icon(
-            onPressed: () {
-              GlobalObjects.storageProvider.user.jwtToken = null;
-              // 退出登录 清空路由栈
-              Navigator.pushNamedAndRemoveUntil(context, '/select', (route) => false);
-            },
-            icon: const Icon(Icons.logout, color: Colors.white),
-            label: Text('退出', style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20))),
-        SizedBox(width: 40),
-      ];
+            icon: const Icon(Icons.upload_file, color: Colors.white),
+            label: Text('投稿', style: textStyle),
+          ),
+          //退出
+          TextButton.icon(
+              onPressed: () {
+                GlobalObjects.storageProvider.user.jwtToken = null;
+                // 退出登录 清空路由栈
+                Navigator.pushNamedAndRemoveUntil(context, '/select', (route) => false);
+              },
+              icon: const Icon(Icons.logout, color: Colors.white),
+              label: Text('退出', style: textStyle)),
+          SizedBox(width: 40),
+        ]),
+      );
     }
-    return [Container()];
+    return SizedBox(width: MediaQuery.of(context).size.width * 0.3);
   }
 
   /// 请求视频方法
@@ -268,60 +279,54 @@ class _IndexPageState extends State<IndexPage> {
 
   /// 搜索框
   Widget _buildSearchBar() {
-    return Stack(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Positioned(
-          //appBar的高度
-          top: 13,
-          left: MediaQuery.of(context).size.width * 0.1,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              //搜索框
-              Container(
-                width: MediaQuery.of(context).size.width * 0.3,
-                margin: const EdgeInsets.only(left: 7, right: 7, top: 7, bottom: 7),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: '搜索',
-                    border: InputBorder.none,
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        if (_searchController.text.isEmpty) {
-                          EasyLoading.showInfo('请输入搜索内容');
-                          return;
-                        }
-
-                        setState(() {
-                          showSearchVideoInfoList = false;
-                          _searchController.clear();
-                          searchVideoInfoList.clear();
-                        });
-                      },
-                    ),
-                  ),
-                  onSubmitted: (value) async {
-                    _log.i('搜索', value);
-                    await _searchVideoInfoList(value);
-                    setState(() {
-                      showSearchVideoInfoList = true;
-                    });
-                  },
-                ),
+        //搜索框
+        Container(
+          width: MediaQuery.of(context).size.width * 0.28,
+          margin: const EdgeInsets.only(left: 5, right: 5, top: 5, bottom: 5),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: '搜索',
+              border: InputBorder.none,
+              prefixIcon: Icon(Icons.search),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  if (_searchController.text.isEmpty) {
+                    EasyLoading.showInfo('请输入搜索内容');
+                    return;
+                  }
+                  setState(() {
+                    showSearchVideoInfoList = false;
+                    _searchController.clear();
+                    searchVideoInfoList.clear();
+                  });
+                },
               ),
-              //搜索后 显示的视频列表
-              SizedBox(height: 10),
-              _buildSearchVideoInfoList(),
-            ],
+            ),
+            onSubmitted: (value) async {
+              if (_searchController.text.isEmpty) {
+                EasyLoading.showInfo('请输入搜索内容');
+                return;
+              }
+              _log.i('搜索', value);
+              await _searchVideoInfoList(value);
+              setState(() {
+                showSearchVideoInfoList = true;
+              });
+            },
           ),
         ),
+        //搜索后 显示的视频列表
+        SizedBox(height: 10),
+        _buildSearchVideoInfoList(),
       ],
     );
   }

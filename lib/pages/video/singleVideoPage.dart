@@ -342,9 +342,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       setState(() {
         //操作成功
         isFollow = !isFollow;
+        //自己的关注数+1 -1
         GlobalObjects.storageProvider.user.followCount = isFollow
             ? GlobalObjects.storageProvider.user.followCount! + 1
             : GlobalObjects.storageProvider.user.followCount! - 1;
+        //对方的粉丝数+1 -1
+        fansCount = isFollow ? fansCount + 1 : fansCount - 1;
       });
     }
     if (response.code == failCode) {
