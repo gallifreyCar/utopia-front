@@ -47,10 +47,17 @@ dependencies:
 
 
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
 flutter:
   uses-material-design: true
+  fonts:
+    - family: MyCustomFont
+      fonts:
+        - asset: fonts/msyh.ttc
+        - asset: fonts/msyhbd.ttc
+        - asset: fonts/msyhl.ttc
 

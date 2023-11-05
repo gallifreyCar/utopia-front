@@ -272,47 +272,43 @@ class _IndexPageState extends State<IndexPage> {
       children: [
         Positioned(
           //appBar的高度
-          top: 14,
+          top: 13,
           left: MediaQuery.of(context).size.width * 0.1,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //搜索框
               Container(
-                height: 40,
-                width: MediaQuery.of(context).size.width * 0.4,
-                margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                width: MediaQuery.of(context).size.width * 0.3,
+                margin: const EdgeInsets.only(left: 7, right: 7, top: 7, bottom: 7),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                child: Center(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: '搜索',
-                      hintStyle: TextStyle(fontSize: 14),
-                      border: InputBorder.none,
-                      prefixIcon: Icon(Icons.search),
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.clear),
-                        onPressed: () {
-                          setState(() {
-                            showSearchVideoInfoList = false;
-                            _searchController.clear();
-                            searchVideoInfoList.clear();
-                          });
-                        },
-                      ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: '搜索',
+                    border: InputBorder.none,
+                    prefixIcon: Icon(Icons.search),
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          showSearchVideoInfoList = false;
+                          _searchController.clear();
+                          searchVideoInfoList.clear();
+                        });
+                      },
                     ),
-                    onSubmitted: (value) async {
-                      _log.i('搜索', value);
-                      await _searchVideoInfoList(value);
-                      setState(() {
-                        showSearchVideoInfoList = true;
-                      });
-                    },
                   ),
+                  onSubmitted: (value) async {
+                    _log.i('搜索', value);
+                    await _searchVideoInfoList(value);
+                    setState(() {
+                      showSearchVideoInfoList = true;
+                    });
+                  },
                 ),
               ),
               //搜索后 显示的视频列表
@@ -436,6 +432,7 @@ class _IndexPageState extends State<IndexPage> {
               // Navigator.of(context).push(MaterialPageRoute(builder: (context) => VideoPlayPage(videoInfoList[index])));
             },
           ),
+          const SizedBox(width: 20),
         ],
       ),
     );

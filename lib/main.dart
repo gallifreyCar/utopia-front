@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
     final app = MaterialApp(
       theme: ThemeData(
         // 微软雅黑
-        fontFamily: 'Microsoft YaHei',
+        fontFamily: 'MyCustomFont',
       ),
       title: _title,
       routes: {

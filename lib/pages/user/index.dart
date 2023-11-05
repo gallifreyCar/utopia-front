@@ -271,8 +271,6 @@ class UserPageState extends State<UserPage> {
                 _buildButton('我的收藏', Icons.star, () {}),
                 //我的投稿
                 _buildButton('我的投稿', Icons.upload_file, () {}),
-                //我的消息
-                _buildButton('我的消息', Icons.message, () {}),
               ],
             ),
           ),
