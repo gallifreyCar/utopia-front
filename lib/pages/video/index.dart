@@ -290,10 +290,15 @@ class _IndexPageState extends State<IndexPage> {
                   decoration: InputDecoration(
                     hintText: '搜索',
                     border: InputBorder.none,
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
                     suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
+                      icon: const Icon(Icons.clear),
                       onPressed: () {
+                        if (_searchController.text.isEmpty) {
+                          EasyLoading.showInfo('请输入搜索内容');
+                          return;
+                        }
+
                         setState(() {
                           showSearchVideoInfoList = false;
                           _searchController.clear();
