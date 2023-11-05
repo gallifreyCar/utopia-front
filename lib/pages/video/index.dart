@@ -29,14 +29,74 @@ enum PageType {
 class _IndexPageState extends State<IndexPage> {
   //当前页面
   PageType pt = PageType.videoList;
+
   //视频信息
   List<VideoInfo> videoInfoList = [];
+
+  //搜索的视频信息
+  List<VideoInfo> searchVideoInfoList = [
+    VideoInfo(
+      id: 3,
+      createdAt: "2023-10-28T13:23:24.033+08:00",
+      playUrl:
+          'https://prod-streaming-video-msn-com.akamaized.net/b7014b7e-b38f-4a64-bd95-4a28a8ef6dee/113a2bf3-3a5f-45d4-8b6f-e40ce8559da3.mp4',
+      coverUrl: 'https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AAOEhRG.img',
+      videoTypeId: 1,
+      describe: '你好',
+      author: Author(
+        id: 7,
+        nickname: 'sgsgds',
+        avatar: 'http://s30hxzidb.bkt.clouddn.com/edd9ff2f.png',
+        username: '车嘉宁',
+        fansCount: 1,
+        followCount: 2,
+        videoCount: 1,
+      ),
+      isFollow: false,
+      isLike: false,
+      isFavorite: false,
+      likeCount: 120,
+      favoriteCount: 0,
+    ),
+    VideoInfo(
+      id: 7,
+      createdAt: "2023-10-27T22:16:25.352+08:00",
+      playUrl:
+          'https://prod-streaming-video-msn-com.akamaized.net/178161a4-26a5-4f84-96d3-6acea1909a06/2213bcd0-7d15-4da0-a619-e32d522572c0.mp4',
+      coverUrl: 'https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AAOEa6N.img',
+      videoTypeId: 1,
+      describe: '这是我的一个视频描述',
+      author: Author(
+        id: 9,
+        nickname: 'fsd啊',
+        avatar: 'http://s3dh6uw2g.bkt.clouddn.com/tesljas35.png',
+        username: '冰航',
+        fansCount: 2,
+        followCount: 3,
+        videoCount: 7,
+      ),
+      isFollow: false,
+      isLike: false,
+      isFavorite: false,
+      likeCount: 120,
+      favoriteCount: 230,
+    ),
+  ];
+
+  //搜索
+  bool showSearchVideoInfoList = false;
+
   //下一次请求的时间
   int nextTime = 0;
+
   // 没有更多
   bool noMore = false;
+
   // 创建一个 PageController
   final PageController _pageController = PageController();
+
+  // 搜索控制器
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -72,13 +132,17 @@ class _IndexPageState extends State<IndexPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: buildAppBar(), body: _buildVideoListPageView());
+    return Scaffold(
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
+      floatingActionButton: _buildSearchBar(),
+      appBar: buildAppBar(),
+      body: _buildVideoListPageView(),
+    );
   }
 
   /// 构建AppBar
   AppBar buildAppBar() {
     TextStyle textStyle = Theme.of(context).primaryTextTheme.titleLarge!;
-
     return AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
@@ -86,11 +150,13 @@ class _IndexPageState extends State<IndexPage> {
           style: textStyle,
         ),
         actions: [
+          //个人信息 登录才显示
           Row(
             children: _buildPersonAppBarRow(),
           ),
           const SizedBox(width: 20),
-          //视频分类 0.热门 1.体育 2.动漫 3.游戏 4.音乐
+          //视频分类 热门单独
+          // 0.体育 1.动漫 2.游戏 3.音乐
           TextButton(
               onPressed: () {
                 pt = PageType.videoList;
@@ -245,6 +311,162 @@ class _IndexPageState extends State<IndexPage> {
         // Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
       });
     });
+  }
+
+  /// 搜索框
+  Widget _buildSearchBar() {
+    return Stack(
+      children: [
+        Positioned(
+          //appBar的高度
+          top: 14,
+          left: MediaQuery.of(context).size.width * 0.1,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //搜索框
+              Container(
+                height: 40,
+                width: MediaQuery.of(context).size.width * 0.4,
+                margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  //阴影
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.5),
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: '搜索',
+                    hintStyle: TextStyle(fontSize: 14),
+                    border: InputBorder.none,
+                    prefixIcon: Icon(Icons.search),
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          showSearchVideoInfoList = false;
+                          _searchController.clear();
+                          searchVideoInfoList.clear();
+                        });
+                      },
+                    ),
+                  ),
+                  onSubmitted: (value) {
+                    _log.i('搜索', value);
+                    setState(() {
+                      showSearchVideoInfoList = true;
+                    });
+                  },
+                ),
+              ),
+              //搜索后 显示的视频列表
+              SizedBox(height: 10),
+              _buildSearchVideoInfoList(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 搜索后 显示的视频列表
+  Widget _buildSearchVideoInfoList() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.6,
+      width: MediaQuery.of(context).size.width * 0.3,
+      child: Offstage(
+        offstage: !showSearchVideoInfoList,
+        child: ListView.builder(
+          itemCount: searchVideoInfoList.length,
+          itemBuilder: (context, index) {
+            return _buildVideoItem(index);
+          },
+        ),
+      ),
+    );
+  }
+
+  /// 搜索后 显示的视频列表 视频列表项 封面+描述
+  Widget _buildVideoItem(int index) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        children: [
+          //封面
+          Container(
+            width: 150,
+            height: 100,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              image: DecorationImage(
+                image: NetworkImage(searchVideoInfoList[index].coverUrl),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          //描述
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  searchVideoInfoList[index].describe,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  searchVideoInfoList[index].describe,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          //点赞数
+          const SizedBox(width: 10),
+
+          Row(
+            children: [
+              const Icon(Icons.thumb_up_alt_outlined),
+              const SizedBox(width: 10),
+              Text(searchVideoInfoList[index].likeCount.toString()),
+            ],
+          ),
+          // 收藏数
+          const SizedBox(width: 10),
+          Row(
+            children: [
+              const Icon(Icons.star_border),
+              const SizedBox(width: 10),
+              Text(searchVideoInfoList[index].favoriteCount.toString()),
+            ],
+          ),
+
+          //播放按钮
+          const SizedBox(width: 10),
+          IconButton(
+            icon: Icon(Icons.play_circle_outline, color: Theme.of(context).primaryColor),
+            onPressed: () {
+              _log.i('播放视频', searchVideoInfoList[index].playUrl);
+              // Navigator.of(context).push(MaterialPageRoute(builder: (context) => VideoPlayPage(videoInfoList[index])));
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
 
