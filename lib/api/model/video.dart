@@ -26,6 +26,28 @@ class VideoRequest {
   }
 }
 
+///搜索视频的请求参数
+class SearchVideoRequest {
+  //搜索关键字
+  final String? search;
+
+  const SearchVideoRequest({
+    this.search,
+  });
+
+  factory SearchVideoRequest.fromJson(Map<String, dynamic> json) {
+    return SearchVideoRequest(
+      search: json['search'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'search': search,
+    };
+  }
+}
+
 ///视频接口的响应体
 class VideoResponse {
   final int code;
@@ -49,6 +71,43 @@ class VideoResponse {
       code: json['code'],
       msg: json['msg'],
       data: VideoData.fromJson(json['data']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    if (data == null) {
+      return {
+        'code': code,
+        'msg': msg,
+      };
+    }
+    return {'code': code, 'msg': msg, 'data': data!.toJson()};
+  }
+}
+
+///热门/搜索 视频接口的响应体 没有nextTime
+class VideoResponseNoNextTime {
+  final int code;
+  final String msg;
+  final VideoDataNoNextTime? data;
+
+  VideoResponseNoNextTime({
+    required this.code,
+    required this.msg,
+    this.data,
+  });
+
+  factory VideoResponseNoNextTime.fromJson(Map<String, dynamic> json) {
+    if (json['data'] == null) {
+      return VideoResponseNoNextTime(
+        code: json['code'],
+        msg: json['msg'],
+      );
+    }
+    return VideoResponseNoNextTime(
+      code: json['code'],
+      msg: json['msg'],
+      data: VideoDataNoNextTime.fromJson(json['data']),
     );
   }
 
@@ -103,6 +162,38 @@ class VideoData {
   }
 }
 
+/// 没有nextTime的视频数据 返回全部数据
+class VideoDataNoNextTime {
+  final List<VideoInfo> videoInfo;
+
+  VideoDataNoNextTime({
+    required this.videoInfo,
+  });
+
+  factory VideoDataNoNextTime.fromJson(Map<String, dynamic> json) {
+    if (json['video_info'] == null) {
+      return VideoDataNoNextTime(
+        videoInfo: [],
+      );
+    }
+    return VideoDataNoNextTime(
+      videoInfo:
+          (json['video_info'] as List<dynamic>).map((e) => VideoInfo.fromJson(e as Map<String, dynamic>)).toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    if (videoInfo == null) {
+      return {
+        'video_info': [],
+      };
+    }
+    return {
+      'video_info': videoInfo.map((e) => e.toJson()).toList(),
+    };
+  }
+}
+
 ///视频信息
 class VideoInfo {
   final int id;
@@ -110,6 +201,7 @@ class VideoInfo {
   final String playUrl;
   final String coverUrl;
   final int videoTypeId;
+  final String title;
   final String describe;
   final Author author;
   final bool isFollow;
@@ -124,6 +216,7 @@ class VideoInfo {
     required this.playUrl,
     required this.coverUrl,
     required this.videoTypeId,
+    required this.title,
     required this.describe,
     required this.author,
     required this.isFollow,
@@ -140,6 +233,7 @@ class VideoInfo {
       playUrl: json['play_url'] as String,
       coverUrl: json['cover_url'] as String,
       videoTypeId: json['video_type_id'] as int,
+      title: json['title'] as String,
       describe: json['describe'] as String,
       author: Author.fromJson(json['author'] as Map<String, dynamic>),
       isFollow: json['is_follow'] as bool,
@@ -157,6 +251,7 @@ class VideoInfo {
       'play_url': playUrl,
       'cover_url': coverUrl,
       'video_type_id': videoTypeId,
+      'title': title,
       'describe': describe,
       'author': author.toJson(),
       'is_follow': isFollow,

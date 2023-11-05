@@ -35,4 +35,12 @@ class VideoApiImpl extends VideoApi {
     final resp = await dio.post('/api/v3/interact/like', data: request.toJson());
     return DefaultResponse.fromJson(resp.data);
   }
+
+  @override
+  Future<VideoResponseNoNextTime> searchVideoList(SearchVideoRequest request) async {
+    final resp = await dio.get('/api/v1/video/search', queryParameters: {
+      "search": request.search,
+    });
+    return VideoResponseNoNextTime.fromJson(resp.data);
+  }
 }

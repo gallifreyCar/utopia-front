@@ -373,7 +373,7 @@ class UserPageState extends State<UserPage> {
       }
       if (_userListResponse.code == 4000) {
         _log.i('获取粉丝或关注列表失败');
-        EasyLoading.showError('获取粉丝或关注列表失败:${_userListResponse.msg!}');
+        EasyLoading.showError('获取粉丝或关注列表失败:${_userListResponse.msg}');
       }
       EasyLoading.dismiss();
     } catch (e) {

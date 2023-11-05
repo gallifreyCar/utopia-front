@@ -33,6 +33,7 @@ class VideoApiMock extends VideoApi {
                     'https://prod-streaming-video-msn-com.akamaized.net/b7014b7e-b38f-4a64-bd95-4a28a8ef6dee/113a2bf3-3a5f-45d4-8b6f-e40ce8559da3.mp4',
                 coverUrl: 'https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AAOEhRG.img',
                 videoTypeId: 1,
+                title: '这是我的第一个视频',
                 describe: '你好',
                 author: Author(
                   id: 7,
@@ -66,6 +67,7 @@ class VideoApiMock extends VideoApi {
                   followCount: 3,
                   videoCount: 7,
                 ),
+                title: '这是我的一个视频标题',
                 isFollow: false,
                 isLike: false,
                 isFavorite: false,
@@ -79,6 +81,7 @@ class VideoApiMock extends VideoApi {
                     'https://prod-streaming-video-msn-com.akamaized.net/fe13f13c-c2cc-4998-b525-038b23bfa9b5/1a9d30ca-54be-411e-8b09-d72ef4488e05.mp4',
                 coverUrl: 'https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AAOEcge.img',
                 videoTypeId: 1,
+                title: '标题',
                 describe: '描述',
                 author: Author(
                   id: 11,
@@ -107,5 +110,11 @@ class VideoApiMock extends VideoApi {
     return Future.delayed(Duration(seconds: 1), () {
       return DefaultResponse(code: 2000, msg: 'ok');
     });
+  }
+
+  @override
+  Future<VideoResponseNoNextTime> searchVideoList(SearchVideoRequest request) {
+    // TODO: implement searchVideoList
+    throw UnimplementedError();
   }
 }

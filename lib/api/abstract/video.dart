@@ -14,4 +14,7 @@ abstract class VideoApi {
 
   //收藏/取消收藏
   Future<DefaultResponse> favorite(VideoLikeAndFavoriteRequest request);
+
+  //search
+  Future<VideoResponseNoNextTime> searchVideoList(SearchVideoRequest request);
 }

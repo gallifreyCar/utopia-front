@@ -34,54 +34,7 @@ class _IndexPageState extends State<IndexPage> {
   List<VideoInfo> videoInfoList = [];
 
   //搜索的视频信息
-  List<VideoInfo> searchVideoInfoList = [
-    VideoInfo(
-      id: 3,
-      createdAt: "2023-10-28T13:23:24.033+08:00",
-      playUrl:
-          'https://prod-streaming-video-msn-com.akamaized.net/b7014b7e-b38f-4a64-bd95-4a28a8ef6dee/113a2bf3-3a5f-45d4-8b6f-e40ce8559da3.mp4',
-      coverUrl: 'https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AAOEhRG.img',
-      videoTypeId: 1,
-      describe: '你好',
-      author: Author(
-        id: 7,
-        nickname: 'sgsgds',
-        avatar: 'http://s30hxzidb.bkt.clouddn.com/edd9ff2f.png',
-        username: '车嘉宁',
-        fansCount: 1,
-        followCount: 2,
-        videoCount: 1,
-      ),
-      isFollow: false,
-      isLike: false,
-      isFavorite: false,
-      likeCount: 120,
-      favoriteCount: 0,
-    ),
-    VideoInfo(
-      id: 7,
-      createdAt: "2023-10-27T22:16:25.352+08:00",
-      playUrl:
-          'https://prod-streaming-video-msn-com.akamaized.net/178161a4-26a5-4f84-96d3-6acea1909a06/2213bcd0-7d15-4da0-a619-e32d522572c0.mp4',
-      coverUrl: 'https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AAOEa6N.img',
-      videoTypeId: 1,
-      describe: '这是我的一个视频描述',
-      author: Author(
-        id: 9,
-        nickname: 'fsd啊',
-        avatar: 'http://s3dh6uw2g.bkt.clouddn.com/tesljas35.png',
-        username: '冰航',
-        fansCount: 2,
-        followCount: 3,
-        videoCount: 7,
-      ),
-      isFollow: false,
-      isLike: false,
-      isFavorite: false,
-      likeCount: 120,
-      favoriteCount: 230,
-    ),
-  ];
+  List<VideoInfo> searchVideoInfoList = [];
 
   //搜索
   bool showSearchVideoInfoList = false;
@@ -279,7 +232,7 @@ class _IndexPageState extends State<IndexPage> {
     _log.i('请求视频列表', request.toJson());
     api.video.getVideoList(request).then((videoResponse) {
       EasyLoading.dismiss();
-      if (videoResponse?.code == 2000) {
+      if (videoResponse.code == 2000) {
         _log.i('请求成功');
         setState(() {
           //如果是切换分类，那么myNextTime就是0 清空列表
@@ -287,19 +240,19 @@ class _IndexPageState extends State<IndexPage> {
             videoInfoList.clear();
           }
           //没有更多视频了
-          if (videoResponse!.data!.videoInfo.isEmpty) {
+          if (videoResponse.data!.videoInfo.isEmpty) {
             EasyLoading.showInfo('没有更多视频了');
             noMore = true;
             return;
           }
           // 如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
-          videoInfoList.addAll(videoResponse!.data!.videoInfo);
-          nextTime = videoResponse!.data!.nextTime!;
+          videoInfoList.addAll(videoResponse.data!.videoInfo);
+          nextTime = videoResponse.data!.nextTime;
         });
       }
-      if (videoResponse?.code == 4000) {
-        showBasicFlash(context, Text("请求失败"), duration: const Duration(seconds: 2));
-        _log.i('请求失败', videoResponse?.msg);
+      if (videoResponse.code == 4000) {
+        showBasicFlash(context, const Text("请求失败"), duration: const Duration(seconds: 2));
+        _log.i('请求失败', videoResponse.msg);
       }
     }).catchError((e) {
       _log.e(e);
@@ -359,8 +312,9 @@ class _IndexPageState extends State<IndexPage> {
                       },
                     ),
                   ),
-                  onSubmitted: (value) {
+                  onSubmitted: (value) async {
                     _log.i('搜索', value);
+                    await _searchVideoInfoList(value);
                     setState(() {
                       showSearchVideoInfoList = true;
                     });
@@ -380,16 +334,40 @@ class _IndexPageState extends State<IndexPage> {
   /// 搜索后 显示的视频列表
   Widget _buildSearchVideoInfoList() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.6,
-      width: MediaQuery.of(context).size.width * 0.3,
+      height: searchVideoInfoList.isEmpty ? 40 : MediaQuery.of(context).size.height * 0.6,
+      width: searchVideoInfoList.isEmpty ? 400 : MediaQuery.of(context).size.width * 0.3,
       child: Offstage(
         offstage: !showSearchVideoInfoList,
-        child: ListView.builder(
-          itemCount: searchVideoInfoList.length,
-          itemBuilder: (context, index) {
-            return _buildVideoItem(index);
-          },
-        ),
+        child: searchVideoInfoList.isEmpty
+            ? Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
+                ),
+                child: Center(
+                  child: Row(
+                    children: const [
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.info,
+                          size: 20,
+                          color: Colors.red,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text('没有搜到视频哦，换个关键词试试吧~', style: TextStyle(fontSize: 18)),
+                      ),
+                    ],
+                  ),
+                ))
+            : ListView.builder(
+                itemCount: searchVideoInfoList.length,
+                itemBuilder: (context, index) {
+                  return _buildVideoItem(index);
+                },
+              ),
       ),
     );
   }
@@ -414,13 +392,13 @@ class _IndexPageState extends State<IndexPage> {
             ),
           ),
           const SizedBox(width: 10),
-          //描述
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  searchVideoInfoList[index].describe,
+                  searchVideoInfoList[index].title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -467,6 +445,31 @@ class _IndexPageState extends State<IndexPage> {
         ],
       ),
     );
+  }
+
+  /// 搜索请求
+  Future<void> _searchVideoInfoList(String searchContent) async {
+    try {
+      EasyLoading.show(status: '搜索中...');
+      final api = GlobalObjects.apiProvider;
+      final request = SearchVideoRequest(search: searchContent);
+      final videoResponse = await api.video.searchVideoList(request);
+
+      if (videoResponse.code == 2000) {
+        _log.i('搜索视频成功', videoResponse.data);
+        setState(() {
+          EasyLoading.showSuccess('搜索视频成功');
+          searchVideoInfoList = videoResponse.data?.videoInfo ?? [];
+        });
+      }
+      if (videoResponse.code == 4000) {
+        EasyLoading.showError(videoResponse.msg);
+        _log.i('搜索视频失败', videoResponse.msg);
+      }
+    } catch (e) {
+      _log.e('搜索视频异常', e);
+    }
+    EasyLoading.dismiss();
   }
 }
 
