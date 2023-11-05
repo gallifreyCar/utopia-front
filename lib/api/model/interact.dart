@@ -138,3 +138,28 @@ class CommentData {
     };
   }
 }
+
+/// 发表评论的请求体
+class PostCommentRequest {
+  final int videoId;
+  final String content;
+
+  PostCommentRequest({
+    required this.videoId,
+    required this.content,
+  });
+
+  factory PostCommentRequest.fromJson(Map<String, dynamic> json) {
+    return PostCommentRequest(
+      videoId: json['video_id'] as int,
+      content: json['content'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'video_id': videoId,
+      'content': content,
+    };
+  }
+}

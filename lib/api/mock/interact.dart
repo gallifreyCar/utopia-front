@@ -30,4 +30,10 @@ class InteractApiMock extends InteractApi {
     // TODO: implement getComment
     throw UnimplementedError();
   }
+
+  @override
+  Future<DefaultResponse> postComment(PostCommentRequest request) {
+    // TODO: implement postComment
+    throw UnimplementedError();
+  }
 }

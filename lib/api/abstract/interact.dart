@@ -13,4 +13,7 @@ abstract class InteractApi {
 
   //获取评论
   Future<CommentResponse> getComment(CommentRequest request);
+
+  //发表评论
+  Future<DefaultResponse> postComment(PostCommentRequest request);
 }

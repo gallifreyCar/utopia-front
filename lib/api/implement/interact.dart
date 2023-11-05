@@ -31,4 +31,10 @@ class InteractApiImpl extends InteractApi {
     final resp = await dio.get('/api/v1/interact/comment/list', data: request.toJson());
     return CommentResponse.fromJson(resp.data);
   }
+
+  @override
+  Future<DefaultResponse> postComment(PostCommentRequest request) async {
+    final resp = await dio.post('/api/v1/interact/comment/post', data: request.toJson());
+    return DefaultResponse.fromJson(resp.data);
+  }
 }
