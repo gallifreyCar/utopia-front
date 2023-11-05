@@ -102,8 +102,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             width: likeWidth,
             height: WH.h(context) - WH.playerHeight(context),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                SizedBox(width: 20),
                 //点赞，收藏，评论，分享
                 _buildButton(context, _buildTextAndNum("点赞", likeCount),
                     isLike ? const Icon(Icons.thumb_up) : const Icon(Icons.thumb_up_off_alt), like),
@@ -422,12 +423,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 }
 
 Widget _buildButton(BuildContext context, Text text, Icon icon, Function() onPressed) {
-  return Container(
-    width: MediaQuery.of(context).size.width * 0.3 / 4,
-    child: Padding(
-      padding: const EdgeInsets.all(5.0),
-      child: TextButton.icon(onPressed: onPressed, icon: icon, label: text),
-    ),
+  return Padding(
+    padding: const EdgeInsets.all(5.0),
+    child: TextButton.icon(onPressed: onPressed, icon: icon, label: text),
   );
 }
 
