@@ -20,6 +20,8 @@ class UserPageState extends State<UserPage> {
   //标题
   String bigTitle = '我的关注';
   IconData bigIcon = Icons.favorite;
+  //提示
+  String tips = '';
 
   final _log = GlobalObjects.logger;
   List<UserInfoData> userInfoList = [];
@@ -113,10 +115,10 @@ class UserPageState extends State<UserPage> {
           width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
           height: WH.personHeight(context) - 120,
           child: userInfoList.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
-                  '暂无更多相关人员哦，关注其他人吧，或者发作品，赚取更多粉丝吧！',
-                  style: TextStyle(fontSize: 20),
+                  tips,
+                  style: const TextStyle(fontSize: 20),
                 ))
               : ListView.builder(
                   itemExtent: WH.personWith(context) / 5,
@@ -368,6 +370,7 @@ class UserPageState extends State<UserPage> {
         _log.i('获取粉丝或关注列表成功');
         setState(() {
           userInfoList = _userListResponse.userList!;
+          userInfoList.isEmpty ? tips = '暂无更多相关人员哦，关注其他人吧，或者发作品，赚取更多粉丝吧！' : tips = '';
         });
       }
       if (_userListResponse.code == 4000) {
