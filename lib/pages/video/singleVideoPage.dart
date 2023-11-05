@@ -239,7 +239,11 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                           ),
                         ],
                       )
-                    : ListView.builder(
+                    : ListView.separated(
+                        separatorBuilder: (context, index) => Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          child: Divider(color: Theme.of(context).primaryColorDark),
+                        ),
                         itemCount: commentList.length,
                         itemBuilder: (context, index) {
                           return ListTile(
