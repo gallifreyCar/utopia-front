@@ -285,40 +285,34 @@ class _IndexPageState extends State<IndexPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  //阴影
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.5),
-                      blurRadius: 5,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
                 ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: '搜索',
-                    hintStyle: TextStyle(fontSize: 14),
-                    border: InputBorder.none,
-                    prefixIcon: Icon(Icons.search),
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
-                      onPressed: () {
-                        setState(() {
-                          showSearchVideoInfoList = false;
-                          _searchController.clear();
-                          searchVideoInfoList.clear();
-                        });
-                      },
+                child: Center(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: '搜索',
+                      hintStyle: TextStyle(fontSize: 14),
+                      border: InputBorder.none,
+                      prefixIcon: Icon(Icons.search),
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            showSearchVideoInfoList = false;
+                            _searchController.clear();
+                            searchVideoInfoList.clear();
+                          });
+                        },
+                      ),
                     ),
+                    onSubmitted: (value) async {
+                      _log.i('搜索', value);
+                      await _searchVideoInfoList(value);
+                      setState(() {
+                        showSearchVideoInfoList = true;
+                      });
+                    },
                   ),
-                  onSubmitted: (value) async {
-                    _log.i('搜索', value);
-                    await _searchVideoInfoList(value);
-                    setState(() {
-                      showSearchVideoInfoList = true;
-                    });
-                  },
                 ),
               ),
               //搜索后 显示的视频列表

@@ -27,6 +27,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     EasyLoading.instance.indicatorType = EasyLoadingIndicatorType.cubeGrid;
     final app = MaterialApp(
+      theme: ThemeData(
+        // 微软雅黑
+        fontFamily: 'Microsoft YaHei',
+      ),
       title: _title,
       routes: {
         '/select': (context) => const LoginModeSelectorPage(),
