@@ -168,8 +168,8 @@ class _IndexPageState extends State<IndexPage> {
     }
     return PageView(
       scrollDirection: Axis.vertical,
-      children: children,
       controller: _pageController,
+      children: children,
     );
   }
 
@@ -179,7 +179,7 @@ class _IndexPageState extends State<IndexPage> {
     String nickname = GlobalObjects.storageProvider.user.nickname ?? '三九';
     TextStyle textStyle = Theme.of(context).primaryTextTheme.titleLarge!;
     if (GlobalObjects.storageProvider.user.jwtToken != null) {
-      return Container(
+      return SizedBox(
         width: MediaQuery.of(context).size.width * 0.28,
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Row(

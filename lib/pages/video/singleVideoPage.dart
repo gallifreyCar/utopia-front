@@ -250,15 +250,15 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                             title: Text(
                               commentList[index].nickname,
                               style: TextStyle(
-                                  fontSize: Theme.of(context).textTheme.titleSmall?.fontSize,
-                                  color: Theme.of(context).primaryColor),
+                                  fontSize: Theme.of(context).textTheme.titleSmall?.fontSize, color: Colors.black),
                             ),
                             subtitle: Text(
                               commentList[index].content,
                               maxLines: 3,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                  fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize, color: Colors.black),
+                                  fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize,
+                                  color: Theme.of(context).primaryColor),
                             ),
                           );
                         },
@@ -469,7 +469,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
   Widget build(BuildContext context) {
     _log.i("build ${widget.text}");
     return Container(
-      color: Theme.of(context).primaryColorLight,
+      color: Theme.of(context).secondaryHeaderColor,
       child: _buildMainRow(),
     );
   }
