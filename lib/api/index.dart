@@ -1,8 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:utopia_front/api/abstract/interact.dart';
 import 'package:utopia_front/api/abstract/upload_file.dart';
 import 'package:utopia_front/api/abstract/video.dart';
+import 'package:utopia_front/api/implement/interact.dart';
 import 'package:utopia_front/api/implement/upload_file.dart';
 import 'package:utopia_front/api/implement/user.dart';
+import 'package:utopia_front/api/mock/interact.dart';
 import 'package:utopia_front/api/mock/video.dart';
 
 import 'abstract/session.dart';
@@ -12,14 +15,20 @@ import 'implement/video.dart';
 
 abstract class ApiProvider {
   SessionApi get session;
+
   UploadFileApi get upload;
+
   VideoApi get video;
+
   UserApi get user;
+
+  InteractApi get interact;
 }
 
 // 网络请求的实现 调用后端接口
 class ApiProviderImpl extends ApiProvider {
   final Dio dio;
+
   ApiProviderImpl(this.dio);
 
   @override
@@ -33,6 +42,10 @@ class ApiProviderImpl extends ApiProvider {
 
   @override
   get user => UserApiImpl(dio);
+
+  @override
+  // TODO: implement interact
+  InteractApi get interact => InteractApiImpl(dio);
 }
 
 // Mock的实现 用于测试
@@ -50,4 +63,8 @@ class ApiProviderMock extends ApiProvider {
   @override
   // TODO: implement user
   get user => throw UnimplementedError();
+
+  @override
+  // TODO: implement interact
+  InteractApi get interact => InteractApiMock();
 }

@@ -6,6 +6,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:utopia_front/global/index.dart';
 
+import '../../api/model/interact.dart';
 import '../../api/model/video.dart';
 import '../../custom_widgets/chat_widow.dart';
 import '../base.dart';
@@ -315,7 +316,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     final request = VideoLikeAndFavoriteRequest(videoId: videoId, actionType: actionType);
     _log.i("点赞/取消点赞请求：", request.toJson());
 
-    final response = await api.video.like(request);
+    final response = await api.interact.like(request);
     if (response.code == successCode) {
       setState(() {
         //操作成功
@@ -336,7 +337,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     int actionType = isFavorite ? 2 : 1;
     final request = VideoLikeAndFavoriteRequest(videoId: videoId, actionType: actionType);
     _log.i("收藏/取消收藏请求：", request.toJson());
-    final response = await api.video.favorite(request);
+    final response = await api.interact.favorite(request);
     if (response.code == successCode) {
       setState(() {
         //操作成功
@@ -357,7 +358,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     int actionType = isFollow ? 2 : 1;
     final request = FollowRequest(actionType: actionType, toUserId: uid);
     _log.i("关注/取消关注请求：", request.toJson());
-    final response = await api.video.follow(request);
+    final response = await api.interact.follow(request);
     if (response.code == successCode) {
       setState(() {
         //操作成功

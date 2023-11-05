@@ -1,23 +1,8 @@
-import 'package:utopia_front/api/model/base.dart';
 import 'package:utopia_front/api/model/video.dart';
 
 import '../abstract/video.dart';
 
 class VideoApiMock extends VideoApi {
-  @override
-  Future<DefaultResponse> favorite(VideoLikeAndFavoriteRequest request) {
-    return Future.delayed(Duration(seconds: 1), () {
-      return DefaultResponse(code: 2000, msg: 'ok');
-    });
-  }
-
-  @override
-  Future<DefaultResponse> follow(FollowRequest request) {
-    return Future.delayed(const Duration(seconds: 1), () {
-      return DefaultResponse(code: 2000, msg: 'ok');
-    });
-  }
-
   @override
   Future<VideoResponse> getVideoList(VideoRequest request) {
     return Future.delayed(const Duration(seconds: 1), () {
@@ -102,13 +87,6 @@ class VideoApiMock extends VideoApi {
             nextTime: 1698470604033,
           ));
       return videoResponse;
-    });
-  }
-
-  @override
-  Future<DefaultResponse> like(VideoLikeAndFavoriteRequest request) {
-    return Future.delayed(Duration(seconds: 1), () {
-      return DefaultResponse(code: 2000, msg: 'ok');
     });
   }
 
