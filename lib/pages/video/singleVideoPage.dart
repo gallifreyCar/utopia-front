@@ -17,18 +17,21 @@ class VideoPlayerPage extends StatefulWidget {
   final String text;
 
   @override
-  _VideoPlayerPageState createState() => _VideoPlayerPageState();
+  VideoPlayerPageState createState() => VideoPlayerPageState();
 }
 
-class _VideoPlayerPageState extends State<VideoPlayerPage> {
+class VideoPlayerPageState extends State<VideoPlayerPage> {
   final _log = GlobalObjects.logger;
 
   int videoId = 0; //视频id
+  // 评论列表
+  List<CommentInfo> commentList = [];
+
   // 点赞，收藏，关注
   bool isLike = false; //是否点赞
   bool isFavorite = false; //是否收藏
   bool isFollow = false; //是否关注
-  // 点赞数，收藏数，粉丝数 ，作品数
+  // 点赞数，收藏数，粉丝数 ，作品数 评论数
   int likeCount = 120;
   int favoriteCount = 240;
   int fansCount = 0;
@@ -38,15 +41,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   bool isLikeButtonEnable = true;
   bool isFavoriteButtonEnable = true;
   bool isFollowButtonEnable = true;
+  bool isSendComment = false;
 
   // 作者个人信息
   String avatar = "";
   String nickname = "";
   String username = "";
-  int uid = 0;
+  int uerId = 0;
 
   // 视频描述
   String describe = "";
+
+  //评论
+  int? lastTime = 0; //最后一条评论的时间
+  bool isLoading = true; //是否正在加载
+  bool noMore = true; //是否没有更多评论
 
   //视频播放器
   late final player = Player();
@@ -55,6 +64,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   @override
   void initState() {
     super.initState();
+
     // 视频id
     videoId = widget.videoInfo.id;
     // 初始化视频播放器
@@ -68,13 +78,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     videoCount = widget.videoInfo.author.videoCount;
     likeCount = widget.videoInfo.likeCount;
     favoriteCount = widget.videoInfo.favoriteCount;
+
     // 个人信息
     avatar = widget.videoInfo.author.avatar; //头像
     nickname = widget.videoInfo.author.nickname; //昵称
-    uid = widget.videoInfo.author.id; //用户id
+    uerId = widget.videoInfo.author.id; //用户id
 
     // 视频描述
     describe = widget.videoInfo.describe;
+    // 获取视频评论
+    _getCommentList();
   }
 
   @override
@@ -105,7 +118,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 //点赞，收藏，评论，分享
                 _buildButton(context, _buildTextAndNum("点赞", likeCount),
                     isLike ? const Icon(Icons.thumb_up) : const Icon(Icons.thumb_up_off_alt), like),
@@ -211,23 +224,46 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             ),
           ),
         ),
-
-        //评论 100条 滚动
-        Expanded(
-          child: ListView.builder(
-            itemCount: 100,
-            itemBuilder: (context, index) {
-              return const ListTile(
-                leading: CircleAvatar(
-                  radius: 15,
-                  child: Icon(Icons.person, size: 15),
-                ),
-                title: Text("用户名"),
-                subtitle: Text("评论内容"),
-              );
-            },
-          ),
-        ),
+        //评论  滚动
+        isLoading
+            ? _buildCommentLoading()
+            : Expanded(
+                child: commentList.isEmpty
+                    ? Column(
+                        children: [
+                          const SizedBox(height: 40),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text("评论区空空如也，快来发表评论吧~",
+                                style: TextStyle(fontSize: 16, color: Theme.of(context).primaryColor)),
+                          ),
+                        ],
+                      )
+                    : ListView.builder(
+                        itemCount: commentList.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            leading: CircleAvatar(
+                              radius: 15,
+                              backgroundImage: NetworkImage(commentList[index].avatar),
+                            ),
+                            title: Text(commentList[index].nickname),
+                            subtitle: Text(commentList[index].content),
+                          );
+                        },
+                      ),
+              ),
+        Container(
+            margin: const EdgeInsets.only(bottom: 40),
+            child: ElevatedButton(
+                onPressed: () {
+                  if (noMore) {
+                    EasyLoading.showToast("没有更多评论了");
+                    return;
+                  }
+                  _getCommentList();
+                },
+                child: const Text("加载更多"))),
       ],
     );
   }
@@ -356,7 +392,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Future followUp() async {
     isFollowButtonEnable = false;
     int actionType = isFollow ? 2 : 1;
-    final request = FollowRequest(actionType: actionType, toUserId: uid);
+    final request = FollowRequest(actionType: actionType, toUserId: uerId);
     _log.i("关注/取消关注请求：", request.toJson());
     final response = await api.interact.follow(request);
     if (response.code == successCode) {
@@ -444,8 +480,135 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       ],
     );
   }
+
+  /// 发送评论
+  sendMsg(String content) async {
+    //判断是否登录
+    if (!isLogin()) {
+      showLoginDialog();
+      return;
+    }
+    // 判断是否发送中
+    if (isSendComment) {
+      EasyLoading.showError('评论正在发送中，请稍等');
+      return;
+    }
+    //判断评论内容是否为空
+    if (content.isEmpty) {
+      EasyLoading.showError('评论内容不能为空');
+      return;
+    }
+    //判断评论内容是否超过200字
+    if (content.length > 200) {
+      EasyLoading.showError('评论内容不能超过200字');
+      return;
+    }
+    //发送评论
+    setState(() {
+      isSendComment = true;
+    });
+    try {
+      final request = PostCommentRequest(content: content, videoId: uerId);
+      api.interact.postComment(request).then((resp) {
+        if (resp.code == 2000) {
+          EasyLoading.showSuccess('评论成功');
+          _log.i('评论成功');
+        }
+        if (resp.code == 4000) {
+          EasyLoading.showError(resp.msg);
+          _log.i('评论失败', resp.msg);
+        }
+      });
+    } catch (e) {
+      _log.e('评论异常', e);
+    }
+
+    setState(() {
+      isSendComment = false;
+    });
+  }
+
+  /// 评论加载动画组件
+  Widget _buildCommentLoading() {
+    return Column(
+      children: [
+        const SizedBox(height: 30),
+        SizedBox(
+          width: WH.w(context),
+          height: 150,
+          child: Center(
+            child: Column(
+              children: [
+                const SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 4,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '评论加载中...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).primaryColor,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 获取评论列表
+  Future<void> _getCommentList() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      _log.i('获取评论列表');
+      // EasyLoading.show(status: '评论加载中...'); 单独在评论列表页面显示
+      final request = CommentRequest(videoId: videoId, lastTime: lastTime);
+      _log.i('获取评论列表参数', request.toJson());
+      api.interact.getComment(request).then((resp) {
+        if (resp.code == 2000) {
+          // EasyLoading.showSuccess('获取评论列表成功');
+          _log.i('获取评论列表成功${resp.data!.commentInfo}');
+          setState(() {
+            commentList.addAll(resp.data!.commentInfo);
+            lastTime = resp.data?.nextTime;
+            if (lastTime == -1) {
+              noMore = true;
+            } else {
+              noMore = false;
+            }
+          });
+
+          setState(() {
+            isLoading = false;
+          });
+        }
+        if (resp.code == 4000) {
+          // EasyLoading.showError(resp.msg);
+          _log.i('获取评论列表失败', resp.msg);
+          setState(() {
+            isLoading = false;
+          });
+        }
+      });
+    } catch (e) {
+      _log.e('获取评论列表异常', e);
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 }
 
+/// 构建同样按钮
 Widget _buildButton(BuildContext context, Text text, Icon icon, Function() onPressed) {
   return Padding(
     padding: const EdgeInsets.all(5.0),
@@ -453,12 +616,10 @@ Widget _buildButton(BuildContext context, Text text, Icon icon, Function() onPre
   );
 }
 
+/// 构建不同样按钮
 Text _buildTextAndNum(String text, int howMany, {TextStyle? textStyle}) {
   if (textStyle != null) {
     return Text("$text: $howMany", style: textStyle);
   }
   return Text("$text: $howMany");
 }
-
-/// 发送评论
-sendMsg(String text) async {}

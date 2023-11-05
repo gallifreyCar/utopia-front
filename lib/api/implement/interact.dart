@@ -28,7 +28,10 @@ class InteractApiImpl extends InteractApi {
 
   @override
   Future<CommentResponse> getComment(CommentRequest request) async {
-    final resp = await dio.get('/api/v1/interact/comment/list', data: request.toJson());
+    final resp = await dio.get('/api/v1/interact/comment/list', queryParameters: {
+      "last_time": request.lastTime,
+      "video_id": request.videoId,
+    });
     return CommentResponse.fromJson(resp.data);
   }
 
