@@ -108,9 +108,10 @@ class UserPageState extends State<UserPage> {
     return Column(
       children: [
         buildTitle(bigIcon, bigTitle),
+        SizedBox(height: 20),
         Container(
           width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
-          height: WH.personHeight(context) - 100,
+          height: WH.personHeight(context) - 120,
           child: userInfoList.isEmpty
               ? const Center(
                   child: Text(
@@ -186,10 +187,10 @@ class UserPageState extends State<UserPage> {
       height: WH.personWith(context) / 6,
       child: Column(
         children: [
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           //头像
           CircleAvatar(
-            radius: 40,
+            radius: 30,
             backgroundImage: NetworkImage(userInfoList[index].avatar),
             backgroundColor: Colors.white,
           ),

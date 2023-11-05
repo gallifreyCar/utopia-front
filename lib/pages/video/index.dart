@@ -112,40 +112,42 @@ class _IndexPageState extends State<IndexPage> {
           // 0.体育 1.动漫 2.游戏 3.音乐
           Container(
             width: MediaQuery.of(context).size.width * 0.25,
-            child: Row(
-              children: [
-                TextButton(
-                    onPressed: () {
-                      pt = PageType.videoList;
-                      _onRefresh(0, 0);
-                    },
-                    child: Text('热门', style: textStyle)),
-                TextButton(
-                    onPressed: () {
-                      _onRefresh(0, 0);
-                    },
-                    child: Text('推荐', style: textStyle)),
-                TextButton(
-                    onPressed: () {
-                      _onRefresh(1, 0);
-                    },
-                    child: Text('体育', style: textStyle)),
-                TextButton(
-                    onPressed: () {
-                      _onRefresh(2, 0);
-                    },
-                    child: Text('动漫', style: textStyle)),
-                TextButton(
-                    onPressed: () {
-                      _onRefresh(3, 0);
-                    },
-                    child: Text('游戏', style: textStyle)),
-                TextButton(
-                    onPressed: () {
-                      _onRefresh(4, 0);
-                    },
-                    child: Text('音乐', style: textStyle)),
-              ],
+            child: Center(
+              child: Row(
+                children: [
+                  TextButton(
+                      onPressed: () {
+                        pt = PageType.videoList;
+                        _onRefresh(0, 0);
+                      },
+                      child: Text('热门', style: textStyle)),
+                  TextButton(
+                      onPressed: () {
+                        _onRefresh(0, 0);
+                      },
+                      child: Text('推荐', style: textStyle)),
+                  TextButton(
+                      onPressed: () {
+                        _onRefresh(1, 0);
+                      },
+                      child: Text('体育', style: textStyle)),
+                  TextButton(
+                      onPressed: () {
+                        _onRefresh(2, 0);
+                      },
+                      child: Text('动漫', style: textStyle)),
+                  TextButton(
+                      onPressed: () {
+                        _onRefresh(3, 0);
+                      },
+                      child: Text('游戏', style: textStyle)),
+                  TextButton(
+                      onPressed: () {
+                        _onRefresh(4, 0);
+                      },
+                      child: Text('音乐', style: textStyle)),
+                ],
+              ),
             ),
           )
         ]);
@@ -178,7 +180,7 @@ class _IndexPageState extends State<IndexPage> {
     if (GlobalObjects.storageProvider.user.jwtToken != null) {
       return Container(
         width: MediaQuery.of(context).size.width * 0.28,
-        child: Row(children: [
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Row(
             children: [
               CircleAvatar(
