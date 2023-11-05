@@ -254,7 +254,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                             ),
                             subtitle: Text(
                               commentList[index].content,
-                              maxLines: 3,
+                              maxLines: 6,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize,
@@ -469,7 +469,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
   Widget build(BuildContext context) {
     _log.i("build ${widget.text}");
     return Container(
-      color: Theme.of(context).secondaryHeaderColor,
+      color: Theme.of(context).primaryColorLight,
       child: _buildMainRow(),
     );
   }

@@ -408,12 +408,26 @@ class _IndexPageState extends State<IndexPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 作者头像和昵称
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 15,
+                      backgroundImage: NetworkImage(searchVideoInfoList[index].author.avatar),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(searchVideoInfoList[index].author.nickname),
+                  ],
+                ),
+                //标题
+                const SizedBox(height: 10),
                 Text(
                   searchVideoInfoList[index].title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
+                //描述
                 const SizedBox(height: 10),
                 Text(
                   searchVideoInfoList[index].describe,

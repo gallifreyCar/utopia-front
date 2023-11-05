@@ -56,7 +56,7 @@ class UserPageState extends State<UserPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).secondaryHeaderColor,
+      backgroundColor: Theme.of(context).primaryColorLight,
       appBar: buildAppBar(),
       body: Center(
         child: Container(
