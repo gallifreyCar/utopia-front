@@ -128,10 +128,10 @@ class UserPageState extends State<UserPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildCardActions(index),
-                            _buildCardActions(index + 1),
-                            _buildCardActions(index + 2),
-                            _buildCardActions(index + 3),
+                            _buildCardActions(index * 4),
+                            _buildCardActions(index * 4 + 1),
+                            _buildCardActions(index * 4 + 2),
+                            _buildCardActions(index * 4 + 3),
                           ],
                         ));
                   }),
