@@ -27,8 +27,8 @@ class InteractApiImpl extends InteractApi {
   }
 
   @override
-  Future<CommentResponse> getComment(CommentRequest request) {
-    // TODO: implement getComment
-    throw UnimplementedError();
+  Future<CommentResponse> getComment(CommentRequest request) async {
+    final resp = await dio.get('/api/v1/interact/comment/list', data: request.toJson());
+    return CommentResponse.fromJson(resp.data);
   }
 }
