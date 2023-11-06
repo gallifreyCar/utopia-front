@@ -38,12 +38,6 @@ class UserPageState extends State<UserPage> {
     TextStyle textStyle = TextStyle(color: secColor, fontSize: Theme.of(context).primaryTextTheme.titleLarge?.fontSize);
     return AppBar(backgroundColor: Theme.of(context).primaryColor, actions: [
       const SizedBox(width: 5),
-      //投稿
-      TextButton.icon(
-        onPressed: () {},
-        icon: Icon(Icons.upload_file, color: secColor),
-        label: Text('投稿', style: textStyle),
-      ),
       TextButton.icon(
           onPressed: () {
             Navigator.pop(context);
@@ -74,7 +68,7 @@ class UserPageState extends State<UserPage> {
     return Row(
       children: [
         _buildUserInfoAndButton(),
-        Container(
+        SizedBox(
           width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
           child: _buildContentColumn(),
         )
@@ -98,7 +92,7 @@ class UserPageState extends State<UserPage> {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(title, style: TextStyle(color: Colors.white, fontSize: 32)),
+            child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 32)),
           ),
         ],
       ),
@@ -110,8 +104,8 @@ class UserPageState extends State<UserPage> {
     return Column(
       children: [
         buildTitle(bigIcon, bigTitle),
-        SizedBox(height: 20),
-        Container(
+        const SizedBox(height: 20),
+        SizedBox(
           width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
           height: WH.personHeight(context) - 120,
           child: userInfoList.isEmpty
@@ -149,7 +143,6 @@ class UserPageState extends State<UserPage> {
       return Container();
     }
     return CardActions(
-        child: _buildUserInfoCard(index),
         width: WH.personWith(context) / 6,
         height: WH.personWith(context) / 6,
         backgroundColor: Theme.of(context).primaryColor,
@@ -171,7 +164,8 @@ class UserPageState extends State<UserPage> {
               ),
               label: "查看作品",
               onPress: () {}),
-        ]);
+        ],
+        child: _buildUserInfoCard(index));
   }
 
   /// 构建个人信息卡片
@@ -239,9 +233,10 @@ class UserPageState extends State<UserPage> {
                         //修改头像
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.cached_outlined),
                             onPressed: () {},
-                            child: const Text('修改头像'),
+                            label: const Text('更新'),
                           ),
                         ),
                         //用户名和昵称
@@ -317,7 +312,6 @@ class UserPageState extends State<UserPage> {
                 style: textStyle,
               ),
             ),
-            IconButton(onPressed: () {}, icon: Icon(Icons.edit, color: Theme.of(context).primaryColor)),
           ],
         ),
       ],
