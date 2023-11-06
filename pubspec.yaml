@@ -57,7 +57,7 @@ flutter:
   fonts:
     - family: MyCustomFont
       fonts:
-        - asset: fonts/msyh.ttc
-        - asset: fonts/msyhbd.ttc
-        - asset: fonts/msyhl.ttc
+        - asset: fonts/my.subset.ttc
+        - asset: fonts/mybd.subset.ttc
+        - asset: fonts/myl.subset.ttc
 
