@@ -586,15 +586,22 @@ class UserPageState extends State<UserPage> {
 
   ///更新用户信息
   Future<void> updateUserInfo() async {
+    //-3. 如果都没有更改，直接返回
+    if (nicknameController.text == GlobalObjects.storageProvider.user.nickname && uploadAvatarFile == null) {
+      EasyLoading.showInfo('没有更改任何信息');
+      return;
+    }
     EasyLoading.show(status: '信息更新中...', maskType: EasyLoadingMaskType.black);
-
-    //-1. 如果昵称更改了，先修改昵称
+    //-2. 如果昵称更改了，先修改昵称
     if (nicknameController.text != GlobalObjects.storageProvider.user.nickname) {
       try {
         final api = GlobalObjects.apiProvider;
         final updateNickname = await api.user.updateNickname(nicknameController.text);
         if (updateNickname.code == 2000) {
           _log.d('更新昵称成功');
+          setState(() {
+            GlobalObjects.storageProvider.user.nickname = nicknameController.text;
+          });
         }
         if (updateNickname.code == 4000) {
           EasyLoading.showError('更新昵称失败，请稍后再试');
@@ -606,6 +613,13 @@ class UserPageState extends State<UserPage> {
         EasyLoading.dismiss();
         return;
       }
+    }
+
+    //-1. 如果没有选则头像文件，直接返回
+    if (uploadAvatarFile == null) {
+      EasyLoading.showSuccess('信息更新成功');
+      _log.d('信息更新成功');
+      return;
     }
 
     //0.校验表单
