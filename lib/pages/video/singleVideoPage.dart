@@ -36,6 +36,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
   int favoriteCount = 240;
   int fansCount = 0;
   int videoCount = 0;
+  int commentCount = 0;
 
   // 按钮是否可用
   bool isLikeButtonEnable = true;
@@ -78,6 +79,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
     videoCount = widget.videoInfo.author.videoCount;
     likeCount = widget.videoInfo.likeCount;
     favoriteCount = widget.videoInfo.favoriteCount;
+    commentCount = widget.videoInfo.commentCount;
 
     // 个人信息
     avatar = widget.videoInfo.author.avatar; //头像
@@ -124,8 +126,8 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                     isLike ? const Icon(Icons.thumb_up) : const Icon(Icons.thumb_up_off_alt), like),
                 _buildButton(context, _buildTextAndNum("收藏", favoriteCount),
                     isFavorite ? const Icon(Icons.star) : const Icon(Icons.star_border), collect),
-                _buildButton(context, const Text("评论 120"), const Icon(Icons.comment), () {}),
-                _buildButton(context, const Text("分享"), const Icon(Icons.share), () {}),
+                _buildButton(context, _buildTextAndNum("评论", commentCount), const Icon(Icons.comment), () {}),
+                // _buildButton(context, const Text("分享"), const Icon(Icons.share), () {}),
               ],
             ),
           ),

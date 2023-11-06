@@ -34,6 +34,7 @@ class VideoApiMock extends VideoApi {
                 isFavorite: false,
                 likeCount: 120,
                 favoriteCount: 0,
+                commentCount: 120,
               ),
               VideoInfo(
                 id: 7,
@@ -58,6 +59,7 @@ class VideoApiMock extends VideoApi {
                 isFavorite: false,
                 likeCount: 120,
                 favoriteCount: 230,
+                commentCount: 10,
               ),
               VideoInfo(
                 id: 10,
@@ -82,6 +84,7 @@ class VideoApiMock extends VideoApi {
                 isFavorite: false,
                 likeCount: 2,
                 favoriteCount: 1,
+                commentCount: 0,
               ),
             ],
             nextTime: 1698470604033,

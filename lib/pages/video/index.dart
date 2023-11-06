@@ -960,6 +960,7 @@ class _IndexPageState extends State<IndexPage> {
       EasyLoading.showError('存储服务异常，请稍后再试');
       return;
     }
+
     //超时处理
     Future.delayed(const Duration(seconds: 30), () {
       if (mounted) {
