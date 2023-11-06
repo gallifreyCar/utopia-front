@@ -539,10 +539,9 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
         if (resp.code == 2000) {
           // EasyLoading.showSuccess('评论成功');
           _log.i('评论成功');
-          //评论数+1
           //评论增加一条
           setState(() {
-            // commentCount = commentCount + 1;
+            commentCount = commentCount + 1;
             commentList.add(CommentInfo(
               nickname: GlobalObjects.storageProvider.user.nickname ?? '',
               avatar: GlobalObjects.storageProvider.user.avatar ?? '',
