@@ -44,7 +44,7 @@ dependencies:
   responsive_builder: ^0.7.0
   emoji_picker_flutter: ^1.6.1
   card_actions: ^0.0.1
-
+  uuid: ^3.0.7
 
 
 

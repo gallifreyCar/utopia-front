@@ -77,3 +77,61 @@ class KodoTokenData {
     };
   }
 }
+
+/// 上传视频回调的响应体
+// {"code":2000,"data":{"image_url":"https://kodo.tbghg.top/70738d7f-02.png"},"msg":"ok"}
+class UploadFileCallbackResponse {
+  final int code;
+  final String msg;
+  final UploadFileCallbackData? data;
+
+  UploadFileCallbackResponse({
+    required this.code,
+    required this.msg,
+    this.data,
+  });
+
+  factory UploadFileCallbackResponse.fromJson(Map<String, dynamic> json) {
+    if (json['data'] == null) {
+      return UploadFileCallbackResponse(
+        code: json['code'],
+        msg: json['msg'],
+      );
+    }
+    return UploadFileCallbackResponse(
+      code: json['code'],
+      msg: json['msg'],
+      data: UploadFileCallbackData.fromJson(json['data']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    if (data == null) {
+      return {
+        'code': code,
+        'msg': msg,
+      };
+    }
+    return {'code': code, 'msg': msg, 'data': data!.toJson()};
+  }
+}
+
+class UploadFileCallbackData {
+  final String imageUrl;
+
+  UploadFileCallbackData({
+    required this.imageUrl,
+  });
+
+  factory UploadFileCallbackData.fromJson(Map<String, dynamic> json) {
+    return UploadFileCallbackData(
+      imageUrl: json['image_url'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'image_url': imageUrl,
+    };
+  }
+}

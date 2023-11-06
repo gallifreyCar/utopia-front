@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flukit/flukit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:universal_html/html.dart' as html;
+import 'package:utopia_front/api/model/kodoFile.dart';
 import 'package:utopia_front/global/index.dart';
 import 'package:utopia_front/pages/video/singleVideoPage.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../api/model/video.dart';
 import '../../util/flash.dart';
@@ -51,6 +56,11 @@ class _IndexPageState extends State<IndexPage> {
 
   // 投稿表单是否显示
   bool showContributeForm = false;
+  String uploadVideoUrl = "";
+  String uploadVideoCoverUrl = "";
+  html.File? uploadVideoFile;
+  html.File? uploadVideoCoverFile;
+  String callbackVideoCoverUrl = "none";
 
   @override
   void initState() {
@@ -550,10 +560,10 @@ class _IndexPageState extends State<IndexPage> {
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 10),
                 //描述
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.15,
+                  height: MediaQuery.of(context).size.height * 0.12,
                   width: MediaQuery.of(context).size.width * 0.2,
                   child: TextFormField(
                     controller: describeController,
@@ -571,34 +581,79 @@ class _IndexPageState extends State<IndexPage> {
                     },
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 //封面
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    //选择文件上传
+                    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+                    uploadInput.multiple = false; // 是否允许选择多文件
+                    uploadInput.draggable = true; // 是否允许拖拽上传
+                    uploadInput.click(); // 打开文件选择对话框
+
+                    uploadInput.onChange.listen((event) {
+                      // 选择完成 判断类型
+                      if (uploadInput.files?.first.type != 'image/jpeg' &&
+                          uploadInput.files?.first.type != 'image/png') {
+                        EasyLoading.showError('请选择图片文件（jpg/png）');
+                        return;
+                      }
+                      setState(() {
+                        // 选择完成
+                        uploadVideoCoverFile = uploadInput.files?.first;
+                        _log.i('文件大小：${uploadVideoCoverFile?.size}');
+                        uploadVideoCoverUrl = html.Url.createObjectUrl(uploadVideoCoverFile);
+                      });
+                    });
+                  },
                   child: const Text('选择封面（可选）'),
                 ),
-                const SizedBox(height: 30),
+                //封面预览
+                _builtNullText(uploadVideoCoverFile?.name),
+
+                const SizedBox(height: 10),
                 //视频
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: const Text('选择视频（必填）'),
-                    ),
-                  ],
+                ElevatedButton(
+                  onPressed: () {
+                    //选择文件上传
+                    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+                    uploadInput.multiple = false; // 是否允许选择多文件
+                    uploadInput.draggable = true; // 是否允许拖拽上传
+                    uploadInput.click(); // 打开文件选择对话框
+
+                    uploadInput.onChange.listen((event) {
+                      // 选择完成 判断类型
+                      if (uploadInput.files?.first.type != 'video/mp4') {
+                        EasyLoading.showError('请选择mp4格式的视频');
+                        return;
+                      }
+
+                      setState(() {
+                        // 选择完成
+                        uploadVideoFile = uploadInput.files?.first;
+                        _log.i('文件大小：${uploadVideoFile?.size}');
+                        uploadVideoUrl = html.Url.createObjectUrl(uploadVideoFile);
+                      });
+                    });
+                  },
+                  child: const Text('选择视频（必选）'),
                 ),
-                const SizedBox(height: 30),
+                //视频预览
+                _builtNullText(uploadVideoFile?.name),
+                const SizedBox(height: 20),
                 //视频类型选择列表 体育 动漫 游戏 音乐  RadioListTile单选
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.1,
+                  width: MediaQuery.of(context).size.width * 0.07,
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const Text(
                         '视频类型(必选)',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       RadioListTile(
-                        title: Text('体育'),
+                        title: const Text('体育'),
                         value: 0,
                         groupValue: selectedValue,
                         onChanged: (value) {
@@ -608,7 +663,7 @@ class _IndexPageState extends State<IndexPage> {
                         },
                       ),
                       RadioListTile(
-                        title: Text('动漫'),
+                        title: const Text('动漫'),
                         value: 1,
                         groupValue: selectedValue,
                         onChanged: (value) {
@@ -618,7 +673,7 @@ class _IndexPageState extends State<IndexPage> {
                         },
                       ),
                       RadioListTile(
-                        title: Text('游戏'),
+                        title: const Text('游戏'),
                         value: 2,
                         groupValue: selectedValue,
                         onChanged: (value) {
@@ -628,7 +683,7 @@ class _IndexPageState extends State<IndexPage> {
                         },
                       ),
                       RadioListTile(
-                        title: Text('音乐'),
+                        title: const Text('音乐'),
                         value: 3,
                         groupValue: selectedValue,
                         onChanged: (value) {
@@ -641,14 +696,28 @@ class _IndexPageState extends State<IndexPage> {
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 //提交
-                ElevatedButton(
-                  onPressed: () {
-                    _log.i('提交投稿');
-                    // _contributeVideo(titleController.text, describeController.text);
-                  },
-                  child: const Text('提交'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _log.i('提交投稿');
+                        uploadFile();
+                        // _contributeVideo(titleController.text, describeController.text);
+                      },
+                      child: const Text('提交'),
+                    ),
+                    const SizedBox(width: 20),
+                    ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            showContributeForm = false;
+                          });
+                        },
+                        child: const Text('返回')),
+                  ],
                 ),
               ],
             ),
@@ -657,49 +726,166 @@ class _IndexPageState extends State<IndexPage> {
       ),
     );
   }
-}
 
-//选择文件 获取token 上传视频
-// Future<void> pickFile(BuildContext context) async {
-//   //1.获取token
-//   final api = GlobalObjects.apiProvider;
-//   final qiniuToken = await api.upload.getKodoToken();
-//   if (qiniuToken.code == 20000) {
-//     _log.d('getKodoToken: ${qiniuToken.data!.token}');
-//   }
-//   if (qiniuToken.code == 4000) {
-//     showBasicFlash(context, Text('获取七牛云存储token失败: ${qiniuToken.msg}'));
-//     _log.e('获取七牛云存储token失败: ${qiniuToken.msg}');
-//     return;
-//   }
-//   //2.选择文件上传
-//
-//   html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-//   uploadInput.multiple = false; // 是否允许选择多文件
-//   uploadInput.draggable = true; // 是否允许拖拽上传
-//   uploadInput.click(); // 打开文件选择对话框
-//
-//   uploadInput.onChange.listen((event) {
-//     // 选择完成
-//     html.File? file = uploadInput.files?.first;
-//     _log.d('文件大小：${file?.size}');
-//
-//     if (file != null) {
-//       html.FormData formData = html.FormData();
-//       formData.appendBlob('file', file.slice(), file.name);
-//       formData.append('token', qiniuToken.data!.token);
-//       formData.append('key', 'tesljas35.png');
-//       //"x:file_type": "COVER",
-//       formData.append('x:file_type', "AVATAR");
-//       formData.append('x:uid', '9');
-//
-//       // 上传文件到服务器
-//       var request = html.HttpRequest();
-//       request.open('POST', 'http://up-cn-east-2.qiniup.com');
-//       request.send(formData);
-//       request.onLoadEnd.listen((event) {
-//         _log.d('上传结果：${request.responseText}');
-//       });
-//     }
-//   });
-// }
+  Widget _builtNullText(String? text) {
+    return text == null
+        ? SizedBox(
+            width: MediaQuery.of(context).size.width * 0.3,
+          )
+        : SizedBox(
+            width: MediaQuery.of(context).size.width * 0.3,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  text,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          );
+  }
+
+  ///获取token 上传视频
+  Future<void> uploadFile() async {
+    //0.校验
+    if (titleController.text.isEmpty || describeController.text.isEmpty) {
+      EasyLoading.showError('标题或描述不能为空');
+      return;
+    }
+    if (uploadVideoFile == null) {
+      EasyLoading.showError('请选择视频文件');
+      return;
+    }
+    if (uploadVideoFile!.size > 1024 * 1024 * 1024) {
+      EasyLoading.showError('视频文件大小不能超过1G');
+      return;
+    }
+    if (uploadVideoCoverFile != null && uploadVideoCoverFile!.size > 1024 * 1024 * 1024) {
+      EasyLoading.showError('封面文件大小不能超过1G');
+      return;
+    }
+
+    EasyLoading.show(status: '视频上传中...', maskType: EasyLoadingMaskType.black);
+    //1.获取token
+    final api = GlobalObjects.apiProvider;
+    final qiniuToken = await api.upload.getKodoToken();
+    if (qiniuToken.code == 20000) {
+      _log.d('getKodoToken: ${qiniuToken.data!.token}');
+    }
+    if (qiniuToken.code == 4000) {
+      EasyLoading.showError('存储服务异常，请稍后再试');
+      _log.e('获取七牛云存储token失败: ${qiniuToken.msg}');
+      EasyLoading.dismiss();
+      return;
+    }
+
+    //2.上传文件
+    //2.2如果封面存在，先上传封面，获得封面url
+    if (uploadVideoCoverFile != null) {
+      int coverUploadResult = await uploadVideoCover(qiniuToken); //上传封面
+      if (coverUploadResult == 2000) {
+        _log.i('封面上传成功');
+      } else if (coverUploadResult == 4000) {
+        EasyLoading.showError('封面上传失败');
+        return;
+      } else if (coverUploadResult == 6000) {
+        _log.i('封面上传异常');
+        EasyLoading.showError('存储服务异常，请稍后再试');
+        return;
+      }
+    }
+
+    //2.2如果封面不存在，就拿头像当封面；直接填上传参数，上传视频
+    // 表单
+    html.FormData formData = html.FormData();
+    formData.appendBlob('file', uploadVideoFile!.slice(), uploadVideoFile!.name);
+    formData.append('token', qiniuToken.data!.token);
+    // 生成uuid,截取11位 拼接文件后缀作为key
+    final uuid = Uuid().v4().substring(0, 11);
+    formData.append('key', '$uuid.mp4');
+    formData.append('x:file_type', "VIDEO");
+    // 封面url 如果封面存在，就用封面url，如果不存在，就用头像url
+    if (callbackVideoCoverUrl != "none") {
+      formData.append('x:cover_url', callbackVideoCoverUrl!);
+    } else {
+      formData.append('x:cover_url', GlobalObjects.storageProvider.user.avatar ?? "");
+    }
+    formData.append('x:video_type_id', selectedValue.toString());
+    formData.append('x:title', titleController.text);
+    formData.append('x:describe', describeController.text);
+    formData.append('x:uid', GlobalObjects.storageProvider.user.uid.toString());
+    _log.i('上传视频参数：${formData.toString()}');
+    // 上传
+    try {
+      var request = html.HttpRequest();
+      request.open('POST', 'http://up-cn-east-2.qiniup.com');
+      request.send(formData);
+      request.onLoad.listen((event) {
+        UploadFileCallbackResponse response = UploadFileCallbackResponse.fromJson(json.decode(request.responseText!));
+        if (response.code == 2000) {
+          _log.i(request.responseText);
+          _log.i('视频上传成功');
+          EasyLoading.showSuccess('上传成功');
+          Navigator.pushNamed(context, "/video_detail", arguments: response.data!);
+          setState(() {
+            showContributeForm = false;
+          });
+        } else {
+          EasyLoading.showError('上传失败');
+          _log.e('视频上传失败: ${request.responseText}');
+          return;
+        }
+      });
+    } catch (e) {
+      _log.e('上传视频异常：$e');
+      EasyLoading.showError('存储服务异常，请稍后再试');
+      return;
+    }
+  }
+
+  //上传封面
+  Future<int> uploadVideoCover(GetKodoTokenResponse qiniuToken) async {
+    int code = 0;
+    // 获取文件扩展名
+    String fileExtension = 'jpg'; // 默认扩展名
+    if (uploadVideoCoverFile!.name.toLowerCase().endsWith('.png')) {
+      fileExtension = 'png';
+    }
+
+    // 表单
+    html.FormData formData = html.FormData();
+    formData.appendBlob('file', uploadVideoCoverFile!, uploadVideoCoverFile!.name);
+    formData.append('token', qiniuToken.data!.token);
+    // 生成uuid,截取11位 拼接文件后缀作为key
+    final uuid = const Uuid().v4().substring(0, 11);
+    formData.append('key', '$uuid.$fileExtension');
+    formData.append('x:file_type', "COVER");
+
+    // 上传
+    try {
+      var request = html.HttpRequest();
+      request.open('POST', 'http://up-cn-east-2.qiniup.com');
+      request.send(formData);
+      request.onLoad.listen((event) {
+        UploadFileCallbackResponse response = UploadFileCallbackResponse.fromJson(json.decode(request.responseText!));
+        if (response.code == 2000) {
+          callbackVideoCoverUrl = response.data!.imageUrl;
+          _log.i(request.responseText);
+          code = 2000;
+          _log.i('封面上传成功');
+          return;
+        } else {
+          code = 4000;
+          _log.e('封面上传失败: ${request.responseText}');
+          return;
+        }
+      });
+    } catch (e) {
+      _log.e('封面上传异常：$e');
+      code = 6000;
+    }
+    return code;
+  }
+}
