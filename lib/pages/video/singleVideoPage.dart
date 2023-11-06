@@ -307,6 +307,12 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
 
   ///follow 关注/取消关注
   follow() async {
+    //自己不能关注自己
+    if (uerId == GlobalObjects.storageProvider.user.uid) {
+      EasyLoading.showToast("不能关注自己");
+      return;
+    }
+
     //判断是否登录 没有登录则弹出登录框 并返回
     if (!isLogin()) {
       showLoginDialog();

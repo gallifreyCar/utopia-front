@@ -398,4 +398,7 @@ class UserPageState extends State<UserPage> {
       return;
     }
   }
+
+  ///更新信息表单
+  // Widget _buildUpdateInfoForm() {}
 }
