@@ -50,4 +50,13 @@ class VideoApiImpl extends VideoApi {
     });
     return HotVideoResponse.fromJson(resp.data);
   }
+
+  @override
+  Future<VideoResponse> getFavoriteVideoList(SomeoneVideoRequest request) async {
+    final resp = await dio.get('/api/v1/video/favorite', queryParameters: {
+      "user_id": request.userId,
+      "last_time": request.lastTime,
+    });
+    return VideoResponse.fromJson(resp.data);
+  }
 }

@@ -9,6 +9,7 @@ import 'package:utopia_front/global/index.dart';
 import 'package:utopia_front/pages/video/singleVideoPage.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../api/model/base.dart';
 import '../../api/model/video.dart';
 import '../../util/flash.dart';
 
@@ -292,23 +293,24 @@ class _IndexPageState extends State<IndexPage> {
   }
 
   /// 请求视频方法
-  Future<void> _onRefresh(int videoType, int myNextTime) async {
+  Future<void> _onRefresh(int videoType, int nextTime) async {
     setState(() {
-      if (myNextTime == 0) {
+      if (nextTime == 0) {
         videoInfoList.clear();
       }
     });
+
     EasyLoading.show(status: '数据加载中...');
     final api = GlobalObjects.apiProvider;
-    final request = VideoRequest(lastTime: myNextTime, videoType: videoType);
+    final request = VideoRequest(lastTime: nextTime, videoType: videoType);
     _log.i('请求视频列表', request.toJson());
     api.video.getVideoList(request).then((videoResponse) {
       EasyLoading.dismiss();
-      if (videoResponse.code == 2000) {
+      if (videoResponse.code == successCode) {
         _log.i('请求成功');
         setState(() {
           //如果是切换分类，那么myNextTime就是0 清空列表
-          if (myNextTime == 0) {
+          if (nextTime == 0) {
             videoInfoList.clear();
           }
           //没有更多视频了
@@ -322,7 +324,7 @@ class _IndexPageState extends State<IndexPage> {
           nextTime = videoResponse.data!.nextTime;
         });
       }
-      if (videoResponse.code == 4000) {
+      if (videoResponse.code == errorCode) {
         showBasicFlash(context, const Text("请求失败"), duration: const Duration(seconds: 2));
         _log.i('请求失败', videoResponse.msg);
       }
@@ -340,14 +342,14 @@ class _IndexPageState extends State<IndexPage> {
       final request = VideoByVideoIdRequest(videoId: video);
       _log.i('请求视频信息', request.toJson());
       final resp = await api.video.getVideoByVideoId(request);
-      if (resp.code == 2000) {
+      if (resp.code == successCode) {
         EasyLoading.dismiss();
         _log.i('请求成功');
         setState(() {
           videoInfoList.add(resp.videoInfo!);
         });
       }
-      if (resp.code == 4000) {
+      if (resp.code == errorCode) {
         EasyLoading.showInfo('请求失败');
         _log.i('请求失败', resp.msg);
       }
@@ -358,23 +360,24 @@ class _IndexPageState extends State<IndexPage> {
   }
 
   ///通过用户id获取用户的视频列表的方法
-  Future<void> _getVideoListByUid(int uid, int myNextTime) async {
+  Future<void> _getVideoListByUid(int uid, int nextTime) async {
     setState(() {
-      if (myNextTime == 0) {
+      if (nextTime == 0) {
         videoInfoList.clear();
       }
     });
+
     EasyLoading.show(status: '数据加载中...');
     final api = GlobalObjects.apiProvider;
-    final request = SomeoneVideoRequest(lastTime: myNextTime, userId: uid);
+    final request = SomeoneVideoRequest(lastTime: nextTime, userId: uid);
     _log.i('请求视频列表', request.toJson());
     api.video.getVideoListByUserId(request).then((resp) {
       EasyLoading.dismiss();
-      if (resp.code == 2000) {
+      if (resp.code == successCode) {
         _log.i('请求成功');
         setState(() {
           //如果是重新，那么myNextTime就是0 清空列表
-          if (myNextTime == 0) {
+          if (nextTime == 0) {
             videoInfoList.clear();
           }
           //没有更多视频了
@@ -388,7 +391,7 @@ class _IndexPageState extends State<IndexPage> {
           nextTime = resp.data!.nextTime;
         });
       }
-      if (resp.code == 4000) {
+      if (resp.code == errorCode) {
         showBasicFlash(context, const Text("请求失败"), duration: const Duration(seconds: 2));
         _log.i('请求失败', resp.msg);
       }
@@ -406,7 +409,7 @@ class _IndexPageState extends State<IndexPage> {
     _log.i('请求视频列表', request.toJson());
     api.video.getHotVideoList(request).then((videoResponse) {
       EasyLoading.dismiss();
-      if (videoResponse.code == 2000) {
+      if (videoResponse.code == successCode) {
         _log.i('请求成功');
         setState(() {
           //没有更多视频了
@@ -422,7 +425,7 @@ class _IndexPageState extends State<IndexPage> {
           version = videoResponse.data!.version;
         });
       }
-      if (videoResponse.code == 4000) {
+      if (videoResponse.code == errorCode) {
         EasyLoading.showError('请求失败');
         _log.i('请求失败', videoResponse.msg);
       }
@@ -638,13 +641,13 @@ class _IndexPageState extends State<IndexPage> {
       final request = SearchVideoRequest(search: searchContent);
       final videoResponse = await api.video.searchVideoList(request);
 
-      if (videoResponse.code == 2000) {
+      if (videoResponse.code == successCode) {
         _log.i('搜索视频成功', videoResponse.data);
         setState(() {
           searchVideoInfoList = videoResponse.data?.videoInfo ?? [];
         });
       }
-      if (videoResponse.code == 4000) {
+      if (videoResponse.code == errorCode) {
         EasyLoading.showError(videoResponse.msg);
         _log.i('搜索视频失败', videoResponse.msg);
       }
@@ -928,10 +931,10 @@ class _IndexPageState extends State<IndexPage> {
     //1.获取token
     final api = GlobalObjects.apiProvider;
     final qiniuToken = await api.upload.getKodoToken();
-    if (qiniuToken.code == 2000) {
+    if (qiniuToken.code == successCode) {
       _log.d('getKodoToken: ${qiniuToken.data!.token}');
     }
-    if (qiniuToken.code == 4000) {
+    if (qiniuToken.code == errorCode) {
       EasyLoading.showError('存储服务异常，请稍后再试');
       _log.e('获取七牛云存储token失败: ${qiniuToken.msg}');
       EasyLoading.dismiss();
@@ -942,9 +945,9 @@ class _IndexPageState extends State<IndexPage> {
     //2.2如果封面存在，先上传封面，获得封面url
     if (uploadVideoCoverFile != null) {
       int coverUploadResult = await uploadVideoCover(qiniuToken); //上传封面
-      if (coverUploadResult == 2000) {
+      if (coverUploadResult == successCode) {
         _log.i('封面上传成功');
-      } else if (coverUploadResult == 4000) {
+      } else if (coverUploadResult == errorCode) {
         EasyLoading.showError('封面上传失败');
         return;
       } else if (coverUploadResult == 6000) {
@@ -982,7 +985,7 @@ class _IndexPageState extends State<IndexPage> {
       request.send(formData);
       request.onLoad.listen((event) {
         UploadFileCallbackResponse response = UploadFileCallbackResponse.fromJson(json.decode(request.responseText!));
-        if (response.code == 2000) {
+        if (response.code == successCode) {
           _log.i(request.responseText);
           _log.i('视频上传成功');
           EasyLoading.showSuccess('投稿成功');
@@ -1037,14 +1040,14 @@ class _IndexPageState extends State<IndexPage> {
       request.send(formData);
       request.onLoad.listen((event) {
         UploadFileCallbackResponse response = UploadFileCallbackResponse.fromJson(json.decode(request.responseText!));
-        if (response.code == 2000) {
+        if (response.code == successCode) {
           callbackVideoCoverUrl = response.data!.imageUrl;
           _log.i(request.responseText);
-          code = 2000;
+          code = successCode;
           _log.i('封面上传成功');
           return;
         } else {
-          code = 4000;
+          code = errorCode;
           _log.e('封面上传失败: ${request.responseText}');
           return;
         }

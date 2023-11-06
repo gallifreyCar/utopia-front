@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:utopia_front/api/model/user.dart';
+import 'package:utopia_front/api/model/video.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../api/model/base.dart';
 import '../../api/model/kodoFile.dart';
 import '../../global/index.dart';
 import '../base.dart';
@@ -22,20 +24,40 @@ class UserPage extends StatefulWidget {
 class UserPageState extends State<UserPage> {
   String avatarUrl = GlobalObjects.storageProvider.user.avatar ?? ''; // 头像
   String nickname = GlobalObjects.storageProvider.user.nickname ?? '';
+
   //标题
   String bigTitle = '我的关注';
   IconData bigIcon = Icons.favorite;
+
   //提示
   String tips = '';
+
   //是否显示更新信息表单
   bool showUpdateInfoForm = false;
+
   //昵称输入框控制器
   late TextEditingController nicknameController;
+
   //头像文件
   html.File? uploadAvatarFile;
 
+  //全局日志
   final _log = GlobalObjects.logger;
+  final api = GlobalObjects.apiProvider;
+
+  //用户信息列表
   List<UserInfoData> userInfoList = [];
+
+  //视频信息列表
+  List<VideoInfo> videoInfoList = [];
+
+  //没有更多视频
+  bool noMore = false;
+  int nextTime = 0;
+
+  // cardMode
+  int cardMode = 0;
+
   @override
   void initState() {
     super.initState();
@@ -126,7 +148,17 @@ class UserPageState extends State<UserPage> {
       children: [
         buildTitle(bigIcon, bigTitle),
         const SizedBox(height: 20),
-        SizedBox(
+        _buildContentColumnChild(),
+      ],
+    );
+  }
+
+  /// 构建四种卡片
+  Widget _buildContentColumnChild() {
+    switch (cardMode) {
+      case 1:
+      case 0:
+        return SizedBox(
           width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
           height: WH.personHeight(context) - 120,
           child: userInfoList.isEmpty
@@ -146,23 +178,54 @@ class UserPageState extends State<UserPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildCardActions(index * 4),
-                            _buildCardActions(index * 4 + 1),
-                            _buildCardActions(index * 4 + 2),
-                            _buildCardActions(index * 4 + 3),
+                            _buildFollowAndFansCardActions(index * 4),
+                            _buildFollowAndFansCardActions(index * 4 + 1),
+                            _buildFollowAndFansCardActions(index * 4 + 2),
+                            _buildFollowAndFansCardActions(index * 4 + 3),
                           ],
                         ));
                   }),
-        ),
-      ],
-    );
+        );
+      case 2:
+      case 3:
+        return SizedBox(
+          width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
+          height: WH.personHeight(context) - 120,
+          child: videoInfoList.isEmpty
+              ? Center(
+                  child: Text(
+                  tips,
+                  style: const TextStyle(fontSize: 20),
+                ))
+              : ListView.builder(
+                  itemExtent: WH.personWith(context) / 5,
+                  itemCount: videoInfoList.length ~/ 4 + 1,
+                  itemBuilder: (context, index) {
+                    return Container(
+                        color: Colors.white,
+                        width: WH.personWith(context) - 0.15 * MediaQuery.of(context).size.width,
+                        height: WH.personHeight(context),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildFavouriteAndMyWorkCardActions(index * 4),
+                            _buildFavouriteAndMyWorkCardActions(index * 4 + 1),
+                            _buildFavouriteAndMyWorkCardActions(index * 4 + 2),
+                            _buildFavouriteAndMyWorkCardActions(index * 4 + 3),
+                          ],
+                        ));
+                  }),
+        );
+    }
+    return Container();
   }
 
-  /// 构建个人信息弹出框
-  Widget _buildCardActions(int index) {
+  /// 构建ListView中卡片内容  mode: 0.我的关注 1.我的粉丝 2.我的收藏 3，我的投稿
+  Widget _buildFollowAndFansCardActions(int index) {
     if (index >= userInfoList.length) {
       return Container();
     }
+
     return CardActions(
         width: WH.personWith(context) / 6,
         height: WH.personWith(context) / 6,
@@ -170,13 +233,21 @@ class UserPageState extends State<UserPage> {
         borderRadius: 20,
         actions: [
           //取消关注
-          CardActionButton(
-              icon: Icon(
-                Icons.no_accounts_sharp,
-                color: Theme.of(context).secondaryHeaderColor,
-              ),
-              label: "取消关注",
-              onPress: () {}),
+          cardMode == 0
+              ? CardActionButton(
+                  icon: Icon(
+                    Icons.no_accounts_sharp,
+                    color: Theme.of(context).secondaryHeaderColor,
+                  ),
+                  label: "取消关注",
+                  onPress: () {})
+              : CardActionButton(
+                  icon: Icon(
+                    Icons.handshake_outlined,
+                    color: Theme.of(context).secondaryHeaderColor,
+                  ),
+                  label: "互粉",
+                  onPress: () {}),
           // 查看作品
           CardActionButton(
               icon: Icon(
@@ -189,6 +260,75 @@ class UserPageState extends State<UserPage> {
         child: _buildUserInfoCard(index));
   }
 
+  /// 构建ListView中卡片内容  mode: 0.我的关注 1.我的粉丝 2.我的收藏 3，我的投稿
+  Widget _buildFavouriteAndMyWorkCardActions(int index) {
+    if (index >= userInfoList.length) {
+      return Container();
+    }
+
+    return CardActions(
+        width: WH.personWith(context) / 6,
+        height: WH.personWith(context) / 6,
+        backgroundColor: Theme.of(context).primaryColor,
+        borderRadius: 20,
+        actions: [
+          // 查看作品
+          CardActionButton(
+              icon: Icon(
+                Icons.video_collection,
+                color: Theme.of(context).secondaryHeaderColor,
+              ),
+              label: "查看作品",
+              onPress: () {}),
+        ],
+        child: _buildVideoInfoCard(index));
+  }
+
+  Widget _buildVideoInfoCard(index) {
+    if (index >= userInfoList.length) {
+      return Container();
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+          color: Theme.of(context).secondaryHeaderColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3), // changes position of shadow
+            ),
+          ]),
+      width: WH.personWith(context) / 6,
+      height: WH.personWith(context) / 6,
+      child: Column(
+        children: [
+          //封面
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              width: WH.personWith(context) / 6,
+              height: WH.personWith(context) / 8 - 40,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: DecorationImage(
+                  image: NetworkImage(videoInfoList[index].coverUrl),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+          //标题
+          _buildIconTextRow('作品: ${videoInfoList[index].title}', Icons.video_camera_back),
+          //作者
+          _buildIconTextRow('作者: ${videoInfoList[index].author}', Icons.person),
+        ],
+      ),
+    );
+  }
+
   /// 构建个人信息卡片
   Widget _buildUserInfoCard(int index) {
     if (index >= userInfoList.length) {
@@ -199,6 +339,14 @@ class UserPageState extends State<UserPage> {
       decoration: BoxDecoration(
         color: Theme.of(context).secondaryHeaderColor,
         borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 3), // changes position of shadow
+          ),
+        ],
       ),
       width: WH.personWith(context) / 6,
       height: WH.personWith(context) / 6,
@@ -279,6 +427,7 @@ class UserPageState extends State<UserPage> {
                   setState(() {
                     bigTitle = '我的关注';
                     bigIcon = Icons.favorite;
+                    cardMode = 0;
                   });
                   _requestFollowOrFansList(true);
                 }),
@@ -287,13 +436,29 @@ class UserPageState extends State<UserPage> {
                   setState(() {
                     bigTitle = '我的粉丝';
                     bigIcon = Icons.face_rounded;
+                    cardMode = 1;
                   });
                   _requestFollowOrFansList(false);
                 }),
                 //我的收藏
-                _buildButton('我的收藏', Icons.star, () {}),
+                _buildButton('我的收藏', Icons.star, () {
+                  onRefreshFavoriteVideo(GlobalObjects.storageProvider.user.uid!, nextTime);
+                  setState(() {
+                    bigTitle = '我的收藏';
+                    bigIcon = Icons.star;
+                    cardMode = 2;
+                    tips = '你还没有收藏任何视频哦~,快去把喜欢的视频收藏起来吧！';
+                  });
+                }),
                 //我的投稿
-                _buildButton('我的投稿', Icons.upload_file, () {}),
+                _buildButton('我的投稿', Icons.upload_file, () {
+                  setState(() {
+                    bigTitle = '我的投稿';
+                    bigIcon = Icons.upload_file;
+                    cardMode = 3;
+                  });
+                  onRefreshPersonVideo(GlobalObjects.storageProvider.user.uid!, nextTime);
+                }),
               ],
             ),
           ),
@@ -346,8 +511,11 @@ class UserPageState extends State<UserPage> {
   /// 构建IconTextRow
   Widget _buildIconTextRow(String text, IconData icon) {
     Color secColor = Theme.of(context).primaryColor;
-    TextStyle textStyle =
-        TextStyle(color: secColor, fontSize: Theme.of(context).primaryTextTheme.titleMedium?.fontSize);
+    TextStyle textStyle = TextStyle(
+      color: secColor,
+      fontSize: Theme.of(context).primaryTextTheme.titleMedium?.fontSize,
+      overflow: TextOverflow.ellipsis,
+    );
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
@@ -417,7 +585,7 @@ class UserPageState extends State<UserPage> {
       GlobalObjects.storageProvider.user.videoCount = userInfo.data!.videoCount;
       _log.i('getUserInfo: ${userInfo.data}');
     }
-    if (userInfo.code == 4000) {
+    if (userInfo.code == errorCode) {
       EasyLoading.showError('获取用户信息失败: ${userInfo.msg}');
       _log.e('获取用户信息失败: ${userInfo.msg}');
       return;
@@ -519,7 +687,7 @@ class UserPageState extends State<UserPage> {
                           const SizedBox(height: 20),
                           //新头像文件信息
 
-                          buildFileInfoText(uploadAvatarFile, '新头像'),
+                          _buildFileInfoText(uploadAvatarFile, '新头像'),
 
                           const SizedBox(height: 20),
 
@@ -593,7 +761,7 @@ class UserPageState extends State<UserPage> {
             GlobalObjects.storageProvider.user.nickname = nicknameController.text;
           });
         }
-        if (updateNickname.code == 4000) {
+        if (updateNickname.code == errorCode) {
           EasyLoading.showError('更新昵称失败，请稍后再试');
           _log.e('更新昵称失败: ${updateNickname.msg}');
           return;
@@ -624,7 +792,7 @@ class UserPageState extends State<UserPage> {
     if (qiniuToken.code == 2000) {
       _log.d('getKodoToken: ${qiniuToken.data!.token}');
     }
-    if (qiniuToken.code == 4000) {
+    if (qiniuToken.code == errorCode) {
       EasyLoading.showError('存储服务异常，请稍后再试');
       _log.e('获取七牛云存储token失败: ${qiniuToken.msg}');
       EasyLoading.dismiss();
@@ -659,38 +827,123 @@ class UserPageState extends State<UserPage> {
             GlobalObjects.storageProvider.user.avatar = response.data!.imageUrl;
           });
           _log.i(request.responseText);
-          _log.i('封面上传成功');
+          _log.i('头像上传成功');
           return;
         } else {
           EasyLoading.showError('更新信息失败');
-          _log.e('封面上传失败: ${request.responseText}');
+          _log.e('头像上传失败: ${request.responseText}');
           return;
         }
       });
     } catch (e) {
       EasyLoading.showError('服务器异常，请稍后再试');
-      _log.e('封面上传异常：$e');
+      _log.e('头像上传异常：$e');
     }
   }
 
   /// 上传文件信息
-  Widget buildFileInfoText(html.File? uploadVideoFile, String? title) {
+  Widget _buildFileInfoText(html.File? uploadVideoFile, String? title) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          uploadVideoFile == null ? '$title未选择文件' : '$title文件名：${uploadVideoFile!.name}',
+          uploadVideoFile == null ? '$title未选择文件' : '$title文件名：${uploadVideoFile.name}',
           style: const TextStyle(fontSize: 12),
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 5),
         Text(
           //换算一下 MB 保留两位小数
-          uploadVideoFile == null ? '' : '$title文件大小：${(uploadVideoFile!.size / 1024 / 1024).toStringAsFixed(2)}MB',
+          uploadVideoFile == null ? '' : '$title文件大小：${(uploadVideoFile.size / 1024 / 1024).toStringAsFixed(2)}MB',
           style: const TextStyle(fontSize: 12),
           overflow: TextOverflow.ellipsis,
         ),
       ],
     );
+  }
+
+  /// 获取个人视频列表
+  Future<void> onRefreshPersonVideo(int uid, int nextTime) async {
+    setState(() {
+      tips = '数据加载中...';
+      if (nextTime == 0) {
+        videoInfoList.clear();
+      }
+    });
+    EasyLoading.show(status: '数据加载中...');
+    final api = GlobalObjects.apiProvider;
+    final request = SomeoneVideoRequest(lastTime: nextTime, userId: uid);
+    _log.i('请求视频列表', request.toJson());
+    api.video.getVideoListByUserId(request).then((resp) {
+      EasyLoading.dismiss();
+      if (resp.code == successCode) {
+        _log.i('请求成功');
+        setState(() {
+          //如果是重新，那么myNextTime就是0 清空列表
+          if (nextTime == 0) {
+            videoInfoList.clear();
+          }
+          //没有更多视频了
+          if (resp.data!.videoInfo.isEmpty) {
+            EasyLoading.showInfo('没有更多视频了');
+            noMore = true;
+            return;
+          }
+          // 如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
+          videoInfoList.addAll(resp.data!.videoInfo);
+          nextTime = resp.data!.nextTime;
+        });
+      }
+      if (resp.code == errorCode) {
+        EasyLoading.showError('请求失败');
+        _log.i('请求失败', resp.msg);
+      }
+    }).catchError((e) {
+      _log.e(e);
+      EasyLoading.showError('服务器抽风了,请稍后再试');
+    });
+  }
+
+  /// 获取收藏视频列表
+  Future<void> onRefreshFavoriteVideo(int uid, int nextTime) async {
+    setState(() {
+      tips = '数据加载中...';
+      if (nextTime == 0) {
+        videoInfoList.clear();
+      }
+    });
+    EasyLoading.show(status: '数据加载中...');
+
+    final request = SomeoneVideoRequest(lastTime: nextTime, userId: uid);
+    _log.i('请求视频列表', request.toJson());
+    api.video.getFavoriteVideoList(request).then((resp) {
+      EasyLoading.dismiss();
+      if (resp.code == successCode) {
+        tips = '你还没有投稿任何视频哦~,试着创造属于你的视频吧！';
+        _log.i('请求成功');
+        setState(() {
+          //如果是重新，那么myNextTime就是0 清空列表
+          if (nextTime == 0) {
+            videoInfoList.clear();
+          }
+          //没有更多视频了
+          if (resp.data!.videoInfo.isEmpty) {
+            EasyLoading.showInfo('没有更多视频了');
+            noMore = true;
+            return;
+          }
+          // 如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
+          videoInfoList.addAll(resp.data!.videoInfo);
+          nextTime = resp.data!.nextTime;
+        });
+      }
+      if (resp.code == errorCode) {
+        EasyLoading.showError('请求失败');
+        _log.i('请求失败', resp.msg);
+      }
+    }).catchError((e) {
+      _log.e(e);
+      EasyLoading.showError('服务器抽风了,请稍后再试');
+    });
   }
 }

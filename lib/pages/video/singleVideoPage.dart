@@ -6,6 +6,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:utopia_front/global/index.dart';
 
+import '../../api/model/base.dart';
 import '../../api/model/interact.dart';
 import '../../api/model/video.dart';
 import '../../custom_widgets/chat_widow.dart';
@@ -300,10 +301,6 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
 
   ///  api
   final api = GlobalObjects.apiProvider;
-  int successCode = 2000;
-  int failCode = 4000;
-
-  /// todo 点赞收藏逻辑可以抽象出来
 
   ///follow 关注/取消关注
   follow() async {
@@ -397,7 +394,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
         likeCount = isLike ? likeCount + 1 : likeCount - 1;
       });
     }
-    if (response.code == failCode) {
+    if (response.code == errorCode) {
       EasyLoading.showError(response.msg);
       _log.i("点赞/取消点赞失败：${response.msg}");
     }
@@ -418,7 +415,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
         favoriteCount = isFavorite ? favoriteCount + 1 : favoriteCount - 1;
       });
     }
-    if (response.code == failCode) {
+    if (response.code == errorCode) {
       EasyLoading.showError(response.msg);
       _log.i("收藏/取消收藏失败：${response.msg}");
     }
@@ -443,7 +440,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
         fansCount = isFollow ? fansCount + 1 : fansCount - 1;
       });
     }
-    if (response.code == failCode) {
+    if (response.code == errorCode) {
       EasyLoading.showError(response.msg);
       _log.i("关注/取消关注失败：${response.msg}");
     }
@@ -555,7 +552,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
             ));
           });
         }
-        if (resp.code == 4000) {
+        if (resp.code == errorCode) {
           EasyLoading.showError(resp.msg);
           _log.i('评论失败', resp.msg);
         }
@@ -632,7 +629,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
             isLoading = false;
           });
         }
-        if (resp.code == 4000) {
+        if (resp.code == errorCode) {
           // EasyLoading.showError(resp.msg);
           _log.i('获取评论列表失败', resp.msg);
           setState(() {

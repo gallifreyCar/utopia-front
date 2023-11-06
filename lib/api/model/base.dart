@@ -22,3 +22,7 @@ class DefaultResponse {
     };
   }
 }
+
+/// 静态变量： 状态码
+const int successCode = 2000;
+const int errorCode = 4000;

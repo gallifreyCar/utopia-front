@@ -16,4 +16,7 @@ abstract class VideoApi {
 
   //获取热门视频
   Future<HotVideoResponse> getHotVideoList(HotVideoRequest request);
+
+  //获取个人收藏的视频
+  Future<VideoResponse> getFavoriteVideoList(SomeoneVideoRequest request);
 }
