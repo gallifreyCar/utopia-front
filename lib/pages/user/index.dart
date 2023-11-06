@@ -23,8 +23,6 @@ class UserPage extends StatefulWidget {
 }
 
 class UserPageState extends State<UserPage> {
-  String avatarUrl = GlobalObjects.storageProvider.user.avatar ?? ''; // 头像
-  String nickname = GlobalObjects.storageProvider.user.nickname ?? '';
   final uid = GlobalObjects.storageProvider.user.uid;
 
   //标题
@@ -66,7 +64,7 @@ class UserPageState extends State<UserPage> {
   void initState() {
     super.initState();
 
-    nicknameController = TextEditingController(text: nickname);
+    nicknameController = TextEditingController(text: GlobalObjects.storageProvider.user.nickname);
     getUserInfo();
     _requestFollowOrFansList(true);
     scrollController.addListener(() {
@@ -507,7 +505,7 @@ class UserPageState extends State<UserPage> {
             top: 20,
             child: CircleAvatar(
               radius: 40,
-              backgroundImage: NetworkImage(avatarUrl),
+              backgroundImage: NetworkImage(GlobalObjects.storageProvider.user.avatar!),
               backgroundColor: Colors.white,
             ),
           ),
@@ -537,7 +535,7 @@ class UserPageState extends State<UserPage> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                "昵称：$nickname",
+                "昵称：${GlobalObjects.storageProvider.user.nickname}",
                 style: textStyle,
               ),
             ),
@@ -790,7 +788,6 @@ class UserPageState extends State<UserPage> {
   ///清空更新表单信息
   void _clearUpdateInfoForm() {
     setState(() {
-      nicknameController.clear();
       uploadAvatarFile = null;
     });
   }
@@ -804,7 +801,7 @@ class UserPageState extends State<UserPage> {
     }
     EasyLoading.show(status: '信息更新中...', maskType: EasyLoadingMaskType.black);
     //-2. 如果昵称更改了，先修改昵称
-    if (nicknameController.text != GlobalObjects.storageProvider.user.nickname) {
+    if (nicknameController.text != GlobalObjects.storageProvider.user.nickname && nicknameController.text.isNotEmpty) {
       try {
         final api = GlobalObjects.apiProvider;
         final updateNickname = await api.user.updateNickname(nicknameController.text);
@@ -878,6 +875,8 @@ class UserPageState extends State<UserPage> {
           setState(() {
             //更新用户信息
             GlobalObjects.storageProvider.user.avatar = response.data!.imageUrl;
+            // _clearUpdateInfoForm();
+            // showUpdateInfoForm = false;
           });
           _log.i(request.responseText);
           _log.i('头像上传成功');
@@ -885,11 +884,15 @@ class UserPageState extends State<UserPage> {
         } else {
           EasyLoading.showError('更新信息失败');
           _log.e('头像上传失败: ${request.responseText}');
+          // _clearUpdateInfoForm();
+          // showUpdateInfoForm = false;
           return;
         }
       });
     } catch (e) {
       EasyLoading.showError('服务器异常，请稍后再试');
+      // _clearUpdateInfoForm();
+      // showUpdateInfoForm = false;
       _log.e('头像上传异常：$e');
     }
   }
