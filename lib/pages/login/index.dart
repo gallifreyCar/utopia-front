@@ -125,13 +125,13 @@ class _LoginPageState extends State<LoginPage> {
         GlobalObjects.storageProvider.user.uid = resp.data?.userId;
         // 请求用户信息
         await getUserInfo(context);
-        showBasicFlash(context, const Text('登录成功'));
+        EasyLoading.showSuccess('登录成功');
         // 进入首页
-        Navigator.pushNamed(context, '/video');
+        Navigator.pushNamed(context, '/video', arguments: {'mode': 3});
       }
       // 登录失败
       if (resp.code == 4000) {
-        showBasicFlash(context, Text('登录失败: ${resp.msg}'));
+        EasyLoading.showError('用户名或密码错误');
         setState(() {
           disableLoginButton = false;
         });
@@ -192,12 +192,12 @@ class _LoginPageState extends State<LoginPage> {
         // 请求用户信息
         await getUserInfo(context);
         // 进入首页
-        showBasicFlash(context, const Text('注册成功'));
-        Navigator.of(context).pushNamed('/video');
+        EasyLoading.showSuccess('注册成功');
+        Navigator.of(context).pushNamed('/video', arguments: {'mode': 3});
       }
       // 注册失败
       if (resp.code == 4000) {
-        showBasicFlash(context, Text('注册失败: ${resp.msg}'));
+        EasyLoading.showError('注册失败: ${resp.msg}');
         setState(() {
           disableRegisterButton = false;
         });

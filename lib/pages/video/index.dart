@@ -863,6 +863,14 @@ class _IndexPageState extends State<IndexPage> {
                         const SizedBox(width: 20),
                         ElevatedButton(
                             onPressed: () {
+                              _clearUploadForm();
+                            },
+                            child: const Text('清空')),
+                        const SizedBox(width: 20),
+                        ElevatedButton(
+                            onPressed: () {
+                              _clearUploadForm();
+
                               setState(() {
                                 showContributeForm = false;
                               });
@@ -879,6 +887,19 @@ class _IndexPageState extends State<IndexPage> {
         ),
       ),
     );
+  }
+
+  void _clearUploadForm() {
+    setState(() {
+      titleController.text = '';
+      describeController.text = '';
+      uploadVideoCoverFile = null;
+      uploadVideoFile = null;
+      uploadVideoCoverUrl = '';
+      uploadVideoUrl = '';
+      callbackVideoCoverUrl = 'none';
+      selectedValue = 0;
+    });
   }
 
   ///构建上传文件的名称

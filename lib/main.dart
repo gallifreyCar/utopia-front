@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
         if (GlobalObjects.storageProvider.user.jwtToken == null) {
           return const LoginModeSelectorPage();
         } else {
-          return const IndexPage(userId: 0, mode: 0, videoId: 0);
+          return const IndexPage(userId: 0, mode: 3, videoId: 0);
         }
       }(),
       builder: EasyLoading.init(),
