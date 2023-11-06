@@ -387,3 +387,86 @@ class SingleVideoResponse {
     };
   }
 }
+
+/// 获取热门视频的请求体 score version
+class HotVideoRequest {
+  final double? score;
+  final int? version;
+
+  const HotVideoRequest({
+    this.score,
+    this.version,
+  });
+
+  factory HotVideoRequest.fromJson(Map<String, dynamic> json) {
+    return HotVideoRequest(
+      score: json['score'] as double?,
+      version: json['version'] as int?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'score': score,
+      'version': version,
+    };
+  }
+}
+
+/// 获取热门视频的响应体
+class HotVideoResponse {
+  int code;
+  String msg;
+  HotVideoData data;
+
+  HotVideoResponse({required this.code, required this.msg, required this.data});
+
+  factory HotVideoResponse.fromJson(Map<String, dynamic> json) {
+    return HotVideoResponse(
+      code: json['code'],
+      msg: json['msg'],
+      data: HotVideoData.fromJson(json['data']),
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'code': code,
+      'msg': msg,
+      'data': data.toJson(),
+    };
+  }
+}
+
+class HotVideoData {
+  List<VideoInfo> hotVideo;
+  double score;
+  int version;
+
+  HotVideoData({required this.hotVideo, required this.score, required this.version});
+
+  factory HotVideoData.fromJson(Map<String, dynamic> json) {
+    if (json['video_info'] == null) {
+      return HotVideoData(
+        hotVideo: [],
+        score: -1,
+        version: 0,
+      );
+    }
+
+    return HotVideoData(
+      hotVideo: (json['video_info'] as List).map((e) => VideoInfo.fromJson(e)).toList(),
+      score: json['score'],
+      version: json['version'],
+    );
+  }
+  Map<String, dynamic> toJson() {
+    if (score == -1 || hotVideo.isEmpty) {
+      hotVideo = [];
+    }
+    return {
+      'video_info': hotVideo.map((e) => e.toJson()).toList(),
+      'score': score,
+      'version': version,
+    };
+  }
+}

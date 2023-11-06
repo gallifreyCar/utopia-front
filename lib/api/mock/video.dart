@@ -110,4 +110,10 @@ class VideoApiMock extends VideoApi {
     // TODO: implement getVideoByVideoId
     throw UnimplementedError();
   }
+
+  @override
+  Future<HotVideoResponse> getHotVideoList(HotVideoRequest request) {
+    // TODO: implement getHotVideoList
+    throw UnimplementedError();
+  }
 }

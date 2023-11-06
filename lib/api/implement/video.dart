@@ -41,4 +41,13 @@ class VideoApiImpl extends VideoApi {
     });
     return SingleVideoResponse.fromJson(resp.data);
   }
+
+  @override
+  Future<HotVideoResponse> getHotVideoList(HotVideoRequest request) async {
+    final resp = await dio.get('/api/v1/video/popular', queryParameters: {
+      "version": request.version,
+      "score": request.score,
+    });
+    return HotVideoResponse.fromJson(resp.data);
+  }
 }

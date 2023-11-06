@@ -13,4 +13,7 @@ abstract class VideoApi {
 
   //获取单个视频
   Future<SingleVideoResponse> getVideoByVideoId(VideoByVideoIdRequest request);
+
+  //获取热门视频
+  Future<HotVideoResponse> getHotVideoList(HotVideoRequest request);
 }

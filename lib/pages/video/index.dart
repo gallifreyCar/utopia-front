@@ -93,6 +93,9 @@ class _IndexPageState extends State<IndexPage> {
         _log.i("某个视频");
         _getOneVideo(widget.videoId);
         break;
+      case 3:
+        _log.i("热门视频");
+        _onRefreshHot(0, 0);
     }
 
     // 添加监听器来检测页面的变化
@@ -113,6 +116,8 @@ class _IndexPageState extends State<IndexPage> {
             case 2:
               _onRefresh(0, nextTime);
               break;
+            case 3:
+              _onRefreshHot(0, 0);
           }
           return;
         }
@@ -167,7 +172,7 @@ class _IndexPageState extends State<IndexPage> {
                 children: [
                   TextButton(
                       onPressed: () {
-                        _onRefresh(0, 0);
+                        Navigator.pushNamed(context, '/video', arguments: {"mode": 3});
                       },
                       child: Text('热门', style: textStyle)),
                   TextButton(
@@ -177,22 +182,22 @@ class _IndexPageState extends State<IndexPage> {
                       child: Text('推荐', style: textStyle)),
                   TextButton(
                       onPressed: () {
-                        _onRefresh(1, 0);
+                        _onRefresh(0, 0);
                       },
                       child: Text('体育', style: textStyle)),
                   TextButton(
                       onPressed: () {
-                        _onRefresh(2, 0);
+                        _onRefresh(1, 0);
                       },
                       child: Text('动漫', style: textStyle)),
                   TextButton(
                       onPressed: () {
-                        _onRefresh(3, 0);
+                        _onRefresh(2, 0);
                       },
                       child: Text('游戏', style: textStyle)),
                   TextButton(
                       onPressed: () {
-                        _onRefresh(4, 0);
+                        _onRefresh(3, 0);
                       },
                       child: Text('音乐', style: textStyle)),
                 ],
@@ -327,7 +332,7 @@ class _IndexPageState extends State<IndexPage> {
     });
   }
 
-  ///请求一个视频信息
+  ///请求一个视频信息的方法
   Future<void> _getOneVideo(int video) async {
     EasyLoading.show(status: '数据加载中...');
     try {
@@ -352,7 +357,7 @@ class _IndexPageState extends State<IndexPage> {
     }
   }
 
-  ///通过用户id获取用户的视频列表
+  ///通过用户id获取用户的视频列表的方法
   Future<void> _getVideoListByUid(int uid, int myNextTime) async {
     setState(() {
       if (myNextTime == 0) {
@@ -386,6 +391,40 @@ class _IndexPageState extends State<IndexPage> {
       if (resp.code == 4000) {
         showBasicFlash(context, const Text("请求失败"), duration: const Duration(seconds: 2));
         _log.i('请求失败', resp.msg);
+      }
+    }).catchError((e) {
+      _log.e(e);
+      EasyLoading.showError('服务器抽风了,请稍后再试');
+    });
+  }
+
+  /// 获取热门视频
+  Future<void> _onRefreshHot(int version, double score) async {
+    EasyLoading.show(status: '数据加载中...');
+    final api = GlobalObjects.apiProvider;
+    final request = HotVideoRequest(version: version, score: score);
+    _log.i('请求视频列表', request.toJson());
+    api.video.getHotVideoList(request).then((videoResponse) {
+      EasyLoading.dismiss();
+      if (videoResponse.code == 2000) {
+        _log.i('请求成功');
+        setState(() {
+          //没有更多视频了
+          if (videoResponse.data!.hotVideo.isEmpty) {
+            EasyLoading.showInfo('没有更多视频了');
+            noMore = true;
+            return;
+          }
+          // 如果是下拉刷新，
+          // 那么score就是上一次请求的score ,version就是上一次请求的version
+          videoInfoList.addAll(videoResponse.data!.hotVideo);
+          score = videoResponse.data!.score;
+          version = videoResponse.data!.version;
+        });
+      }
+      if (videoResponse.code == 4000) {
+        EasyLoading.showError('请求失败');
+        _log.i('请求失败', videoResponse.msg);
       }
     }).catchError((e) {
       _log.e(e);
