@@ -878,8 +878,8 @@ class _IndexPageState extends State<IndexPage> {
       EasyLoading.showError('视频文件大小不能超过1G');
       return;
     }
-    if (uploadVideoCoverFile != null && uploadVideoCoverFile!.size > 1024 * 1024 * 1024) {
-      EasyLoading.showError('封面文件大小不能超过1G');
+    if (uploadVideoCoverFile != null && uploadVideoCoverFile!.size > 1024 * 1024 * 10) {
+      EasyLoading.showError('封面文件大小不能超过10M');
       return;
     }
 
@@ -887,7 +887,7 @@ class _IndexPageState extends State<IndexPage> {
     //1.获取token
     final api = GlobalObjects.apiProvider;
     final qiniuToken = await api.upload.getKodoToken();
-    if (qiniuToken.code == 20000) {
+    if (qiniuToken.code == 2000) {
       _log.d('getKodoToken: ${qiniuToken.data!.token}');
     }
     if (qiniuToken.code == 4000) {
@@ -937,7 +937,7 @@ class _IndexPageState extends State<IndexPage> {
     // 上传
     try {
       var request = html.HttpRequest();
-      request.open('POST', 'http://up-cn-east-2.qiniup.com');
+      request.open('POST', GlobalObjects.qiniuKodoUrl);
       request.send(formData);
       request.onLoad.listen((event) {
         UploadFileCallbackResponse response = UploadFileCallbackResponse.fromJson(json.decode(request.responseText!));
@@ -983,7 +983,7 @@ class _IndexPageState extends State<IndexPage> {
     // 上传
     try {
       var request = html.HttpRequest();
-      request.open('POST', 'http://up-cn-east-2.qiniup.com');
+      request.open('POST', GlobalObjects.qiniuKodoUrl);
       request.send(formData);
       request.onLoad.listen((event) {
         UploadFileCallbackResponse response = UploadFileCallbackResponse.fromJson(json.decode(request.responseText!));

@@ -20,6 +20,8 @@ class GlobalObjects {
   static Logger logger = Logger();
   //baseUrl 用于网络请求的baseUrl
   static const String baseUrl = GlobalConfig.isUseTestBaseUrl ? GlobalConfig.testBaseUrl : GlobalConfig.workBaseUrl;
+  // 七牛云上传地址
+  static const String qiniuKodoUrl = GlobalConfig.qiniuKodoUrl;
 
   //初始化
   static Future<void> init() async {
