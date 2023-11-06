@@ -518,19 +518,9 @@ class UserPageState extends State<UserPage> {
 
                           const SizedBox(height: 20),
                           //新头像文件信息
-                          Text(
-                            uploadAvatarFile == null ? '未选择头像' : '已选择头像：${uploadAvatarFile!.name}',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            // uploadAvatarFile == null ? '' : '文件大小：${uploadAvatarFile!.size}字节',
-                            //换算一下 MB 保留两位小数
-                            uploadAvatarFile == null
-                                ? ''
-                                : '文件大小：${(uploadAvatarFile!.size / 1024 / 1024).toStringAsFixed(2)}MB',
-                            style: const TextStyle(fontSize: 12),
-                          ),
+
+                          buildFileInfoText(uploadAvatarFile, '新头像'),
+
                           const SizedBox(height: 20),
 
                           //提交
@@ -584,7 +574,7 @@ class UserPageState extends State<UserPage> {
     });
   }
 
-  ///更新用户信息
+  ///更新用户信息方法
   Future<void> updateUserInfo() async {
     //-3. 如果都没有更改，直接返回
     if (nicknameController.text == GlobalObjects.storageProvider.user.nickname && uploadAvatarFile == null) {
@@ -681,5 +671,26 @@ class UserPageState extends State<UserPage> {
       EasyLoading.showError('服务器异常，请稍后再试');
       _log.e('封面上传异常：$e');
     }
+  }
+
+  /// 上传文件信息
+  Widget buildFileInfoText(html.File? uploadVideoFile, String? title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          uploadVideoFile == null ? '$title未选择文件' : '$title文件名：${uploadVideoFile!.name}',
+          style: const TextStyle(fontSize: 12),
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 5),
+        Text(
+          //换算一下 MB 保留两位小数
+          uploadVideoFile == null ? '' : '$title文件大小：${(uploadVideoFile!.size / 1024 / 1024).toStringAsFixed(2)}MB',
+          style: const TextStyle(fontSize: 12),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
   }
 }

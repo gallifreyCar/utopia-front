@@ -667,7 +667,6 @@ class _IndexPageState extends State<IndexPage> {
               decoration: BoxDecoration(
                 // 增加圆角
                 borderRadius: BorderRadius.circular(30),
-
                 color: Colors.white,
                 // 设置阴影
                 boxShadow: [
@@ -691,7 +690,7 @@ class _IndexPageState extends State<IndexPage> {
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     //标题
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.2,
@@ -710,7 +709,6 @@ class _IndexPageState extends State<IndexPage> {
                         },
                       ),
                     ),
-
                     const SizedBox(height: 10),
                     //描述
                     SizedBox(
@@ -732,7 +730,7 @@ class _IndexPageState extends State<IndexPage> {
                         },
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     //封面
                     ElevatedButton(
                       onPressed: () {
@@ -759,8 +757,9 @@ class _IndexPageState extends State<IndexPage> {
                       },
                       child: const Text('选择封面（可选）'),
                     ),
-                    //封面预览
-                    _builtNullText(uploadVideoCoverFile?.name),
+                    //封面文件信息
+                    const SizedBox(height: 5),
+                    buildFileInfoText(uploadVideoCoverFile, "封面"),
 
                     const SizedBox(height: 10),
                     //视频
@@ -790,8 +789,10 @@ class _IndexPageState extends State<IndexPage> {
                       child: const Text('选择视频（必选）'),
                     ),
                     //视频预览
-                    _builtNullText(uploadVideoFile?.name),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 5),
+                    buildFileInfoText(uploadVideoFile, "视频"),
+
+                    const SizedBox(height: 10),
                     //视频类型选择列表 体育 动漫 游戏 音乐  RadioListTile单选
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.1,
@@ -901,27 +902,6 @@ class _IndexPageState extends State<IndexPage> {
       callbackVideoCoverUrl = 'none';
       selectedValue = 0;
     });
-  }
-
-  ///构建上传文件的名称
-  Widget _builtNullText(String? text) {
-    return text == null
-        ? SizedBox(
-            width: MediaQuery.of(context).size.width * 0.3,
-          )
-        : SizedBox(
-            width: MediaQuery.of(context).size.width * 0.3,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  text,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          );
   }
 
   ///获取token 上传视频
@@ -1082,4 +1062,25 @@ class _IndexPageState extends State<IndexPage> {
 
     return code;
   }
+}
+
+/// 上传文件信息
+Widget buildFileInfoText(html.File? uploadVideoFile, String? title) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        uploadVideoFile == null ? '$title未选择文件' : '$title文件名：${uploadVideoFile!.name}',
+        style: const TextStyle(fontSize: 12),
+        overflow: TextOverflow.ellipsis,
+      ),
+      const SizedBox(height: 5),
+      Text(
+        //换算一下 MB 保留两位小数
+        uploadVideoFile == null ? '' : '$title文件大小：${(uploadVideoFile!.size / 1024 / 1024).toStringAsFixed(2)}MB',
+        style: const TextStyle(fontSize: 12),
+        overflow: TextOverflow.ellipsis,
+      ),
+    ],
+  );
 }
