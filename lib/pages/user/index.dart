@@ -770,6 +770,19 @@ class UserPageState extends State<UserPage> {
             ),
           ),
         ),
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  cardMode = 0;
+                  bigTitle = '我的关注';
+                  onRefreshFavoriteVideo(GlobalObjects.storageProvider.user.uid!, 0);
+                });
+              },
+              child: const Icon(Icons.refresh)),
+        ),
       ],
     );
   }
