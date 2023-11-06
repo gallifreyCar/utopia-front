@@ -91,7 +91,7 @@ class _IndexPageState extends State<IndexPage> {
         break;
       case 2:
         _log.i("某个视频");
-        _onRefresh(2, 0);
+        _getOneVideo(widget.videoId);
         break;
     }
 
@@ -111,7 +111,7 @@ class _IndexPageState extends State<IndexPage> {
               _getVideoListByUid(widget.userId, nextTime);
               break;
             case 2:
-              _onRefresh(2, nextTime);
+              _onRefresh(0, nextTime);
               break;
           }
           return;
@@ -327,6 +327,31 @@ class _IndexPageState extends State<IndexPage> {
     });
   }
 
+  ///请求一个视频信息
+  Future<void> _getOneVideo(int video) async {
+    EasyLoading.show(status: '数据加载中...');
+    try {
+      final api = GlobalObjects.apiProvider;
+      final request = VideoByVideoIdRequest(videoId: video);
+      _log.i('请求视频信息', request.toJson());
+      final resp = await api.video.getVideoByVideoId(request);
+      if (resp.code == 2000) {
+        EasyLoading.dismiss();
+        _log.i('请求成功');
+        setState(() {
+          videoInfoList.add(resp.videoInfo!);
+        });
+      }
+      if (resp.code == 4000) {
+        EasyLoading.showInfo('请求失败');
+        _log.i('请求失败', resp.msg);
+      }
+    } catch (e) {
+      _log.e(e);
+      EasyLoading.showError('服务器抽风了,请稍后再试');
+    }
+  }
+
   ///通过用户id获取用户的视频列表
   Future<void> _getVideoListByUid(int uid, int myNextTime) async {
     setState(() {
@@ -391,7 +416,7 @@ class _IndexPageState extends State<IndexPage> {
                   decoration: InputDecoration(
                     hintText: '搜索',
                     border: InputBorder.none,
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.clear),
                       onPressed: () {
@@ -433,7 +458,7 @@ class _IndexPageState extends State<IndexPage> {
 
   /// 搜索后 显示的视频列表
   Widget _buildSearchVideoInfoList() {
-    return Container(
+    return SizedBox(
       height: searchVideoInfoList.isEmpty ? 40 : MediaQuery.of(context).size.height * 0.6,
       width: searchVideoInfoList.isEmpty ? 400 : MediaQuery.of(context).size.width * 0.3,
       child: Offstage(
@@ -553,7 +578,11 @@ class _IndexPageState extends State<IndexPage> {
             icon: Icon(Icons.play_circle_outline, color: Theme.of(context).primaryColor),
             onPressed: () {
               _log.i('播放视频', searchVideoInfoList[index].playUrl);
-              // Navigator.of(context).push(MaterialPageRoute(builder: (context) => VideoPlayPage(videoInfoList[index])));
+
+              showSearchVideoInfoList = false;
+
+              Navigator.of(context)
+                  .pushNamed("/video", arguments: {"mode": 2, "videoId": searchVideoInfoList[index].id});
             },
           ),
           const SizedBox(width: 20),
@@ -813,6 +842,7 @@ class _IndexPageState extends State<IndexPage> {
     );
   }
 
+  ///构建上传文件的名称
   Widget _builtNullText(String? text) {
     return text == null
         ? SizedBox(

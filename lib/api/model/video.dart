@@ -334,3 +334,83 @@ class SomeoneVideoRequest {
     };
   }
 }
+
+/// 获取某个视频的详细信息的请求体
+class VideoByVideoIdRequest {
+  final int videoId;
+
+  const VideoByVideoIdRequest({
+    required this.videoId,
+  });
+
+  factory VideoByVideoIdRequest.fromJson(Map<String, dynamic> json) {
+    return VideoByVideoIdRequest(
+      videoId: json['video_id'] as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'video_id': videoId,
+    };
+  }
+}
+
+/// 获取某个视频的详细信息的响应体
+/*
+{
+    "code": 2000,
+    "msg": "ok",
+    "data": {
+        "video_info": {
+            "id": 3,
+            "created_at": "2023-10-27T17:58:31.102+08:00",
+            "play_url": "https://prod-streaming-video-msn-com.akamaized.net/b7014b7e-b38f-4a64-bd95-4a28a8ef6dee/113a2bf3-3a5f-45d4-8b6f-e40ce8559da3.mp4",
+            "cover_url": "https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AAOEhRG.img",
+            "video_type_id": 1,
+            "describe": "你好",
+            "title": "你好标题",
+            "author": {
+                "id": 7,
+                "nickname": "sgsgds",
+                "avatar": "https://kodo.tbghg.top/005bff77.png",
+                "username": "董洋",
+                "fans_count": 3,
+                "follow_count": 0,
+                "video_count": 1
+            },
+            "is_follow": false,
+            "is_like": false,
+            "is_favorite": false,
+            "like_count": 2,
+            "favorite_count": 1
+        }
+    }
+}
+ */
+class SingleVideoResponse {
+  final int code;
+  final String msg;
+  final VideoInfo videoInfo;
+
+  const SingleVideoResponse({
+    required this.code,
+    required this.msg,
+    required this.videoInfo,
+  });
+  factory SingleVideoResponse.fromJson(Map<String, dynamic> json) {
+    return SingleVideoResponse(
+      code: json['code'] as int,
+      msg: json['msg'] as String,
+      videoInfo: VideoInfo.fromJson(json['data']['video_info'] as Map<String, dynamic>),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'code': code,
+      'msg': msg,
+      'data': videoInfo.toJson(),
+    };
+  }
+}

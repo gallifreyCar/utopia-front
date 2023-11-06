@@ -33,4 +33,12 @@ class VideoApiImpl extends VideoApi {
     });
     return VideoResponse.fromJson(resp.data);
   }
+
+  @override
+  Future<SingleVideoResponse> getVideoByVideoId(VideoByVideoIdRequest request) async {
+    final resp = await dio.get('/api/v1/video/single', queryParameters: {
+      "video_id": request.videoId,
+    });
+    return SingleVideoResponse.fromJson(resp.data);
+  }
 }
