@@ -190,7 +190,7 @@ class _IndexPageState extends State<IndexPage> {
     TextStyle textStyle = Theme.of(context).primaryTextTheme.titleLarge!;
     if (GlobalObjects.storageProvider.user.jwtToken != null) {
       return SizedBox(
-        width: MediaQuery.of(context).size.width * 0.28,
+        width: MediaQuery.of(context).size.width * 0.3,
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Row(
             children: [
@@ -201,9 +201,13 @@ class _IndexPageState extends State<IndexPage> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  nickname,
-                  style: textStyle,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.052,
+                  child: Text(
+                    nickname,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).primaryTextTheme.titleMedium!,
+                  ),
                 ),
               )
             ],
@@ -344,7 +348,7 @@ class _IndexPageState extends State<IndexPage> {
                 ),
               ),
               //搜索后 显示的视频列表
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               _buildSearchVideoInfoList(),
             ],
           ),
@@ -530,14 +534,14 @@ class _IndexPageState extends State<IndexPage> {
           width: MediaQuery.of(context).size.width * 0.3,
           height: MediaQuery.of(context).size.height * 0.85,
           child: Padding(
-            padding: const EdgeInsets.all(30.0),
+            padding: const EdgeInsets.all(10.0),
             child: Column(
               children: [
                 const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
                     '投稿',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -563,7 +567,7 @@ class _IndexPageState extends State<IndexPage> {
                 const SizedBox(height: 10),
                 //描述
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.12,
+                  height: MediaQuery.of(context).size.height * 0.1,
                   width: MediaQuery.of(context).size.width * 0.2,
                   child: TextFormField(
                     controller: describeController,
@@ -643,7 +647,7 @@ class _IndexPageState extends State<IndexPage> {
                 const SizedBox(height: 20),
                 //视频类型选择列表 体育 动漫 游戏 音乐  RadioListTile单选
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.07,
+                  width: MediaQuery.of(context).size.width * 0.1,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
