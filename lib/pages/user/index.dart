@@ -24,6 +24,7 @@ class UserPage extends StatefulWidget {
 class UserPageState extends State<UserPage> {
   String avatarUrl = GlobalObjects.storageProvider.user.avatar ?? ''; // 头像
   String nickname = GlobalObjects.storageProvider.user.nickname ?? '';
+  final uid = GlobalObjects.storageProvider.user.uid;
 
   //标题
   String bigTitle = '我的关注';
@@ -58,6 +59,8 @@ class UserPageState extends State<UserPage> {
   // cardMode
   int cardMode = 0;
 
+  // 控制器
+  ScrollController scrollController = ScrollController();
   @override
   void initState() {
     super.initState();
@@ -65,6 +68,20 @@ class UserPageState extends State<UserPage> {
     nicknameController = TextEditingController(text: nickname);
     getUserInfo();
     _requestFollowOrFansList(true);
+    scrollController.addListener(() {
+      if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
+        if (!noMore) {
+          switch (cardMode) {
+            case 2:
+              onRefreshFavoriteVideo(uid!, nextTime);
+              break;
+            case 3:
+              onRefreshPersonVideo(uid!, nextTime);
+              break;
+          }
+        }
+      }
+    });
   }
 
   ///销毁
@@ -198,6 +215,7 @@ class UserPageState extends State<UserPage> {
                   style: const TextStyle(fontSize: 20),
                 ))
               : ListView.builder(
+                  controller: scrollController,
                   itemExtent: WH.personWith(context) / 5,
                   itemCount: videoInfoList.length ~/ 4 + 1,
                   itemBuilder: (context, index) {
@@ -262,7 +280,7 @@ class UserPageState extends State<UserPage> {
 
   /// 构建ListView中卡片内容  mode: 0.我的关注 1.我的粉丝 2.我的收藏 3，我的投稿
   Widget _buildFavouriteAndMyWorkCardActions(int index) {
-    if (index >= userInfoList.length) {
+    if (index >= videoInfoList.length) {
       return Container();
     }
 
@@ -279,13 +297,15 @@ class UserPageState extends State<UserPage> {
                 color: Theme.of(context).secondaryHeaderColor,
               ),
               label: "查看作品",
-              onPress: () {}),
+              onPress: () {
+                Navigator.of(context).pushNamed('/video', arguments: {"mode": 2, "videoId": videoInfoList[index].id});
+              }),
         ],
         child: _buildVideoInfoCard(index));
   }
 
   Widget _buildVideoInfoCard(index) {
-    if (index >= userInfoList.length) {
+    if (index >= videoInfoList.length) {
       return Container();
     }
 
@@ -323,7 +343,7 @@ class UserPageState extends State<UserPage> {
           //标题
           _buildIconTextRow('作品: ${videoInfoList[index].title}', Icons.video_camera_back),
           //作者
-          _buildIconTextRow('作者: ${videoInfoList[index].author}', Icons.person),
+          _buildIconTextRow('作者: ${videoInfoList[index].author.nickname}', Icons.person),
         ],
       ),
     );
@@ -447,7 +467,6 @@ class UserPageState extends State<UserPage> {
                     bigTitle = '我的收藏';
                     bigIcon = Icons.star;
                     cardMode = 2;
-                    tips = '你还没有收藏任何视频哦~,快去把喜欢的视频收藏起来吧！';
                   });
                 }),
                 //我的投稿
@@ -865,7 +884,7 @@ class UserPageState extends State<UserPage> {
   /// 获取个人视频列表
   Future<void> onRefreshPersonVideo(int uid, int nextTime) async {
     setState(() {
-      tips = '数据加载中...';
+      tips = '';
       if (nextTime == 0) {
         videoInfoList.clear();
       }
@@ -907,7 +926,7 @@ class UserPageState extends State<UserPage> {
   /// 获取收藏视频列表
   Future<void> onRefreshFavoriteVideo(int uid, int nextTime) async {
     setState(() {
-      tips = '数据加载中...';
+      tips = '';
       if (nextTime == 0) {
         videoInfoList.clear();
       }

@@ -87,7 +87,7 @@ class _IndexPageState extends State<IndexPage> {
         _onRefresh(0, 0);
         break;
       case 1:
-        _log.i("某个up的视频");
+        _log.i("某个人的所有视频");
         _getVideoListByUid(widget.userId, 0);
         break;
       case 2:
@@ -989,7 +989,6 @@ class _IndexPageState extends State<IndexPage> {
           _log.i(request.responseText);
           _log.i('视频上传成功');
           EasyLoading.showSuccess('投稿成功');
-          Navigator.pushNamed(context, "/video_detail", arguments: response.data!);
           setState(() {
             showContributeForm = false;
           });
@@ -1004,15 +1003,6 @@ class _IndexPageState extends State<IndexPage> {
       EasyLoading.showError('存储服务异常，请稍后再试');
       return;
     }
-
-    //超时处理
-    Future.delayed(const Duration(seconds: 30), () {
-      if (mounted) {
-        EasyLoading.showError('上传超时，请稍后再试');
-        _log.e('上传超时');
-        return;
-      }
-    });
   }
 
   ///上传封面
