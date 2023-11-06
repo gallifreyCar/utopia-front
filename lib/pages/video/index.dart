@@ -599,16 +599,12 @@ class _IndexPageState extends State<IndexPage> {
               decoration: BoxDecoration(
                 // 增加圆角
                 borderRadius: BorderRadius.circular(30),
-                // 设置边框
-                border: Border.all(
-                  color: Theme.of(context).primaryColor,
-                  width: 2,
-                ),
+
                 color: Colors.white,
                 // 设置阴影
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.black.withOpacity(0.5),
                     spreadRadius: 5,
                     blurRadius: 10,
                     offset: const Offset(0, 3),
