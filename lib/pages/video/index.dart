@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flukit/flukit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:utopia_front/api/model/kodoFile.dart';
@@ -150,7 +151,17 @@ class _IndexPageState extends State<IndexPage> {
     return Scaffold(
       floatingActionButton: _buildSearchBar(),
       appBar: buildAppBar(),
-      body: _buildVideoListPageView(),
+      body: RawKeyboardListener(
+          focusNode: _focusNode,
+          onKey: (event) {
+            if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+              _pageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.ease);
+            }
+            if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+              _pageController.previousPage(duration: Duration(milliseconds: 300), curve: Curves.ease);
+            }
+          },
+          child: _buildVideoListPageView()),
     );
   }
 
