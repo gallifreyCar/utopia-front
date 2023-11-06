@@ -439,6 +439,7 @@ class UserPageState extends State<UserPage> {
                             icon: const Icon(Icons.cached_outlined),
                             onPressed: () {
                               setState(() {
+                                nicknameController.text = GlobalObjects.storageProvider.user.nickname!;
                                 showUpdateInfoForm = true;
                               });
                             },
@@ -744,6 +745,7 @@ class UserPageState extends State<UserPage> {
                               ElevatedButton(
                                   onPressed: () {
                                     _clearUpdateInfoForm();
+                                    nicknameController.text = "";
                                   },
                                   child: const Text('清空')),
                               const SizedBox(width: 20),
@@ -788,6 +790,7 @@ class UserPageState extends State<UserPage> {
   ///清空更新表单信息
   void _clearUpdateInfoForm() {
     setState(() {
+      nicknameController.text = "";
       uploadAvatarFile = null;
     });
   }
@@ -804,16 +807,16 @@ class UserPageState extends State<UserPage> {
     if (nicknameController.text != GlobalObjects.storageProvider.user.nickname && nicknameController.text.isNotEmpty) {
       try {
         final api = GlobalObjects.apiProvider;
-        final updateNickname = await api.user.updateNickname(nicknameController.text);
-        if (updateNickname.code == 2000) {
+        final resp = await api.user.updateNickname(nicknameController.text);
+        if (resp.code == successCode) {
           _log.d('更新昵称成功');
           setState(() {
             GlobalObjects.storageProvider.user.nickname = nicknameController.text;
           });
         }
-        if (updateNickname.code == errorCode) {
+        if (resp.code == errorCode) {
           EasyLoading.showError('更新昵称失败，请稍后再试');
-          _log.e('更新昵称失败: ${updateNickname.msg}');
+          _log.e('更新昵称失败: ${resp.msg}');
           return;
         }
       } catch (e) {
@@ -826,6 +829,8 @@ class UserPageState extends State<UserPage> {
     //-1. 如果没有选则头像文件，直接返回
     if (uploadAvatarFile == null) {
       EasyLoading.showSuccess('信息更新成功');
+      _clearUpdateInfoForm();
+      showUpdateInfoForm = false;
       _log.d('信息更新成功');
       return;
     }
@@ -875,8 +880,8 @@ class UserPageState extends State<UserPage> {
           setState(() {
             //更新用户信息
             GlobalObjects.storageProvider.user.avatar = response.data!.imageUrl;
-            // _clearUpdateInfoForm();
-            // showUpdateInfoForm = false;
+            _clearUpdateInfoForm();
+            showUpdateInfoForm = false;
           });
           _log.i(request.responseText);
           _log.i('头像上传成功');
@@ -884,15 +889,15 @@ class UserPageState extends State<UserPage> {
         } else {
           EasyLoading.showError('更新信息失败');
           _log.e('头像上传失败: ${request.responseText}');
-          // _clearUpdateInfoForm();
-          // showUpdateInfoForm = false;
+          _clearUpdateInfoForm();
+          showUpdateInfoForm = false;
           return;
         }
       });
     } catch (e) {
       EasyLoading.showError('服务器异常，请稍后再试');
-      // _clearUpdateInfoForm();
-      // showUpdateInfoForm = false;
+      _clearUpdateInfoForm();
+      showUpdateInfoForm = false;
       _log.e('头像上传异常：$e');
     }
   }
