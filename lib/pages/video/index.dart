@@ -77,6 +77,13 @@ class _IndexPageState extends State<IndexPage> {
   bool onlySeeOne = false;
   int currentIndex = 0;
 
+  //
+  double score = 0.0;
+  int version = 0;
+
+  //键盘控制器
+  final FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -118,7 +125,7 @@ class _IndexPageState extends State<IndexPage> {
               _onRefresh(0, nextTime);
               break;
             case 3:
-              _onRefreshHot(0, 0);
+              _onRefreshHot(version, score);
           }
           return;
         }
@@ -402,10 +409,10 @@ class _IndexPageState extends State<IndexPage> {
   }
 
   /// 获取热门视频
-  Future<void> _onRefreshHot(int version, double score) async {
+  Future<void> _onRefreshHot(int myVersion, double myScore) async {
     EasyLoading.show(status: '数据加载中...');
     final api = GlobalObjects.apiProvider;
-    final request = HotVideoRequest(version: version, score: score);
+    final request = HotVideoRequest(version: myVersion, score: myScore);
     _log.i('请求视频列表', request.toJson());
     api.video.getHotVideoList(request).then((videoResponse) {
       EasyLoading.dismiss();
