@@ -53,6 +53,8 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
 
   // 视频描述
   String describe = "";
+  // 发表时间
+  String publishTime = "";
 
   //评论
   int? lastTime = 0; //最后一条评论的时间
@@ -89,6 +91,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
 
     // 视频描述
     describe = widget.videoInfo.describe;
+    publishTime = widget.videoInfo.createdAt.substring(0, 10);
     // 获取视频评论
     _getCommentList();
   }
@@ -128,7 +131,8 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                 _buildButton(context, _buildTextAndNum("收藏", favoriteCount),
                     isFavorite ? const Icon(Icons.star) : const Icon(Icons.star_border), collect),
                 _buildButton(context, _buildTextAndNum("评论", commentCount), const Icon(Icons.comment), () {}),
-                // _buildButton(context, const Text("分享"), const Icon(Icons.share), () {}),
+                //发布时间
+                _buildButton(context, Text("$publishTime"), const Icon(Icons.date_range), () {}),
               ],
             ),
           ),
@@ -236,6 +240,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                   //文字从左到右
                   textDirection: TextDirection.ltr,
                 ),
+                const SizedBox(height: 10),
               ],
             ),
           ),

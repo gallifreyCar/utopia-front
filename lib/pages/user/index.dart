@@ -10,6 +10,7 @@ import 'package:utopia_front/api/model/video.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../api/model/base.dart';
+import '../../api/model/interact.dart';
 import '../../api/model/kodoFile.dart';
 import '../../global/index.dart';
 import '../base.dart';
@@ -258,14 +259,18 @@ class UserPageState extends State<UserPage> {
                     color: Theme.of(context).secondaryHeaderColor,
                   ),
                   label: "取消关注",
-                  onPress: () {})
+                  onPress: () {
+                    followUp(userInfoList[index].id);
+                  })
               : CardActionButton(
                   icon: Icon(
                     Icons.handshake_outlined,
                     color: Theme.of(context).secondaryHeaderColor,
                   ),
                   label: "互粉",
-                  onPress: () {}),
+                  onPress: () {
+                    followUp(userInfoList[index].id);
+                  }),
           // 查看作品
           CardActionButton(
               icon: Icon(
@@ -329,8 +334,8 @@ class UserPageState extends State<UserPage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
-              width: WH.personWith(context) / 6,
-              height: WH.personWith(context) / 8 - 40,
+              width: WH.personWith(context) / 7,
+              height: WH.personWith(context) / 8 - 70,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 image: DecorationImage(
@@ -344,6 +349,10 @@ class UserPageState extends State<UserPage> {
           _buildIconTextRow('作品: ${videoInfoList[index].title}', Icons.video_camera_back),
           //作者
           _buildIconTextRow('作者: ${videoInfoList[index].author.nickname}', Icons.person),
+          //发表时间
+          //2023-10-27T17:54:03.55+08:00 截取前10位
+          _buildIconTextRow('发表时间: ${videoInfoList[index].createdAt.substring(0, 10)}', Icons.date_range,
+              diyPadding: 4),
         ],
       ),
     );
@@ -434,11 +443,14 @@ class UserPageState extends State<UserPage> {
                         ),
                         //用户名和昵称
                         _buildUsernameAndNicknameColumn(),
-                        _buildIconTextRow('粉丝数: ${GlobalObjects.storageProvider.user.fansCount}', Icons.person),
+                        _buildIconTextRow('粉丝数: ${GlobalObjects.storageProvider.user.fansCount}', Icons.person,
+                            diyFontSize: 12),
                         //关注数
-                        _buildIconTextRow('关注数: ${GlobalObjects.storageProvider.user.followCount}', Icons.person_add),
+                        _buildIconTextRow('关注数: ${GlobalObjects.storageProvider.user.followCount}', Icons.person_add,
+                            diyFontSize: 12),
                         //投稿数
-                        _buildIconTextRow('投稿数: ${GlobalObjects.storageProvider.user.videoCount}', Icons.upload_file),
+                        _buildIconTextRow('投稿数: ${GlobalObjects.storageProvider.user.videoCount}', Icons.upload_file,
+                            diyFontSize: 12),
                       ],
                     )),
                 const SizedBox(height: 20),
@@ -530,11 +542,12 @@ class UserPageState extends State<UserPage> {
   }
 
   /// 构建IconTextRow
-  Widget _buildIconTextRow(String text, IconData icon) {
+  Widget _buildIconTextRow(String text, IconData icon,
+      {TextStyle? diyTextStyle, double? diyFontSize, double? diyPadding}) {
     Color secColor = Theme.of(context).primaryColor;
     TextStyle textStyle = TextStyle(
       color: secColor,
-      fontSize: Theme.of(context).primaryTextTheme.titleMedium?.fontSize,
+      fontSize: diyFontSize ?? Theme.of(context).primaryTextTheme.titleMedium?.fontSize,
       overflow: TextOverflow.ellipsis,
     );
     return Row(
@@ -542,10 +555,10 @@ class UserPageState extends State<UserPage> {
       mainAxisSize: MainAxisSize.max,
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: diyPadding != null ? EdgeInsets.all(diyPadding) : const EdgeInsets.all(8.0),
           child: Icon(icon, color: secColor),
         ),
-        Text(text, style: textStyle),
+        Text(text, style: diyTextStyle ?? textStyle),
       ],
     );
   }
@@ -966,5 +979,45 @@ class UserPageState extends State<UserPage> {
       _log.e(e);
       EasyLoading.showError('服务器抽风了,请稍后再试');
     });
+  }
+
+  ///关注   关注的人只有取消关注  粉丝列表只可以关注
+  Future followUp(int uerId) async {
+    int actionType = 0;
+
+    switch (cardMode) {
+      case 0:
+        actionType = 2;
+        break;
+      case 1:
+        actionType = 1;
+        break;
+      default:
+        return;
+    }
+
+    final request = FollowRequest(actionType: actionType, toUserId: uerId);
+    _log.i("关注/取消关注请求：", request.toJson());
+    final response = await api.interact.follow(request);
+    if (response.code == successCode) {
+      _log.i("关注/取消关注成功：${response.msg}");
+      EasyLoading.showSuccess("操作成功");
+      setState(() {
+        if (cardMode == 0) {
+          GlobalObjects.storageProvider.user.followCount = GlobalObjects.storageProvider.user.followCount! - 1;
+          setState(() {
+            userInfoList.removeWhere((element) => element.id == uerId);
+          });
+        }
+
+        if (cardMode == 1) {
+          GlobalObjects.storageProvider.user.fansCount = GlobalObjects.storageProvider.user.fansCount! + 1;
+        }
+      });
+    }
+    if (response.code == errorCode) {
+      EasyLoading.showError(response.msg);
+      _log.i("关注/取消关注失败：${response.msg}");
+    }
   }
 }
