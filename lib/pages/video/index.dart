@@ -801,7 +801,7 @@ class _IndexPageState extends State<IndexPage> {
       }
     }
 
-    //2.2如果封面不存在，就拿头像当封面；直接填上传参数，上传视频
+    //2.2如果封面不存在，就先拿头像封面占位图（后端异步处理帧截取封面，处理完后再替换） 直接填上传参数，上传视频
     // 表单
     html.FormData formData = html.FormData();
     formData.appendBlob('file', uploadVideoFile!.slice(), uploadVideoFile!.name);
@@ -809,11 +809,12 @@ class _IndexPageState extends State<IndexPage> {
     // 生成uuid,截取11位 拼接文件后缀作为key
     final uuid = Uuid().v4().substring(0, 11);
     formData.append('key', '$uuid.mp4');
-    formData.append('x:file_type', "VIDEO");
-    // 封面url 如果封面存在，就用封面url，如果不存在，就用头像url
+    // 判断封面是url否存在
     if (callbackVideoCoverUrl != "none") {
+      formData.append('x:file_type', "VIDEO");
       formData.append('x:cover_url', callbackVideoCoverUrl!);
     } else {
+      formData.append('x:file_type', "VIDEO-WITHCOVER");
       formData.append('x:cover_url', GlobalObjects.storageProvider.user.avatar ?? "");
     }
     formData.append('x:video_type_id', selectedValue.toString());
