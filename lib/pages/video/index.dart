@@ -232,6 +232,7 @@ class _IndexPageState extends State<IndexPage> {
 
     for (var i = 0; i < videoInfoList.length; i++) {
       children.add(KeepAliveWrapper(
+        keepAlive: false,
         child: VideoPlayerPage(
           text: "视频$i",
           videoInfo: videoInfoList[i],
