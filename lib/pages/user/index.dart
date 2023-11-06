@@ -278,7 +278,13 @@ class UserPageState extends State<UserPage> {
                 color: Theme.of(context).secondaryHeaderColor,
               ),
               label: "查看作品",
-              onPress: () {}),
+              onPress: () {
+                setState(() {
+                  cardMode = 3;
+                  bigTitle = "${userInfoList[index].nickname}的作品";
+                  onRefreshPersonVideo(userInfoList[index].id, 0);
+                });
+              }),
         ],
         child: _buildUserInfoCard(index));
   }
