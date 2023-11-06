@@ -79,7 +79,6 @@ class KodoTokenData {
 }
 
 /// 上传视频回调的响应体
-// {"code":2000,"data":{"image_url":"https://kodo.tbghg.top/70738d7f-02.png"},"msg":"ok"}
 class UploadFileCallbackResponse {
   final int code;
   final String msg;

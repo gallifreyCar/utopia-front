@@ -293,7 +293,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                   }
                   _getCommentList();
                 },
-                child: const Text("加载更多"))),
+                child: const Text("刷新评论"))),
       ],
     );
   }

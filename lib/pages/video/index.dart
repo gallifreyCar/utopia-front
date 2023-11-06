@@ -889,6 +889,7 @@ class _IndexPageState extends State<IndexPage> {
     );
   }
 
+  /// 清空上传表单
   void _clearUploadForm() {
     setState(() {
       titleController.text = '';
@@ -1004,13 +1005,13 @@ class _IndexPageState extends State<IndexPage> {
         if (response.code == 2000) {
           _log.i(request.responseText);
           _log.i('视频上传成功');
-          EasyLoading.showSuccess('上传成功');
+          EasyLoading.showSuccess('投稿成功');
           Navigator.pushNamed(context, "/video_detail", arguments: response.data!);
           setState(() {
             showContributeForm = false;
           });
         } else {
-          EasyLoading.showError('上传失败');
+          EasyLoading.showError('视频上传失败');
           _log.e('视频上传失败: ${request.responseText}');
           return;
         }

@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:card_actions/card_action_button.dart';
 import 'package:card_actions/card_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:universal_html/html.dart' as html;
 import 'package:utopia_front/api/model/user.dart';
+import 'package:uuid/uuid.dart';
 
+import '../../api/model/kodoFile.dart';
 import '../../global/index.dart';
 import '../base.dart';
 
@@ -22,14 +27,29 @@ class UserPageState extends State<UserPage> {
   IconData bigIcon = Icons.favorite;
   //提示
   String tips = '';
+  //是否显示更新信息表单
+  bool showUpdateInfoForm = false;
+  //昵称输入框控制器
+  late TextEditingController nicknameController;
+  //头像文件
+  html.File? uploadAvatarFile;
 
   final _log = GlobalObjects.logger;
   List<UserInfoData> userInfoList = [];
   @override
   void initState() {
     super.initState();
+
+    nicknameController = TextEditingController(text: nickname);
     getUserInfo();
     _requestFollowOrFansList(true);
+  }
+
+  ///销毁
+  @override
+  void dispose() {
+    super.dispose();
+    nicknameController.dispose();
   }
 
   /// 构建AppBar
@@ -50,6 +70,7 @@ class UserPageState extends State<UserPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: _buildUpdateInfoForm(),
       backgroundColor: Theme.of(context).primaryColorLight,
       appBar: buildAppBar(),
       body: Center(
@@ -230,12 +251,16 @@ class UserPageState extends State<UserPage> {
                     child: Column(
                       children: [
                         const SizedBox(height: 20),
-                        //修改头像
+                        //更新个人信息按钮
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton.icon(
                             icon: const Icon(Icons.cached_outlined),
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                showUpdateInfoForm = true;
+                              });
+                            },
                             label: const Text('更新'),
                           ),
                         ),
@@ -400,5 +425,247 @@ class UserPageState extends State<UserPage> {
   }
 
   ///更新信息表单
-  // Widget _buildUpdateInfoForm() {}
+  Widget _buildUpdateInfoForm() {
+    return Stack(
+      children: [
+        Positioned(
+          top: MediaQuery.of(context).size.height * 0.2,
+          left: MediaQuery.of(context).size.width * 0.45,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.2,
+            height: MediaQuery.of(context).size.height * 0.45,
+            child: Offstage(
+              offstage: !showUpdateInfoForm,
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      // 增加圆角
+                      borderRadius: BorderRadius.circular(30),
+                      color: Colors.white,
+                      // 设置阴影
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.5),
+                          spreadRadius: 5,
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              '更新信息',
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          //昵称
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.2,
+                            child: TextFormField(
+                              controller: nicknameController,
+                              decoration: const InputDecoration(
+                                labelText: '昵称',
+                                hintText: '请输入昵称',
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return '请输入昵称';
+                                }
+                                if (value.length > 12) {
+                                  return '昵称长度不能超过12个字符';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          //头像
+                          ElevatedButton(
+                            onPressed: () {
+                              //选择文件上传
+                              html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+                              uploadInput.multiple = false; // 是否允许选择多文件
+                              uploadInput.draggable = true; // 是否允许拖拽上传
+                              uploadInput.click(); // 打开文件选择对话框
+
+                              uploadInput.onChange.listen((event) {
+                                // 选择完成 判断类型
+                                if (uploadInput.files?.first.type != 'image/jpeg' &&
+                                    uploadInput.files?.first.type != 'image/png') {
+                                  EasyLoading.showError('请选择图片文件（jpg/png）');
+                                  return;
+                                }
+                                setState(() {
+                                  // 选择完成
+                                  uploadAvatarFile = uploadInput.files?.first;
+                                  _log.i('文件大小：${uploadAvatarFile?.size}');
+                                });
+                              });
+                            },
+                            child: const Text('选择头像'),
+                          ),
+
+                          const SizedBox(height: 20),
+                          //新头像文件信息
+                          Text(
+                            uploadAvatarFile == null ? '未选择头像' : '已选择头像：${uploadAvatarFile!.name}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            // uploadAvatarFile == null ? '' : '文件大小：${uploadAvatarFile!.size}字节',
+                            //换算一下 MB 保留两位小数
+                            uploadAvatarFile == null
+                                ? ''
+                                : '文件大小：${(uploadAvatarFile!.size / 1024 / 1024).toStringAsFixed(2)}MB',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          const SizedBox(height: 20),
+
+                          //提交
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  _log.i('提交更新信息表单');
+                                  updateUserInfo();
+                                },
+                                child: const Text('提交'),
+                              ),
+                              const SizedBox(width: 20),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    _clearUpdateInfoForm();
+                                  },
+                                  child: const Text('清空')),
+                              const SizedBox(width: 20),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    _clearUpdateInfoForm();
+
+                                    setState(() {
+                                      showUpdateInfoForm = false;
+                                    });
+                                  },
+                                  child: const Text('返回')),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  ///清空更新表单信息
+  void _clearUpdateInfoForm() {
+    setState(() {
+      nicknameController.clear();
+      uploadAvatarFile = null;
+    });
+  }
+
+  ///更新用户信息
+  Future<void> updateUserInfo() async {
+    EasyLoading.show(status: '信息更新中...', maskType: EasyLoadingMaskType.black);
+
+    //-1. 如果昵称更改了，先修改昵称
+    if (nicknameController.text != GlobalObjects.storageProvider.user.nickname) {
+      try {
+        final api = GlobalObjects.apiProvider;
+        final updateNickname = await api.user.updateNickname(nicknameController.text);
+        if (updateNickname.code == 2000) {
+          _log.d('更新昵称成功');
+        }
+        if (updateNickname.code == 4000) {
+          EasyLoading.showError('更新昵称失败，请稍后再试');
+          _log.e('更新昵称失败: ${updateNickname.msg}');
+          return;
+        }
+      } catch (e) {
+        _log.e('更新昵称异常: $e');
+        EasyLoading.dismiss();
+        return;
+      }
+    }
+
+    //0.校验表单
+    if (uploadAvatarFile != null && uploadAvatarFile!.size > 1024 * 1024 * 10) {
+      EasyLoading.showError('头像文件大小不能超过10M');
+      return;
+    }
+
+    //1.获取token
+    final api = GlobalObjects.apiProvider;
+    final qiniuToken = await api.upload.getKodoToken();
+    if (qiniuToken.code == 2000) {
+      _log.d('getKodoToken: ${qiniuToken.data!.token}');
+    }
+    if (qiniuToken.code == 4000) {
+      EasyLoading.showError('存储服务异常，请稍后再试');
+      _log.e('获取七牛云存储token失败: ${qiniuToken.msg}');
+      EasyLoading.dismiss();
+      return;
+    }
+    // 获取文件扩展名
+    String fileExtension = 'jpg'; // 默认扩展名
+    if (uploadAvatarFile != null) {
+      fileExtension = uploadAvatarFile!.name.substring(uploadAvatarFile!.name.lastIndexOf('.') + 1);
+    }
+
+    // 2.填充表单
+    html.FormData formData = html.FormData();
+    formData.appendBlob('file', uploadAvatarFile!, uploadAvatarFile!.name);
+    formData.append('token', qiniuToken.data!.token);
+    // 生成uuid,截取11位 拼接文件后缀作为key
+    final uuid = const Uuid().v4().substring(0, 11);
+    formData.append('key', '$uuid.$fileExtension');
+    formData.append('x:file_type', "AVATAR");
+    formData.append('x:uid', GlobalObjects.storageProvider.user.uid.toString());
+    // 上传
+    try {
+      var request = html.HttpRequest();
+      request.open('POST', GlobalObjects.qiniuKodoUrl);
+      request.send(formData);
+      request.onLoad.listen((event) {
+        UploadFileCallbackResponse response = UploadFileCallbackResponse.fromJson(json.decode(request.responseText!));
+        if (response.code == 2000) {
+          EasyLoading.showSuccess('更新信息成功');
+          setState(() {
+            //更新用户信息
+            GlobalObjects.storageProvider.user.avatar = response.data!.imageUrl;
+          });
+          _log.i(request.responseText);
+          _log.i('封面上传成功');
+          return;
+        } else {
+          EasyLoading.showError('更新信息失败');
+          _log.e('封面上传失败: ${request.responseText}');
+          return;
+        }
+      });
+    } catch (e) {
+      EasyLoading.showError('服务器异常，请稍后再试');
+      _log.e('封面上传异常：$e');
+    }
+  }
 }
