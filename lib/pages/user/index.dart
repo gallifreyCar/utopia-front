@@ -462,7 +462,7 @@ class UserPageState extends State<UserPage> {
                 }),
                 //我的收藏
                 _buildButton('我的收藏', Icons.star, () {
-                  onRefreshFavoriteVideo(GlobalObjects.storageProvider.user.uid!, nextTime);
+                  onRefreshFavoriteVideo(GlobalObjects.storageProvider.user.uid!, 0);
                   setState(() {
                     bigTitle = '我的收藏';
                     bigIcon = Icons.star;
@@ -476,7 +476,7 @@ class UserPageState extends State<UserPage> {
                     bigIcon = Icons.upload_file;
                     cardMode = 3;
                   });
-                  onRefreshPersonVideo(GlobalObjects.storageProvider.user.uid!, nextTime);
+                  onRefreshPersonVideo(GlobalObjects.storageProvider.user.uid!, 0);
                 }),
               ],
             ),
@@ -924,16 +924,16 @@ class UserPageState extends State<UserPage> {
   }
 
   /// 获取收藏视频列表
-  Future<void> onRefreshFavoriteVideo(int uid, int nextTime) async {
+  Future<void> onRefreshFavoriteVideo(int uid, int lastTime) async {
     setState(() {
       tips = '';
-      if (nextTime == 0) {
+      if (lastTime == 0) {
         videoInfoList.clear();
       }
     });
     EasyLoading.show(status: '数据加载中...');
 
-    final request = SomeoneVideoRequest(lastTime: nextTime, userId: uid);
+    final request = SomeoneVideoRequest(lastTime: lastTime, userId: uid);
     _log.i('请求视频列表', request.toJson());
     api.video.getFavoriteVideoList(request).then((resp) {
       EasyLoading.dismiss();
@@ -942,7 +942,7 @@ class UserPageState extends State<UserPage> {
         _log.i('请求成功');
         setState(() {
           //如果是重新，那么myNextTime就是0 清空列表
-          if (nextTime == 0) {
+          if (lastTime == 0) {
             videoInfoList.clear();
           }
           //没有更多视频了

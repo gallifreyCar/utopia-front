@@ -293,16 +293,16 @@ class _IndexPageState extends State<IndexPage> {
   }
 
   /// 请求视频方法
-  Future<void> _onRefresh(int videoType, int nextTime) async {
+  Future<void> _onRefresh(int videoType, int lastTime) async {
     setState(() {
-      if (nextTime == 0) {
+      if (lastTime == 0) {
         videoInfoList.clear();
       }
     });
 
     EasyLoading.show(status: '数据加载中...');
     final api = GlobalObjects.apiProvider;
-    final request = VideoRequest(lastTime: nextTime, videoType: videoType);
+    final request = VideoRequest(lastTime: lastTime, videoType: videoType);
     _log.i('请求视频列表', request.toJson());
     api.video.getVideoList(request).then((videoResponse) {
       EasyLoading.dismiss();
@@ -310,7 +310,7 @@ class _IndexPageState extends State<IndexPage> {
         _log.i('请求成功');
         setState(() {
           //如果是切换分类，那么myNextTime就是0 清空列表
-          if (nextTime == 0) {
+          if (lastTime == 0) {
             videoInfoList.clear();
           }
           //没有更多视频了
@@ -360,16 +360,16 @@ class _IndexPageState extends State<IndexPage> {
   }
 
   ///通过用户id获取用户的视频列表的方法
-  Future<void> _getVideoListByUid(int uid, int nextTime) async {
+  Future<void> _getVideoListByUid(int uid, int lastTime) async {
     setState(() {
-      if (nextTime == 0) {
+      if (lastTime == 0) {
         videoInfoList.clear();
       }
     });
 
     EasyLoading.show(status: '数据加载中...');
     final api = GlobalObjects.apiProvider;
-    final request = SomeoneVideoRequest(lastTime: nextTime, userId: uid);
+    final request = SomeoneVideoRequest(lastTime: lastTime, userId: uid);
     _log.i('请求视频列表', request.toJson());
     api.video.getVideoListByUserId(request).then((resp) {
       EasyLoading.dismiss();
@@ -377,7 +377,7 @@ class _IndexPageState extends State<IndexPage> {
         _log.i('请求成功');
         setState(() {
           //如果是重新，那么myNextTime就是0 清空列表
-          if (nextTime == 0) {
+          if (lastTime == 0) {
             videoInfoList.clear();
           }
           //没有更多视频了
