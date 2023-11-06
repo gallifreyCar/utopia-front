@@ -467,6 +467,7 @@ class UserPageState extends State<UserPage> {
                     bigTitle = '我的收藏';
                     bigIcon = Icons.star;
                     cardMode = 2;
+                    noMore = false;
                   });
                 }),
                 //我的投稿
@@ -475,6 +476,7 @@ class UserPageState extends State<UserPage> {
                     bigTitle = '我的投稿';
                     bigIcon = Icons.upload_file;
                     cardMode = 3;
+                    noMore = false;
                   });
                   onRefreshPersonVideo(GlobalObjects.storageProvider.user.uid!, 0);
                 }),
@@ -882,16 +884,16 @@ class UserPageState extends State<UserPage> {
   }
 
   /// 获取个人视频列表
-  Future<void> onRefreshPersonVideo(int uid, int nextTime) async {
+  Future<void> onRefreshPersonVideo(int uid, int lastTime) async {
     setState(() {
       tips = '';
-      if (nextTime == 0) {
+      if (lastTime == 0) {
         videoInfoList.clear();
       }
     });
     EasyLoading.show(status: '数据加载中...');
     final api = GlobalObjects.apiProvider;
-    final request = SomeoneVideoRequest(lastTime: nextTime, userId: uid);
+    final request = SomeoneVideoRequest(lastTime: lastTime, userId: uid);
     _log.i('请求视频列表', request.toJson());
     api.video.getVideoListByUserId(request).then((resp) {
       EasyLoading.dismiss();
@@ -899,7 +901,7 @@ class UserPageState extends State<UserPage> {
         _log.i('请求成功');
         setState(() {
           //如果是重新，那么myNextTime就是0 清空列表
-          if (nextTime == 0) {
+          if (lastTime == 0) {
             videoInfoList.clear();
           }
           //没有更多视频了

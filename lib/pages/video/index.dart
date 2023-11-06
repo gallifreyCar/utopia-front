@@ -967,10 +967,10 @@ class _IndexPageState extends State<IndexPage> {
     formData.append('key', '$uuid.mp4');
     // 判断封面是url否存在
     if (callbackVideoCoverUrl != "none") {
-      formData.append('x:file_type', "VIDEO");
+      formData.append('x:file_type', "VIDEO-WITHCOVER");
       formData.append('x:cover_url', callbackVideoCoverUrl!);
     } else {
-      formData.append('x:file_type', "VIDEO-WITHCOVER");
+      formData.append('x:file_type', "VIDEO");
       formData.append('x:cover_url', GlobalObjects.storageProvider.user.avatar ?? "");
     }
     formData.append('x:video_type_id', selectedValue.toString());
@@ -1003,6 +1003,7 @@ class _IndexPageState extends State<IndexPage> {
       EasyLoading.showError('存储服务异常，请稍后再试');
       return;
     }
+    _clearUploadForm();
   }
 
   ///上传封面
