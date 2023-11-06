@@ -7,4 +7,7 @@ abstract class VideoApi {
 
   //搜索视频
   Future<VideoResponseNoNextTime> searchVideoList(SearchVideoRequest request);
+
+  //获取某人的视频列表
+  Future<VideoResponse> getVideoListByUserId(SomeoneVideoRequest request);
 }

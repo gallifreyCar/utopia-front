@@ -35,7 +35,13 @@ class MyApp extends StatelessWidget {
       routes: {
         '/select': (context) => const LoginModeSelectorPage(),
         '/login': (context) => const LoginPage(),
-        '/video': (context) => const IndexPage(),
+        '/video': (context) {
+          final Map<String, dynamic>? arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+          final int userId = arguments?['userId'] ?? 0;
+          final int mode = arguments?['mode'] ?? 0;
+          final int videoId = arguments?['videoId'] ?? 0;
+          return IndexPage(userId: userId, mode: mode, videoId: videoId);
+        },
         '/user': (context) => const UserPage(),
       },
       home: () {
@@ -43,7 +49,7 @@ class MyApp extends StatelessWidget {
         if (GlobalObjects.storageProvider.user.jwtToken == null) {
           return const LoginModeSelectorPage();
         } else {
-          return const IndexPage();
+          return const IndexPage(userId: 0, mode: 0, videoId: 0);
         }
       }(),
       builder: EasyLoading.init(),

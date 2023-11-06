@@ -24,4 +24,13 @@ class VideoApiImpl extends VideoApi {
     });
     return VideoResponseNoNextTime.fromJson(resp.data);
   }
+
+  @override
+  Future<VideoResponse> getVideoListByUserId(SomeoneVideoRequest request) async {
+    final resp = await dio.get('/api/v1/video/upload', queryParameters: {
+      "user_id": request.userId,
+      "last_time": request.lastTime,
+    });
+    return VideoResponse.fromJson(resp.data);
+  }
 }

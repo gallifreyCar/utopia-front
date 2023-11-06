@@ -307,3 +307,30 @@ class Author {
     };
   }
 }
+
+///获取某个用户的视频列表的请求体
+class SomeoneVideoRequest {
+  //最后时间 时间戳
+  final int? lastTime;
+  //视频类型
+  final int? userId;
+
+  const SomeoneVideoRequest({
+    this.lastTime,
+    this.userId,
+  });
+
+  factory SomeoneVideoRequest.fromJson(Map<String, dynamic> json) {
+    return SomeoneVideoRequest(
+      lastTime: json['lastTime'] as int?,
+      userId: json['user_id'] as int?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'lastTime': lastTime,
+      'user_id': userId,
+    };
+  }
+}

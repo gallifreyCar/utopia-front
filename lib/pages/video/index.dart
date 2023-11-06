@@ -13,7 +13,17 @@ import '../../api/model/video.dart';
 import '../../util/flash.dart';
 
 class IndexPage extends StatefulWidget {
-  const IndexPage({Key? key}) : super(key: key);
+  const IndexPage({
+    Key? key,
+    required this.mode,
+    required this.userId,
+    required this.videoId,
+  }) : super(key: key);
+
+  // mode 带参数的路由跳转 默认0：热门视频 1：某个up的视频（uid获取） 2：某个视频（video_id获取）
+  final int mode;
+  final int userId;
+  final int videoId;
 
   @override
   State<IndexPage> createState() => _IndexPageState();
@@ -62,20 +72,48 @@ class _IndexPageState extends State<IndexPage> {
   html.File? uploadVideoCoverFile;
   String callbackVideoCoverUrl = "none";
 
+  //是否只看某人
+  bool onlySeeOne = false;
+  int currentIndex = 0;
+
   @override
   void initState() {
     super.initState();
-    // 请求视频列表
-    _onRefresh(1, 0);
+
+    switch (widget.mode) {
+      case 0:
+        _log.i("热门视频");
+        _onRefresh(0, 0);
+        break;
+      case 1:
+        _log.i("某个up的视频");
+        _getVideoListByUid(widget.userId, 0);
+        break;
+      case 2:
+        _log.i("某个视频");
+        _onRefresh(2, 0);
+        break;
+    }
 
     // 添加监听器来检测页面的变化
     _pageController.addListener(() {
       int? currentPageIndex = _pageController.page?.toInt();
       _log.i("当前页面索引：$currentPageIndex");
+      currentIndex = currentPageIndex ?? 0;
       if (currentPageIndex == videoInfoList.length - 1) {
         if (!noMore) {
           _log.i("加载下一页");
-          _onRefresh(2, nextTime);
+          switch (widget.mode) {
+            case 0:
+              _onRefresh(0, nextTime);
+              break;
+            case 1:
+              _getVideoListByUid(widget.userId, nextTime);
+              break;
+            case 2:
+              _onRefresh(2, nextTime);
+              break;
+          }
           return;
         }
         EasyLoading.showInfo("没有更多了");
@@ -241,7 +279,7 @@ class _IndexPageState extends State<IndexPage> {
               },
               icon: const Icon(Icons.logout, color: Colors.white),
               label: Text('退出', style: textStyle)),
-          SizedBox(width: 40),
+          const SizedBox(width: 40),
         ]),
       );
     }
@@ -285,13 +323,48 @@ class _IndexPageState extends State<IndexPage> {
       }
     }).catchError((e) {
       _log.e(e);
-      EasyLoading.dismiss();
       EasyLoading.showError('服务器抽风了,请稍后再试');
-      //停留5秒
-      Future.delayed(const Duration(seconds: 5), () {
-        EasyLoading.dismiss();
-        // Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginModeSelectorPage()));
-      });
+    });
+  }
+
+  ///通过用户id获取用户的视频列表
+  Future<void> _getVideoListByUid(int uid, int myNextTime) async {
+    setState(() {
+      if (myNextTime == 0) {
+        videoInfoList.clear();
+      }
+    });
+    EasyLoading.show(status: '数据加载中...');
+    final api = GlobalObjects.apiProvider;
+    final request = SomeoneVideoRequest(lastTime: myNextTime, userId: uid);
+    _log.i('请求视频列表', request.toJson());
+    api.video.getVideoListByUserId(request).then((resp) {
+      EasyLoading.dismiss();
+      if (resp.code == 2000) {
+        _log.i('请求成功');
+        setState(() {
+          //如果是重新，那么myNextTime就是0 清空列表
+          if (myNextTime == 0) {
+            videoInfoList.clear();
+          }
+          //没有更多视频了
+          if (resp.data!.videoInfo.isEmpty) {
+            EasyLoading.showInfo('没有更多视频了');
+            noMore = true;
+            return;
+          }
+          // 如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
+          videoInfoList.addAll(resp.data!.videoInfo);
+          nextTime = resp.data!.nextTime;
+        });
+      }
+      if (resp.code == 4000) {
+        showBasicFlash(context, const Text("请求失败"), duration: const Duration(seconds: 2));
+        _log.i('请求失败', resp.msg);
+      }
+    }).catchError((e) {
+      _log.e(e);
+      EasyLoading.showError('服务器抽风了,请稍后再试');
     });
   }
 
@@ -863,7 +936,7 @@ class _IndexPageState extends State<IndexPage> {
     }
   }
 
-  //上传封面
+  ///上传封面
   Future<int> uploadVideoCover(GetKodoTokenResponse qiniuToken) async {
     int code = 0;
     // 获取文件扩展名

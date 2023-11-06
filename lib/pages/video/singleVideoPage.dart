@@ -174,10 +174,22 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                           TextStyle(fontSize: 18, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
                 ],
               ),
-              ElevatedButton.icon(
-                onPressed: follow,
-                icon: isFollow ? const Icon(Icons.check) : const Icon(Icons.add),
-                label: isFollow ? const Text("已关注") : const Text("关注"),
+              Column(
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: follow,
+                    icon: isFollow ? const Icon(Icons.check) : const Icon(Icons.add),
+                    label: isFollow ? const Text("已关注") : const Text("关注"),
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context)
+                            .pushNamed("/video", arguments: {"userId": uerId, "videoId": videoId, "mode": 1});
+                      },
+                      icon: const Icon(Icons.remove_red_eye_outlined),
+                      label: const Text("只看ta")),
+                ],
               ),
             ],
           ),
