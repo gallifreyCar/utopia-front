@@ -85,6 +85,8 @@ class _IndexPageState extends State<IndexPage> {
   //键盘控制器
   final FocusNode _focusNode = FocusNode();
 
+  // 播放器在进入页面时播放 退出页面暂停
+  late List<GlobalKey<VideoPlayerPageState>> globalKeyList;
   @override
   void initState() {
     super.initState();
@@ -112,6 +114,7 @@ class _IndexPageState extends State<IndexPage> {
       int? currentPageIndex = _pageController.page?.toInt();
       _log.i("当前页面索引：$currentPageIndex");
       currentIndex = currentPageIndex ?? 0;
+      // 判断是否滑动到了最后一页
       if (currentPageIndex == videoInfoList.length - 1) {
         if (!noMore) {
           _log.i("加载下一页");
@@ -132,6 +135,15 @@ class _IndexPageState extends State<IndexPage> {
         }
         EasyLoading.showInfo("没有更多了");
         _log.i("没有更多了");
+      }
+      // 播放当前视频
+      globalKeyList[currentPageIndex ?? 0].currentState?.startPlay();
+
+      // 切换视频时，暂停上一个视频
+      if (globalKeyList.length > 1) {
+        if (currentPageIndex != null && currentPageIndex > 0) {
+          globalKeyList[currentPageIndex - 1].currentState?.pausePlay();
+        }
       }
     });
   }
@@ -155,10 +167,10 @@ class _IndexPageState extends State<IndexPage> {
           focusNode: _focusNode,
           onKey: (event) {
             if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
-              _pageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.ease);
+              _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
             }
             if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
-              _pageController.previousPage(duration: Duration(milliseconds: 300), curve: Curves.ease);
+              _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
             }
           },
           child: _buildVideoListPageView()),
@@ -229,11 +241,14 @@ class _IndexPageState extends State<IndexPage> {
   /// 构建视频PageView
   Widget _buildVideoListPageView() {
     var children = <Widget>[];
+    globalKeyList = <GlobalKey<VideoPlayerPageState>>[];
 
     for (var i = 0; i < videoInfoList.length; i++) {
+      globalKeyList.add(GlobalKey<VideoPlayerPageState>());
       children.add(KeepAliveWrapper(
-        keepAlive: false,
+        keepAlive: true,
         child: VideoPlayerPage(
+          key: globalKeyList[i],
           text: "视频$i",
           videoInfo: videoInfoList[i],
         ),
