@@ -374,7 +374,7 @@ class _IndexPageState extends State<IndexPage> {
                 _log.i('code: $code');
                 if (code == 2001) {
                   EasyLoading.showToast('你最近活跃度不够，先去看看视频吧，再来看看推荐吧');
-                  Future.delayed(const Duration(seconds: 1), () {
+                  Future.delayed(const Duration(seconds: 2), () {
                     EasyLoading.dismiss();
                     mode = 0;
                     _onRefreshHot(0, 0);

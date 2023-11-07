@@ -76,7 +76,6 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
     videoId = widget.videoInfo.id;
     // 初始化视频播放器
     player.open(Media(widget.videoInfo.playUrl));
-    player.pause();
     // 是否点赞，收藏，关注
     isLike = widget.videoInfo.isLike;
     isFavorite = widget.videoInfo.isFavorite;
