@@ -12,7 +12,6 @@ import 'package:uuid/uuid.dart';
 
 import '../../api/model/base.dart';
 import '../../api/model/video.dart';
-import '../../util/flash.dart';
 
 class IndexPage extends StatefulWidget {
   const IndexPage({
@@ -43,6 +42,9 @@ class _IndexPageState extends State<IndexPage> {
 
   //搜索
   bool showSearchVideoInfoList = false;
+
+  //模式 0：热门视频 1：某个up的视频（uid获取） 2：某个视频（video_id获取） 3：收藏的视频
+  int mode = 0;
 
   //下一次请求的时间
   int nextTime = 0;
@@ -82,19 +84,25 @@ class _IndexPageState extends State<IndexPage> {
   double score = 0.0;
   int version = 0;
 
+  //分类视频参数
+  int categoryId = 0;
+
   //键盘控制器
   final FocusNode _focusNode = FocusNode();
 
   // 播放器在进入页面时播放 退出页面暂停
   late List<GlobalKey<VideoPlayerPageState>> globalKeyList;
+
   @override
   void initState() {
     super.initState();
+    // 初始化
+    mode = widget.mode;
 
-    switch (widget.mode) {
+    switch (mode) {
       case 0:
         _log.i("热门视频");
-        _onRefresh(0, 0);
+        _onRefreshHot(0, 0);
         break;
       case 1:
         _log.i("某个人的所有视频");
@@ -105,8 +113,15 @@ class _IndexPageState extends State<IndexPage> {
         _getOneVideo(widget.videoId);
         break;
       case 3:
-        _log.i("热门视频");
+        _log.i("分类视频");
         _onRefreshHot(0, 0);
+        break;
+      case 4:
+        _log.i("推荐视频");
+        _onRefreshBestMatch(0);
+        if (videoInfoList.length == 0) {
+          _onRefreshHot(0, 0);
+        }
     }
 
     // 添加监听器来检测页面的变化
@@ -118,18 +133,25 @@ class _IndexPageState extends State<IndexPage> {
       if (currentPageIndex == videoInfoList.length - 1) {
         if (!noMore) {
           _log.i("加载下一页");
-          switch (widget.mode) {
+          switch (mode) {
+            // 热门视频
             case 0:
-              _onRefresh(0, nextTime);
-              break;
-            case 1:
-              _getVideoListByUid(widget.userId, nextTime);
-              break;
-            case 2:
-              _onRefresh(0, nextTime);
-              break;
-            case 3:
               _onRefreshHot(version, score);
+              break;
+            // 某个人的所有视频
+            case 1:
+              _getVideoListByUid(widget.userId, nextTime); //
+              break;
+            // 分类视频
+            case 3:
+              _onRefresh(categoryId, nextTime);
+              break;
+            // 推荐视频
+            case 4:
+              _onRefreshBestMatch(nextTime);
+              if (videoInfoList.isEmpty) {
+                _onRefreshHot(0, 0);
+              }
           }
           return;
         }
@@ -227,32 +249,52 @@ class _IndexPageState extends State<IndexPage> {
                 children: [
                   TextButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/video', arguments: {"mode": 3});
+                        setState(() {
+                          mode = 0;
+                          version = 0;
+                          score = 0;
+                          _onRefreshHot(version, score);
+                        });
                       },
                       child: Text('热门', style: textStyle)),
                   TextButton(
                       onPressed: () {
-                        _onRefresh(0, 0);
-                      },
-                      child: Text('推荐', style: textStyle)),
-                  TextButton(
-                      onPressed: () {
-                        _onRefresh(0, 0);
+                        setState(() {
+                          mode = 3;
+                          categoryId = 0;
+                          nextTime = 0;
+                          _onRefresh(categoryId, nextTime);
+                        });
                       },
                       child: Text('体育', style: textStyle)),
                   TextButton(
                       onPressed: () {
-                        _onRefresh(1, 0);
+                        setState(() {
+                          mode = 3;
+                          categoryId = 1;
+                          nextTime = 0;
+                          _onRefresh(categoryId, nextTime);
+                        });
                       },
                       child: Text('动漫', style: textStyle)),
                   TextButton(
                       onPressed: () {
-                        _onRefresh(2, 0);
+                        setState(() {
+                          mode = 3;
+                          categoryId = 2;
+                          nextTime = 0;
+                          _onRefresh(categoryId, nextTime);
+                        });
                       },
                       child: Text('游戏', style: textStyle)),
                   TextButton(
                       onPressed: () {
-                        _onRefresh(3, 0);
+                        setState(() {
+                          mode = 3;
+                          categoryId = 3;
+                          nextTime = 0;
+                          _onRefresh(categoryId, nextTime);
+                        });
                       },
                       child: Text('音乐', style: textStyle)),
                 ],
@@ -316,14 +358,31 @@ class _IndexPageState extends State<IndexPage> {
           ),
           const SizedBox(width: 5),
 
+          //个人
           TextButton.icon(
               onPressed: () {
-                setState(() {
-                  Navigator.pushNamed(context, '/user');
-                });
+                Navigator.pushNamed(context, '/user');
               },
               icon: const Icon(Icons.person, color: Colors.white),
               label: Text('个人', style: textStyle)),
+          //推荐
+          TextButton.icon(
+              onPressed: () async {
+                mode = 4;
+                nextTime = 0;
+                int code = await _onRefreshBestMatch(nextTime);
+                _log.i('code: $code');
+                if (code == 2001) {
+                  EasyLoading.showToast('你最近活跃度不够，先去看看视频吧，再来看看推荐吧');
+                  Future.delayed(const Duration(seconds: 1), () {
+                    EasyLoading.dismiss();
+                    mode = 0;
+                    _onRefreshHot(0, 0);
+                  });
+                }
+              },
+              icon: const Icon(Icons.lightbulb, color: Colors.white),
+              label: Text('推荐', style: textStyle)),
           //投稿
           TextButton.icon(
             onPressed: () {
@@ -348,149 +407,6 @@ class _IndexPageState extends State<IndexPage> {
       );
     }
     return SizedBox(width: MediaQuery.of(context).size.width * 0.3);
-  }
-
-  /// 请求视频方法
-  Future<void> _onRefresh(int videoType, int lastTime) async {
-    setState(() {
-      if (lastTime == 0) {
-        videoInfoList.clear();
-      }
-    });
-
-    EasyLoading.show(status: '数据加载中...');
-    final api = GlobalObjects.apiProvider;
-    final request = VideoRequest(lastTime: lastTime, videoType: videoType);
-    _log.i('请求视频列表', request.toJson());
-    api.video.getVideoList(request).then((videoResponse) {
-      EasyLoading.dismiss();
-      if (videoResponse.code == successCode) {
-        _log.i('请求成功');
-        setState(() {
-          //如果是切换分类，那么myNextTime就是0 清空列表
-          if (lastTime == 0) {
-            videoInfoList.clear();
-          }
-          //没有更多视频了
-          if (videoResponse.data!.videoInfo.isEmpty) {
-            EasyLoading.showInfo('没有更多视频了');
-            noMore = true;
-            return;
-          }
-          // 如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
-          videoInfoList.addAll(videoResponse.data!.videoInfo);
-          nextTime = videoResponse.data!.nextTime;
-        });
-      }
-      if (videoResponse.code == errorCode) {
-        showBasicFlash(context, const Text("请求失败"), duration: const Duration(seconds: 2));
-        _log.i('请求失败', videoResponse.msg);
-      }
-    }).catchError((e) {
-      _log.e(e);
-      EasyLoading.showError('服务器抽风了,请稍后再试');
-    });
-  }
-
-  ///请求一个视频信息的方法
-  Future<void> _getOneVideo(int video) async {
-    EasyLoading.show(status: '数据加载中...');
-    try {
-      final api = GlobalObjects.apiProvider;
-      final request = VideoByVideoIdRequest(videoId: video);
-      _log.i('请求视频信息', request.toJson());
-      final resp = await api.video.getVideoByVideoId(request);
-      if (resp.code == successCode) {
-        EasyLoading.dismiss();
-        _log.i('请求成功');
-        setState(() {
-          videoInfoList.add(resp.videoInfo!);
-        });
-      }
-      if (resp.code == errorCode) {
-        EasyLoading.showInfo('请求失败');
-        _log.i('请求失败', resp.msg);
-      }
-    } catch (e) {
-      _log.e(e);
-      EasyLoading.showError('服务器抽风了,请稍后再试');
-    }
-  }
-
-  ///通过用户id获取用户的视频列表的方法
-  Future<void> _getVideoListByUid(int uid, int lastTime) async {
-    setState(() {
-      if (lastTime == 0) {
-        videoInfoList.clear();
-      }
-    });
-
-    EasyLoading.show(status: '数据加载中...');
-    final api = GlobalObjects.apiProvider;
-    final request = SomeoneVideoRequest(lastTime: lastTime, userId: uid);
-    _log.i('请求视频列表', request.toJson());
-    api.video.getVideoListByUserId(request).then((resp) {
-      EasyLoading.dismiss();
-      if (resp.code == successCode) {
-        _log.i('请求成功');
-        setState(() {
-          //如果是重新，那么myNextTime就是0 清空列表
-          if (lastTime == 0) {
-            videoInfoList.clear();
-          }
-          //没有更多视频了
-          if (resp.data!.videoInfo.isEmpty) {
-            EasyLoading.showInfo('没有更多视频了');
-            noMore = true;
-            return;
-          }
-          // 如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
-          videoInfoList.addAll(resp.data!.videoInfo);
-          nextTime = resp.data!.nextTime;
-        });
-      }
-      if (resp.code == errorCode) {
-        showBasicFlash(context, const Text("请求失败"), duration: const Duration(seconds: 2));
-        _log.i('请求失败', resp.msg);
-      }
-    }).catchError((e) {
-      _log.e(e);
-      EasyLoading.showError('服务器抽风了,请稍后再试');
-    });
-  }
-
-  /// 获取热门视频
-  Future<void> _onRefreshHot(int myVersion, double myScore) async {
-    EasyLoading.show(status: '数据加载中...');
-    final api = GlobalObjects.apiProvider;
-    final request = HotVideoRequest(version: myVersion, score: myScore);
-    _log.i('请求视频列表', request.toJson());
-    api.video.getHotVideoList(request).then((videoResponse) {
-      EasyLoading.dismiss();
-      if (videoResponse.code == successCode) {
-        _log.i('请求成功');
-        setState(() {
-          //没有更多视频了
-          if (videoResponse.data!.hotVideo.isEmpty) {
-            EasyLoading.showInfo('没有更多视频了');
-            noMore = true;
-            return;
-          }
-          // 如果是下拉刷新，
-          // 那么score就是上一次请求的score ,version就是上一次请求的version
-          videoInfoList.addAll(videoResponse.data!.hotVideo);
-          score = videoResponse.data!.score;
-          version = videoResponse.data!.version;
-        });
-      }
-      if (videoResponse.code == errorCode) {
-        EasyLoading.showError('请求失败');
-        _log.i('请求失败', videoResponse.msg);
-      }
-    }).catchError((e) {
-      _log.e(e);
-      EasyLoading.showError('服务器抽风了,请稍后再试');
-    });
   }
 
   /// 搜索框
@@ -689,30 +605,6 @@ class _IndexPageState extends State<IndexPage> {
         ],
       ),
     );
-  }
-
-  /// 搜索请求
-  Future<void> _searchVideoInfoList(String searchContent) async {
-    try {
-      EasyLoading.show(status: '搜索中...');
-      final api = GlobalObjects.apiProvider;
-      final request = SearchVideoRequest(search: searchContent);
-      final videoResponse = await api.video.searchVideoList(request);
-
-      if (videoResponse.code == successCode) {
-        _log.i('搜索视频成功', videoResponse.data);
-        setState(() {
-          searchVideoInfoList = videoResponse.data?.videoInfo ?? [];
-        });
-      }
-      if (videoResponse.code == errorCode) {
-        EasyLoading.showError(videoResponse.msg);
-        _log.i('搜索视频失败', videoResponse.msg);
-      }
-    } catch (e) {
-      _log.e('搜索视频异常', e);
-    }
-    EasyLoading.dismiss();
   }
 
   /// 投稿表单
@@ -951,6 +843,51 @@ class _IndexPageState extends State<IndexPage> {
     );
   }
 
+  /// 上传文件信息
+  Widget buildFileInfoText(html.File? uploadVideoFile, String? title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          uploadVideoFile == null ? '$title未选择文件' : '$title文件名：${uploadVideoFile!.name}',
+          style: const TextStyle(fontSize: 12),
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 5),
+        Text(
+          //换算一下 MB 保留两位小数
+          uploadVideoFile == null ? '' : '$title文件大小：${(uploadVideoFile!.size / 1024 / 1024).toStringAsFixed(2)}MB',
+          style: const TextStyle(fontSize: 12),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  /// 搜索请求
+  Future<void> _searchVideoInfoList(String searchContent) async {
+    try {
+      EasyLoading.show(status: '搜索中...');
+      final api = GlobalObjects.apiProvider;
+      final request = SearchVideoRequest(search: searchContent);
+      final videoResponse = await api.video.searchVideoList(request);
+
+      if (videoResponse.code == successCode) {
+        _log.i('搜索视频成功', videoResponse.data);
+        setState(() {
+          searchVideoInfoList = videoResponse.data?.videoInfo ?? [];
+        });
+      }
+      if (videoResponse.code == errorCode) {
+        EasyLoading.showError(videoResponse.msg);
+        _log.i('搜索视频失败', videoResponse.msg);
+      }
+    } catch (e) {
+      _log.e('搜索视频异常', e);
+    }
+    EasyLoading.dismiss();
+  }
+
   /// 清空上传表单
   void _clearUploadForm() {
     setState(() {
@@ -1114,25 +1051,212 @@ class _IndexPageState extends State<IndexPage> {
 
     return code;
   }
-}
 
-/// 上传文件信息
-Widget buildFileInfoText(html.File? uploadVideoFile, String? title) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        uploadVideoFile == null ? '$title未选择文件' : '$title文件名：${uploadVideoFile!.name}',
-        style: const TextStyle(fontSize: 12),
-        overflow: TextOverflow.ellipsis,
-      ),
-      const SizedBox(height: 5),
-      Text(
-        //换算一下 MB 保留两位小数
-        uploadVideoFile == null ? '' : '$title文件大小：${(uploadVideoFile!.size / 1024 / 1024).toStringAsFixed(2)}MB',
-        style: const TextStyle(fontSize: 12),
-        overflow: TextOverflow.ellipsis,
-      ),
-    ],
-  );
+  /// 请求视频方法
+  Future<void> _onRefresh(int videoType, int lastTime) async {
+    setState(() {
+      if (lastTime == 0) {
+        videoInfoList.clear();
+      }
+    });
+
+    EasyLoading.show(status: '数据加载中...');
+    final api = GlobalObjects.apiProvider;
+    final request = VideoRequest(lastTime: lastTime, videoType: videoType);
+    _log.i('请求视频列表', request.toJson());
+
+    try {
+      VideoResponse resp = await api.video.getVideoList(request);
+
+      if (resp.code == successCode) {
+        _log.i('请求成功');
+        setState(() {
+          //如果是切换分类，那么myNextTime就是0 清空列表
+          if (lastTime == 0) {
+            videoInfoList.clear();
+          }
+          //没有更多视频了
+          if (resp.data!.videoInfo.isEmpty) {
+            EasyLoading.showInfo('没有更多视频了');
+            noMore = true;
+            return;
+          }
+          // 如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
+          videoInfoList.addAll(resp.data!.videoInfo);
+          nextTime = resp.data!.nextTime;
+          EasyLoading.dismiss();
+        });
+      }
+      if (resp.code == errorCode) {
+        EasyLoading.showInfo('请求失败');
+        _log.i('请求失败', resp.msg);
+      }
+    } catch (e) {
+      _log.e(e);
+      EasyLoading.showError('服务器抽风了,请稍后再试');
+    }
+  }
+
+  ///请求一个视频信息的方法
+  Future<void> _getOneVideo(int video) async {
+    EasyLoading.show(status: '数据加载中...');
+    try {
+      final api = GlobalObjects.apiProvider;
+      final request = VideoByVideoIdRequest(videoId: video);
+      _log.i('请求视频信息', request.toJson());
+      final resp = await api.video.getVideoByVideoId(request);
+      if (resp.code == successCode) {
+        _log.i('请求成功');
+        setState(() {
+          videoInfoList.add(resp.videoInfo!);
+        });
+        EasyLoading.dismiss();
+      }
+      if (resp.code == errorCode) {
+        EasyLoading.showInfo('请求失败');
+        _log.i('请求失败', resp.msg);
+      }
+    } catch (e) {
+      _log.e(e);
+      EasyLoading.showError('服务器抽风了,请稍后再试');
+    }
+  }
+
+  ///通过用户id获取用户的视频列表的方法
+  Future<void> _getVideoListByUid(int uid, int lastTime) async {
+    setState(() {
+      if (lastTime == 0) {
+        videoInfoList.clear();
+      }
+    });
+
+    EasyLoading.show(status: '数据加载中...');
+    final api = GlobalObjects.apiProvider;
+    final request = SomeoneVideoRequest(lastTime: lastTime, userId: uid);
+    _log.i('请求视频列表', request.toJson());
+
+    try {
+      VideoResponse resp = await api.video.getVideoListByUserId(request);
+
+      if (resp.code == successCode) {
+        _log.i('请求成功');
+        setState(() {
+          //如果是重新，那么myNextTime就是0 清空列表
+          if (lastTime == 0) {
+            videoInfoList.clear();
+          }
+          //没有更多视频了
+          if (resp.data!.videoInfo.isEmpty) {
+            EasyLoading.showInfo('没有更多视频了');
+            noMore = true;
+            return;
+          }
+          // 如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
+          videoInfoList.addAll(resp.data!.videoInfo);
+          nextTime = resp.data!.nextTime;
+          EasyLoading.dismiss();
+        });
+      }
+      if (resp.code == errorCode) {
+        EasyLoading.showError('请求失败：${resp.msg}');
+        _log.i('请求失败', resp.msg);
+      }
+    } catch (e) {
+      _log.e(e);
+      EasyLoading.showError('服务器抽风了,请稍后再试');
+    }
+  }
+
+  /// 获取热门视频
+  Future<void> _onRefreshHot(int myVersion, double myScore) async {
+    setState(() {
+      if (myScore == 0 && myVersion == 0) {
+        videoInfoList.clear();
+      }
+    });
+
+    EasyLoading.show(status: '数据加载中...');
+    final api = GlobalObjects.apiProvider;
+    final request = HotVideoRequest(version: myVersion, score: myScore);
+    _log.i('请求视频列表', request.toJson());
+
+    try {
+      HotVideoResponse resp = await api.video.getHotVideoList(request);
+
+      if (resp.code == successCode) {
+        _log.i('请求成功');
+        setState(() {
+          //没有更多视频了
+          if (resp.data.hotVideo.isEmpty) {
+            EasyLoading.showInfo('没有更多视频了');
+            noMore = true;
+            return;
+          }
+          // 如果是下拉刷新，
+          // 那么score就是上一次请求的score ,version就是上一次请求的version
+          videoInfoList.addAll(resp.data.hotVideo);
+          score = resp.data.score;
+          version = resp.data.version;
+          EasyLoading.dismiss();
+        });
+      }
+      if (resp.code == errorCode) {
+        EasyLoading.showError('请求失败：${resp.msg}');
+        _log.i('请求失败', resp.msg);
+      }
+    } catch (e) {
+      _log.e(e);
+      EasyLoading.showError('服务器抽风了,请稍后再试');
+    }
+  }
+
+  /// 获取推荐视频
+  Future<int> _onRefreshBestMatch(int lastTime) async {
+    int code = 2000;
+
+    setState(() {
+      if (lastTime == 0) {
+        videoInfoList.clear();
+      }
+    });
+
+    EasyLoading.show(status: '数据加载中...');
+    final api = GlobalObjects.apiProvider;
+    _log.i('请求视频列表', lastTime);
+
+    try {
+      VideoResponse resp = await api.video.getRecommendVideoList(lastTime);
+
+      if (resp.code == successCode) {
+        _log.i('请求成功');
+        setState(() {
+          //如果是切换分类，那么myNextTime就是0 清空列表
+          if (lastTime == 0) {
+            videoInfoList.clear();
+          }
+          //没有更多视频了
+          if (resp.data!.videoInfo.isEmpty) {
+            EasyLoading.showInfo('没有更多视频了');
+            code = 2001;
+            noMore = true;
+            return;
+          }
+          // 如果是下拉刷新，那么myNextTime就是上一次请求的nextTime
+          videoInfoList.addAll(resp.data!.videoInfo);
+          nextTime = resp.data!.nextTime;
+          EasyLoading.dismiss();
+        });
+      }
+      if (resp.code == errorCode) {
+        EasyLoading.showError('请求失败: ${resp.msg}');
+        code = errorCode;
+        _log.i('请求失败', resp.msg);
+      }
+    } catch (e) {
+      _log.e(e);
+      EasyLoading.showError('服务器抽风了,请稍后再试');
+    }
+
+    return code;
+  }
 }

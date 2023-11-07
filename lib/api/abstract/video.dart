@@ -19,4 +19,7 @@ abstract class VideoApi {
 
   //获取个人收藏的视频
   Future<VideoResponse> getFavoriteVideoList(SomeoneVideoRequest request);
+
+  //获取推荐视频
+  Future<VideoResponse> getRecommendVideoList(int lastTime);
 }

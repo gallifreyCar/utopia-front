@@ -59,4 +59,12 @@ class VideoApiImpl extends VideoApi {
     });
     return VideoResponse.fromJson(resp.data);
   }
+
+  @override
+  Future<VideoResponse> getRecommendVideoList(int lastTime) async {
+    final resp = await dio.get('/api/v1/video/feed', queryParameters: {
+      "last_time": lastTime,
+    });
+    return VideoResponse.fromJson(resp.data);
+  }
 }
