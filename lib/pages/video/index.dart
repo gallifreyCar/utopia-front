@@ -139,10 +139,14 @@ class _IndexPageState extends State<IndexPage> {
       // 播放当前视频
       globalKeyList[currentPageIndex ?? 0].currentState?.startPlay();
 
-      // 切换视频时，暂停上一个视频
+      // 切换视频时，暂停上一个视频 （如果有的话，下滑）
+      // 暂停下一个视频（如果有的话，上滑）
       if (globalKeyList.length > 1) {
         if (currentPageIndex != null && currentPageIndex > 0) {
           globalKeyList[currentPageIndex - 1].currentState?.pausePlay();
+        }
+        if (currentPageIndex != null && currentPageIndex < globalKeyList.length - 1) {
+          globalKeyList[currentPageIndex + 1].currentState?.pausePlay();
         }
       }
     });
