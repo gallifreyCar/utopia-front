@@ -203,8 +203,8 @@ class VideoInfo {
   final int videoTypeId;
   final String title;
   final String describe;
-  final Author author;
-  final bool isFollow;
+  Author author;
+  bool isFollow;
   final bool isLike;
   final bool isFavorite;
   final int likeCount;
@@ -273,9 +273,9 @@ class Author {
   final String nickname;
   final String avatar;
   final String username;
-  final int fansCount;
+  int fansCount;
   final int followCount;
-  final int videoCount;
+  int videoCount;
 
   Author({
     required this.id,
@@ -316,6 +316,7 @@ class Author {
 class SomeoneVideoRequest {
   //最后时间 时间戳
   final int? lastTime;
+
   //视频类型
   final int? userId;
 
@@ -371,6 +372,7 @@ class SingleVideoResponse {
     required this.msg,
     required this.videoInfo,
   });
+
   factory SingleVideoResponse.fromJson(Map<String, dynamic> json) {
     return SingleVideoResponse(
       code: json['code'] as int,
@@ -428,6 +430,7 @@ class HotVideoResponse {
       data: HotVideoData.fromJson(json['data']),
     );
   }
+
   Map<String, dynamic> toJson() {
     return {
       'code': code,
@@ -459,6 +462,7 @@ class HotVideoData {
       version: json['version'],
     );
   }
+
   Map<String, dynamic> toJson() {
     if (score == -1 || hotVideo.isEmpty) {
       hotVideo = [];

@@ -13,9 +13,12 @@ import '../../custom_widgets/chat_widow.dart';
 import '../base.dart';
 
 class VideoPlayerPage extends StatefulWidget {
-  const VideoPlayerPage({Key? key, required this.text, required this.videoInfo}) : super(key: key);
+  const VideoPlayerPage({Key? key, required this.text, required this.videoInfo, required this.callback})
+      : super(key: key);
   final VideoInfo videoInfo;
   final String text;
+
+  final Function(int userId, bool isFollow, int fansCount) callback;
 
   @override
   VideoPlayerPageState createState() => VideoPlayerPageState();
@@ -103,12 +106,22 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
     super.dispose();
   }
 
+  ///给父组件调用的方法，暂停播放
   void pausePlay() {
     player.pause();
   }
 
+  ///给父组件调用的方法，开始播放
   void startPlay() {
     player.play();
+  }
+
+  ///同步关注后要更新的信息
+  void syncAuth(bool newIsFollow, int newFAnsCount) {
+    setState(() {
+      isFollow = newIsFollow;
+      fansCount = newFAnsCount;
+    });
   }
 
   /// 构建视频播放器部件
@@ -141,7 +154,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                     isFavorite ? const Icon(Icons.star) : const Icon(Icons.star_border), collect),
                 _buildButton(context, _buildTextAndNum("评论", commentCount), const Icon(Icons.comment), () {}),
                 //发布时间
-                _buildButton(context, Text("$publishTime"), const Icon(Icons.date_range), () {}),
+                _buildButton(context, Text(publishTime), const Icon(Icons.date_range), () {}),
               ],
             ),
           ),
@@ -338,6 +351,8 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
     }
     try {
       await followUp();
+
+      await widget.callback(uerId, isLike, fansCount);
     } catch (e) {
       _log.e("请求失败", e);
     }

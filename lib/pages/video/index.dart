@@ -78,7 +78,7 @@ class _IndexPageState extends State<IndexPage> {
   bool onlySeeOne = false;
   int currentIndex = 0;
 
-  //
+  //热门视频参数
   double score = 0.0;
   int version = 0;
 
@@ -148,8 +148,28 @@ class _IndexPageState extends State<IndexPage> {
         if (currentPageIndex != null && currentPageIndex < globalKeyList.length - 1) {
           globalKeyList[currentPageIndex + 1].currentState?.pausePlay();
         }
+
+        // 同步作者信息
+        if (currentPageIndex != null) {
+          globalKeyList[currentPageIndex]
+              .currentState
+              ?.syncAuth(videoInfoList[currentPageIndex].isFollow, videoInfoList[currentPageIndex].author.fansCount);
+          _log.i(
+              "同步作者信息:${videoInfoList[currentPageIndex].author.fansCount},${videoInfoList[currentPageIndex].isFollow}");
+        }
       }
     });
+  }
+
+  /// 回调函数，用于相步作者的信息
+  void _callback(int userId, bool isFollow, int fansCount) {
+    for (var element in videoInfoList) {
+      if (element.author.id == userId) {
+        element.author.fansCount = fansCount;
+        element.isFollow = isFollow;
+      }
+    }
+    _log.i("回调函数执行完毕");
   }
 
   @override
@@ -250,11 +270,11 @@ class _IndexPageState extends State<IndexPage> {
     for (var i = 0; i < videoInfoList.length; i++) {
       globalKeyList.add(GlobalKey<VideoPlayerPageState>());
       children.add(KeepAliveWrapper(
-        keepAlive: true,
         child: VideoPlayerPage(
           key: globalKeyList[i],
           text: "视频$i",
           videoInfo: videoInfoList[i],
+          callback: _callback,
         ),
       ));
     }
