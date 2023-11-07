@@ -361,6 +361,7 @@ class _IndexPageState extends State<IndexPage> {
           //个人
           TextButton.icon(
               onPressed: () {
+                globalKeyList[_pageController.page!.round()].currentState!.pausePlay();
                 Navigator.pushNamed(context, '/user');
               },
               icon: const Icon(Icons.person, color: Colors.white),
@@ -596,7 +597,7 @@ class _IndexPageState extends State<IndexPage> {
               _log.i('播放视频', searchVideoInfoList[index].playUrl);
 
               showSearchVideoInfoList = false;
-
+              globalKeyList[_pageController.page!.round()].currentState!.pausePlay();
               Navigator.of(context)
                   .pushNamed("/video", arguments: {"mode": 2, "videoId": searchVideoInfoList[index].id});
             },
