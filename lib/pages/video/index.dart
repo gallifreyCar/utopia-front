@@ -91,7 +91,7 @@ class _IndexPageState extends State<IndexPage> {
       case 4:
         _log.i("推荐视频");
         _onRefreshBestMatch(0);
-        if (videoInfoList.length == 0) {
+        if (videoInfoList.isEmpty) {
           _onRefreshHot(0, 0);
         }
     }

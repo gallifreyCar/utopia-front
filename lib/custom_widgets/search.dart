@@ -56,10 +56,6 @@ class SearchWindowState extends State<SearchWindow> {
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.clear),
                       onPressed: () {
-                        if (_searchController.text.isEmpty) {
-                          EasyLoading.showInfo('请输入搜索内容');
-                          return;
-                        }
                         setState(() {
                           showSearchVideoInfoList = false;
                           _searchController.clear();
