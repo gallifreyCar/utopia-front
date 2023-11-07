@@ -212,6 +212,7 @@ class VideoPlayerPageState extends State<VideoPlayerPage> {
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
                       onPressed: () {
+                        pausePlay();
                         Navigator.of(context)
                             .pushNamed("/video", arguments: {"userId": uerId, "videoId": videoId, "mode": 1});
                       },
