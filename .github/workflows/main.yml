@@ -32,14 +32,6 @@ jobs:
         run: ls -R
         working-directory: ./web
 
-      - name: 部署到github Page
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          personal_token: ${{ secrets.GH_DEPLOY }}
-          external_repository: VideoUtopia/VideoUtopia.github.io
-          publish_branch: master
-          publish_dir: build/web
-
       - name: 部署到服务器
         uses: appleboy/scp-action@v0.1.4
         with:
