@@ -1,5 +1,5 @@
 class GlobalConfig {
-  static const String workBaseUrl = 'https://api.tbghg.top';
+  static const String workBaseUrl = 'https://uptopic.gallifrey.asia';
   static const String testBaseUrl = 'localhost:8080';
   static const String qiniuKodoUrl = 'https://up-cn-east-2.qiniup.com';
   static const String? proxy = null;
