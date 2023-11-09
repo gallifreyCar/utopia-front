@@ -48,6 +48,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "build/web/*"
           port: 2200
-          target: "./utopic"
+          target: "./uptopic"
           overwrite: true
 
